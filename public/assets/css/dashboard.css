@@ -1132,6 +1132,139 @@ img {
     color: var(--danger);
 }
 
+/* ══════════════════════════════════════════════════════════
+   PREMIUM FORM CONTROLS (Project-wide)
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Standard Input & Textarea ── */
+.form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xs);
+    color: var(--text-main);
+    font-family: var(--font);
+    font-size: 0.9rem;
+    transition: var(--transition-base);
+    outline: none;
+}
+
+.form-input:hover {
+    border-color: var(--accent-soft);
+}
+
+.form-input:focus {
+    border-color: var(--primary-action);
+    background: var(--surface-color);
+    box-shadow: 0 0 0 4px var(--primary-10), var(--glow-primary);
+}
+
+/* ── Number Input (Remove spin buttons) ── */
+input[type="number"].form-input {
+    -moz-appearance: textfield;
+    appearance: none;
+}
+
+input[type="number"].form-input::-webkit-outer-spin-button,
+input[type="number"].form-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* ── Custom Select Dropdown ── */
+.form-select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='hsl(150, 63%, 19%)'%3e%3cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m19 9-7 7-7-7'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.1rem;
+    padding-right: 2.8rem;
+}
+
+[data-theme="dark"] .form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='hsl(90, 20%, 90%)'%3e%3cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m19 9-7 7-7-7'/%3e%3c/svg%3e");
+}
+
+/* ── Custom Premium Checkbox ── */
+.form-checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-main);
+    user-select: none;
+}
+
+.form-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--surface-color);
+    display: grid;
+    place-content: center;
+    transition: var(--transition-base);
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+    margin: 0;
+}
+
+.form-checkbox::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    transform: scale(0);
+    transition: 120ms transform ease-in-out;
+    box-shadow: inset 1em 1em var(--surface-color);
+    background-color: CanvasText;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.form-checkbox:checked {
+    background-color: var(--primary-action);
+    border-color: var(--primary-action);
+    box-shadow: var(--glow-primary);
+}
+
+.form-checkbox:checked::before {
+    transform: scale(1);
+}
+
+.form-checkbox:focus {
+    box-shadow: 0 0 0 4px var(--primary-10);
+}
+
+.form-checkbox:hover {
+    border-color: var(--primary-action);
+}
+
+/* ── Form Group Helpers ── */
+.form-group {
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ─────────────────────────────────────────────────────────── */
+
 /* Back Button — Standard across project */
 .btn-back {
     display: inline-flex;

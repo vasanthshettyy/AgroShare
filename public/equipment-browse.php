@@ -244,7 +244,7 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
         <form class="filter-bar" method="GET" action="equipment-browse.php" aria-label="Filter equipment">
             <div class="filter-group">
                 <label for="filter-category" class="filter-label">Category</label>
-                <select name="category" id="filter-category" class="filter-select">
+                <select name="category" id="filter-category" class="form-input form-select">
                     <option value="">All Categories</option>
                     <?php foreach (['tractor','harvester','seeder','sprayer','other'] as $cat): ?>
                     <option value="<?= $cat ?>" <?= ($filters['category'] ?? '') === $cat ? 'selected' : '' ?>>
@@ -256,19 +256,19 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
 
             <div class="filter-group">
                 <label for="filter-district" class="filter-label">District</label>
-                <input type="text" name="district" id="filter-district" class="filter-input"
+                <input type="text" name="district" id="filter-district" class="form-input"
                        placeholder="e.g. Dharwad" value="<?= e($filters['district'] ?? '') ?>">
             </div>
 
             <div class="filter-group">
                 <label for="filter-price" class="filter-label">Max ₹/Day</label>
-                <input type="number" name="max_price" id="filter-price" class="filter-input"
+                <input type="number" name="max_price" id="filter-price" class="form-input"
                        placeholder="5000" min="0" step="100" value="<?= e($filters['max_price'] ?? '') ?>">
             </div>
 
             <div class="filter-group filter-checkbox-group">
-                <label class="filter-checkbox-label">
-                    <input type="checkbox" name="has_operator" value="1" class="filter-checkbox"
+                <label class="form-checkbox-label">
+                    <input type="checkbox" name="has_operator" value="1" class="form-checkbox"
                            <?= !empty($filters['has_operator']) ? 'checked' : '' ?>>
                     <span>Operator Included</span>
                 </label>
