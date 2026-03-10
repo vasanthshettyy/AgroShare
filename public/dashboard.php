@@ -1,6 +1,15 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../src/Controllers/EquipmentController.php';
 requireAuth();
+
+$userId = (int)$_SESSION['user_id'];
+
+// Fetch KPI data
+$totalEquipment = getUserEquipmentCount($conn, $userId);
+$activeRentals  = getUserActiveRentalsCount($conn, $userId);
+$poolCount      = getUserPoolCount($conn, $userId);
+$trustScore     = getUserTrustScore($conn, $userId);
 
 // Derive initials from full name for the avatar
 $nameParts = explode(' ', $_SESSION['full_name']);
@@ -74,7 +83,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 <span>Dashboard</span>
             </a>
 
-            <a href="#" class="nav-link">
+            <a href="equipment-browse.php?mine=1" class="nav-link">
                 <!-- tractor icon -->
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -107,7 +116,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 <span>Pooling</span>
             </a>
 
-            <a href="#" class="nav-link">
+            <a href="equipment-browse.php" class="nav-link">
                 <!-- search icon -->
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -187,23 +196,22 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
 
         <div class="topbar-right">
             <!-- Theme toggle -->
-            <button class="btn-icon" id="theme-toggle" aria-label="Toggle colour theme" title="Toggle theme">
-                <!-- Moon -->
-                <svg id="theme-moon" width="17" height="17" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-                <!-- Sun (hidden by default) -->
-                <svg id="theme-sun" width="17" height="17" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                     style="display:none;" aria-hidden="true">
-                    <circle cx="12" cy="12" r="5"/>
-                    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            <button class="btn-icon theme-toggle-animated" id="theme-toggle" aria-label="Toggle colour theme" title="Toggle theme">
+                <svg width="20" height="20" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg" class="solar-switch-svg">
+                    <!-- Sun Group -->
+                    <g class="sun-group">
+                        <path class="sun-core" d="M12.4058 17.7625C15.1672 17.7625 17.4058 15.5239 17.4058 12.7625C17.4058 10.0011 15.1672 7.76251 12.4058 7.76251C9.64434 7.76251 7.40576 10.0011 7.40576 12.7625C7.40576 15.5239 9.64434 17.7625 12.4058 17.7625Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path class="sun-ray" d="M12.4058 1.76251V3.76251" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path class="sun-ray" d="M12.4058 21.7625V23.7625" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path class="sun-ray" d="M4.62598 4.98248L6.04598 6.40248" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path class="sun-ray" d="M18.7656 19.1225L20.1856 20.5425" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path class="sun-ray" d="M1.40576 12.7625H3.40576" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path class="sun-ray" d="M21.4058 12.7625H23.4058" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path class="sun-ray" d="M4.62598 20.5425L6.04598 19.1225" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path class="sun-ray" d="M18.7656 6.40248L20.1856 4.98248" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </g>
+                    <!-- Moon Path -->
+                    <path class="moon-path" d="M21.1918 13.2013C21.0345 14.9035 20.3957 16.5257 19.35 17.8781C18.3044 19.2305 16.8953 20.2571 15.2875 20.8379C13.6797 21.4186 11.9398 21.5294 10.2713 21.1574C8.60281 20.7854 7.07479 19.9459 5.86602 18.7371C4.65725 17.5283 3.81774 16.0003 3.4457 14.3318C3.07367 12.6633 3.18451 10.9234 3.76526 9.31561C4.346 7.70783 5.37263 6.29868 6.72501 5.25307C8.07739 4.20746 9.69959 3.56862 11.4018 3.41132C10.4052 4.75958 9.92564 6.42077 10.0503 8.09273C10.175 9.76469 10.8957 11.3364 12.0812 12.5219C13.2667 13.7075 14.8384 14.4281 16.5104 14.5528C18.1823 14.6775 19.8435 14.1979 21.1918 13.2013Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
             </button>
 
@@ -236,7 +244,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 <h1>Dashboard</h1>
                 <p>Your farm activity at a glance, <?= e($nameParts[0]) ?>.</p>
             </div>
-            <a href="#" class="btn-primary" role="button">
+            <a href="equipment-browse.php?mine=1&action=list" class="btn-primary" role="button">
                 <!-- plus icon -->
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
@@ -250,24 +258,24 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
         <section class="kpi-grid" aria-label="Key performance indicators">
 
             <!-- KPI 1 — Hero card (dark green) -->
-            <div class="kpi-card kpi-hero">
+            <a href="equipment-browse.php?mine=1" class="kpi-card kpi-hero" style="text-decoration: none; display: block; cursor: pointer;">
                 <div class="kpi-header">
                     <span class="kpi-label">Total Equipment</span>
-                    <a href="#" class="kpi-header-link" aria-label="View equipment">
+                    <div class="kpi-header-link" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="7" y1="17" x2="17" y2="7"/>
                             <polyline points="7 7 17 7 17 17"/>
                         </svg>
-                    </a>
+                    </div>
                 </div>
-                <div class="kpi-value" data-target="0">0</div>
+                <div class="kpi-value" data-target="<?= $totalEquipment ?>"><?= $totalEquipment ?></div>
                 <div class="kpi-trend neutral">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                          stroke-linecap="round" aria-hidden="true">
                         <line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
-                    No change
+                    Total listed
                 </div>
                 <!-- Decorative icon -->
                 <div class="kpi-icon" aria-hidden="true">
@@ -276,7 +284,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         <circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/>
                     </svg>
                 </div>
-            </div>
+            </a>
 
             <!-- KPI 2 — Active Rentals -->
             <div class="kpi-card">
@@ -290,13 +298,13 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         </svg>
                     </a>
                 </div>
-                <div class="kpi-value" data-target="0">0</div>
+                <div class="kpi-value" data-target="<?= $activeRentals ?>"><?= $activeRentals ?></div>
                 <div class="kpi-trend neutral">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                          stroke-linecap="round" aria-hidden="true">
                         <line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
-                    No bookings
+                    Ongoing
                 </div>
                 <div class="kpi-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -318,13 +326,13 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         </svg>
                     </a>
                 </div>
-                <div class="kpi-value" data-target="0">0</div>
+                <div class="kpi-value" data-target="<?= $poolCount ?>"><?= $poolCount ?></div>
                 <div class="kpi-trend neutral">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                          stroke-linecap="round" aria-hidden="true">
                         <line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
-                    No campaigns
+                    Joined
                 </div>
                 <div class="kpi-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -347,7 +355,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         </svg>
                     </a>
                 </div>
-                <div class="kpi-value">—</div>
+                <div class="kpi-value"><?= number_format($trustScore, 1) ?></div>
                 <div class="kpi-trend neutral">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                          stroke-linecap="round" aria-hidden="true">
@@ -463,30 +471,9 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
         <!-- ── ROW 3: Quick Actions (4 equal columns) ───────── -->
         <section class="actions-grid" aria-label="Quick actions">
 
-            <a href="#" class="action-card">
-                <div class="action-icon-wrap green" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8"  x2="12" y2="16"/>
-                        <line x1="8"  y1="12" x2="16" y2="12"/>
-                    </svg>
-                </div>
-                <div class="action-body">
-                    <h3>List Equipment</h3>
-                    <p>Add a tool or machine to share with farmers nearby</p>
-                </div>
-                <div class="action-footer">
-                    <div class="action-arrow" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                             stroke-width="2.5" stroke-linecap="round">
-                            <polyline points="9 18 15 12 9 6"/>
-                        </svg>
-                    </div>
-                </div>
-            </a>
 
-            <a href="#" class="action-card">
+
+            <a href="equipment-browse.php" class="action-card">
                 <div class="action-icon-wrap teal" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -556,6 +543,134 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
     </main><!-- /.main-content -->
 </div><!-- /.app-layout -->
 
-<script src="assets/js/dashboard.js" defer></script>
+<!-- Equipment Creation Modal -->
+<div id="equipmentModal" class="modal-overlay">
+    <div class="modal-content">
+        <button type="button" class="modal-close" id="modalCloseBtn" aria-label="Close modal">&times;</button>
+        <div class="modal-header">
+            <h2>List New Equipment</h2>
+            <p>Add a tool or machine to share with farmers nearby.</p>
+        </div>
+        <form id="equipmentForm" class="eq-form" method="POST" action="api/create-equipment.php" enctype="multipart/form-data" novalidate>
+            <input type="hidden" name="csrf_token" id="csrfToken" value="<?= generateCsrfToken() ?>">
+            
+            <!-- Equipment Details Section -->
+            <div class="form-section">
+                <h2 class="form-section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 11V5h9l3 6m0 0H3m12 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m14 0h2a2 2 0 0 1 2 2v4h-3.5"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/></svg>
+                    Equipment Details
+                </h2>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="eq-title" class="form-label">Equipment Title</label>
+                        <input type="text" name="title" id="eq-title" class="form-input" placeholder="e.g. Mahindra 475 DI Tractor" maxlength="150" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="eq-category" class="form-label">Category</label>
+                        <select name="category" id="eq-category" class="form-input form-select" required>
+                            <option value="">Select category…</option>
+                            <option value="tractor">Tractor</option>
+                            <option value="harvester">Harvester</option>
+                            <option value="seeder">Seeder</option>
+                            <option value="sprayer">Sprayer</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="eq-condition" class="form-label">Condition</label>
+                        <select name="condition" id="eq-condition" class="form-input form-select" required>
+                            <option value="">Select condition…</option>
+                            <option value="excellent">Excellent</option>
+                            <option value="good">Good</option>
+                            <option value="fair">Fair</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="eq-description" class="form-label">Description</label>
+                        <textarea name="description" id="eq-description" class="form-input form-textarea" rows="4" placeholder="Describe your equipment, its features, attachments, and usage history…" required></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pricing Section -->
+            <div class="form-section">
+                <h2 class="form-section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    Pricing
+                </h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="eq-price-hour" class="form-label">Price per Hour (₹)</label>
+                        <input type="number" name="price_per_hour" id="eq-price-hour" class="form-input" placeholder="500" min="0" step="50" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="eq-price-day" class="form-label">Price per Day (₹)</label>
+                        <input type="number" name="price_per_day" id="eq-price-day" class="form-input" placeholder="3000" min="0" step="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-checkbox-label">
+                            <input type="checkbox" name="includes_operator" value="1" class="form-checkbox">
+                            <span class="checkbox-visual"></span>
+                            <span>Includes Operator</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Location Section -->
+            <div class="form-section">
+                <h2 class="form-section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    Location
+                </h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="eq-village" class="form-label">Village</label>
+                        <input type="text" name="location_village" id="eq-village" class="form-input" placeholder="e.g. Kundgol" maxlength="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="eq-district" class="form-label">District</label>
+                        <input type="text" name="location_district" id="eq-district" class="form-input" placeholder="e.g. Dharwad" maxlength="100" required>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Photos Section -->
+            <div class="form-section">
+                <h2 class="form-section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    Photos (up to 5)
+                </h2>
+                <div class="image-upload-zone" id="imageUploadZone">
+                    <input type="file" name="images[]" id="eq-images" accept="image/jpeg,image/png,image/webp" multiple class="image-upload-input">
+                    <div class="upload-placeholder" id="uploadPlaceholder">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                            <path d="m21 11-3-3a2 2 0 0 0-2.828 0l-8.086 8.086"/>
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                        </svg>
+                        <p>Drag & drop images here, or <strong>click to browse</strong></p>
+                        <span>JPEG, PNG, WebP — max 2MB each</span>
+                    </div>
+                    <div class="image-preview-grid" id="imagePreviewGrid"></div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" id="cancelBtn">Cancel</button>
+                <button type="submit" class="btn-primary" id="submitBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    List Equipment
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="assets/js/dashboard.js?v=<?= time() ?>" defer></script>
 </body>
 </html>

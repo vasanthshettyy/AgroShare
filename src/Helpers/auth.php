@@ -66,12 +66,7 @@ function validateCsrfToken(string $token): bool
         return false;
     }
 
-    $valid = hash_equals($_SESSION['csrf_token'], $token);
-
-    // Regenerate token after validation to prevent reuse
-    unset($_SESSION['csrf_token']);
-
-    return $valid;
+    return hash_equals($_SESSION['csrf_token'], $token);
 }
 
 // ── Flash Messages ─────────────────────────────────────────

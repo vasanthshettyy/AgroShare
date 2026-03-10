@@ -311,13 +311,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .form-input:focus {
             outline: none;
-            border-color: var(--secondary-action);
-            box-shadow: 0 0 0 3px var(--secondary-10);
+            border-color: var(--primary-action);
+            box-shadow: 0 0 0 4px var(--primary-10);
             background: #FFF;
         }
         .form-input.is-invalid {
             border-color: var(--danger);
-            box-shadow: 0 0 0 3px rgba(198,40,40,0.10);
+            box-shadow: 0 0 0 4px rgba(198,40,40,0.12);
         }
         .form-input.has-icon { padding-left: 42px; }
         .form-input.has-suffix { padding-right: 46px; }
@@ -450,6 +450,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .auth-footer a:hover { color: var(--secondary-action); }
 
+        /* Back Button */
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--primary-10);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            color: var(--primary-action);
+            font-size: 0.8rem;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+            width: fit-content;
+        }
+        .btn-back:hover {
+            background: var(--primary-action);
+            color: #FFF;
+            transform: translateX(-4px);
+        }
+        .btn-back svg { width: 14px; height: 14px; }
+
         /* ── Responsive ──────────────────────────────────── */
         @media (max-width: 680px) {
             .auth-wrapper { grid-template-columns: 1fr; max-width: 420px; }
@@ -517,6 +540,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- ══ RIGHT — Login Form ════════════════════════════════ -->
     <div class="auth-form-panel">
+        <a href="signup.php" class="btn-back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Back to Signup
+        </a>
         <div class="form-head">
             <h1>Log In</h1>
             <p>Enter your phone number and password to continue.</p>

@@ -1,0 +1,3 @@
+# Disable PHP execution in uploads directory
+# Prevents backdoor scripts from running even if uploaded
+php_flag engine off

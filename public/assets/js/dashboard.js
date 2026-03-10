@@ -5,32 +5,18 @@
 'use strict';
 
 /* ── 1. Theme Toggle ──────────────────────────────────────────
-   Reads saved pref from localStorage on load.
-   Toggles   data-theme="dark"/"light" on <html>.
+   Toggles data-theme="dark"/"light" on <html>.
+   Animations are handled in CSS based on this attribute.
    ─────────────────────────────────────────────────────────── */
-const html       = document.documentElement;
-const themeBtn   = document.getElementById('theme-toggle');
-const moonSvg    = document.getElementById('theme-moon');
-const sunSvg     = document.getElementById('theme-sun');
-
-function applyThemeIcons() {
-    const isDark = html.getAttribute('data-theme') === 'dark' ||
-                   (!html.hasAttribute('data-theme') &&
-                    window.matchMedia('(prefers-color-scheme: dark)').matches);
-    if (moonSvg) moonSvg.style.display = isDark ? 'none'  : 'block';
-    if (sunSvg)  sunSvg.style.display  = isDark ? 'block' : 'none';
-}
-
-// Initialise icons on load
-applyThemeIcons();
+const html = document.documentElement;
+const themeBtn = document.getElementById('theme-toggle');
 
 if (themeBtn) {
     themeBtn.addEventListener('click', () => {
         const current = html.getAttribute('data-theme');
-        const next    = current === 'dark' ? 'light' : 'dark';
+        const next = current === 'dark' ? 'light' : 'dark';
         html.setAttribute('data-theme', next);
         localStorage.setItem('theme', next);
-        applyThemeIcons();
     });
 }
 
@@ -38,8 +24,8 @@ if (themeBtn) {
    Hamburger opens the drawer.
    Clicking the overlay (backdrop) closes it.
    ─────────────────────────────────────────────────────────── */
-const sidebar     = document.getElementById('sidebar');
-const overlay     = document.getElementById('sidebarOverlay');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebarOverlay');
 const hamburgerBtn = document.getElementById('hamburgerBtn');
 
 function openSidebar() {
@@ -56,7 +42,7 @@ function closeSidebar() {
 }
 
 if (hamburgerBtn) hamburgerBtn.addEventListener('click', openSidebar);
-if (overlay)      overlay.addEventListener('click', closeSidebar);
+if (overlay) overlay.addEventListener('click', closeSidebar);
 
 // Close on Escape key
 document.addEventListener('keydown', (e) => {
@@ -71,17 +57,17 @@ document.addEventListener('keydown', (e) => {
 const kpiValues = document.querySelectorAll('.kpi-value[data-target]');
 
 function animateCount(el) {
-    const target   = parseFloat(el.dataset.target);
-    const isFloat  = el.dataset.float === 'true';
-    const prefix   = el.dataset.prefix  || '';
-    const suffix   = el.dataset.suffix  || '';
+    const target = parseFloat(el.dataset.target);
+    const isFloat = el.dataset.float === 'true';
+    const prefix = el.dataset.prefix || '';
+    const suffix = el.dataset.suffix || '';
     const duration = 1200; // ms
-    const start    = performance.now();
+    const start = performance.now();
 
     function step(ts) {
         const progress = Math.min((ts - start) / duration, 1);
-        const eased    = 1 - Math.pow(1 - progress, 3); // ease-out-cubic
-        const current  = eased * target;
+        const eased = 1 - Math.pow(1 - progress, 3); // ease-out-cubic
+        const current = eased * target;
         el.textContent = prefix + (isFloat ? current.toFixed(1) : Math.floor(current)) + suffix;
         if (progress < 1) requestAnimationFrame(step);
     }
@@ -102,26 +88,17 @@ if ('IntersectionObserver' in window && kpiValues.length) {
 } else {
     // Fallback: set immediately for browsers without IntersectionObserver
     kpiValues.forEach(el => {
-        const target  = parseFloat(el.dataset.target);
-        const prefix  = el.dataset.prefix  || '';
-        const suffix  = el.dataset.suffix  || '';
+        const target = parseFloat(el.dataset.target);
+        const prefix = el.dataset.prefix || '';
+        const suffix = el.dataset.suffix || '';
         const isFloat = el.dataset.float === 'true';
         el.textContent = prefix + (isFloat ? target.toFixed(1) : target) + suffix;
     });
 }
 
 /* ── 4. Active Nav Link ────────────────────────────────────────
-   Marks the link whose href matches the current page.
+   (Removed — active states are now handled server-side via PHP)
    ─────────────────────────────────────────────────────────── */
-const navLinks  = document.querySelectorAll('.nav-link');
-const pageName  = window.location.pathname.split('/').pop() || 'index';
-
-navLinks.forEach(link => {
-    const href = (link.getAttribute('href') || '').split('/').pop();
-    if (href && href !== '#' && pageName.startsWith(href.replace('.php', ''))) {
-        link.classList.add('active');
-    }
-});
 
 /* ── 5. Inline SVG chart — monthly rentals line ──────────────
    Draws a smooth area chart using pure SVG path maths.
@@ -134,14 +111,14 @@ function renderAreaChart(containerId) {
     const rawData = (wrap.dataset.values || '').split(',').map(Number);
     if (!rawData.length) return;
 
-    const W = wrap.clientWidth  || 320;
+    const W = wrap.clientWidth || 320;
     const H = wrap.clientHeight || 140;
     const PAD = { top: 12, right: 12, bottom: 20, left: 30 };
     const chartW = W - PAD.left - PAD.right;
-    const chartH = H - PAD.top  - PAD.bottom;
+    const chartH = H - PAD.top - PAD.bottom;
 
-    const maxVal  = Math.max(...rawData, 1);
-    const step    = chartW / (rawData.length - 1);
+    const maxVal = Math.max(...rawData, 1);
+    const step = chartW / (rawData.length - 1);
 
     // Helper — map data point to (x, y)
     const px = (i) => PAD.left + i * step;
@@ -151,11 +128,11 @@ function renderAreaChart(containerId) {
     let dLine = `M ${px(0)},${py(rawData[0])}`;
     for (let i = 1; i < rawData.length; i++) {
         const cpX = px(i - 0.5);
-        dLine += ` C ${cpX},${py(rawData[i-1])} ${cpX},${py(rawData[i])} ${px(i)},${py(rawData[i])}`;
+        dLine += ` C ${cpX},${py(rawData[i - 1])} ${cpX},${py(rawData[i])} ${px(i)},${py(rawData[i])}`;
     }
 
     // Area path (closed)
-    const dArea = `${dLine} L ${px(rawData.length-1)},${PAD.top + chartH} L ${PAD.left},${PAD.top + chartH} Z`;
+    const dArea = `${dLine} L ${px(rawData.length - 1)},${PAD.top + chartH} L ${PAD.left},${PAD.top + chartH} Z`;
 
     // Y-axis grid lines
     const gridLines = [0.25, 0.5, 0.75, 1].map(t => {
@@ -167,7 +144,7 @@ function renderAreaChart(containerId) {
     // Y labels
     const yLabels = [0.25, 0.5, 0.75, 1].map(t => {
         const val = Math.round(t * maxVal);
-        const yy  = PAD.top + chartH - t * chartH + 4;
+        const yy = PAD.top + chartH - t * chartH + 4;
         return `<text x="${PAD.left - 6}" y="${yy}" text-anchor="end"
                       font-size="9" fill="var(--text-subtle)">${val}</text>`;
     }).join('');
@@ -202,3 +179,204 @@ function renderAreaChart(containerId) {
 // Run on load and on resize
 renderAreaChart('chart-area');
 window.addEventListener('resize', () => renderAreaChart('chart-area'));
+
+/* ── 6. Equipment Modal ───────────────────────────────────────
+   Modal for listing new equipment without page redirect.
+   ─────────────────────────────────────────────────────────── */
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Modal elements
+    const equipmentModal = document.getElementById('equipmentModal');
+    const listEquipmentBtns = document.querySelectorAll('.listEquipmentBtn');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const equipmentForm = document.getElementById('equipmentForm');
+
+    console.log('AgroShare Modal: Initializing...', {
+        btnsFound: listEquipmentBtns.length,
+        modalFound: !!equipmentModal
+    });
+
+    // Open modal
+    listEquipmentBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('AgroShare Modal: Open button clicked');
+            
+            if (equipmentModal) {
+                equipmentModal.classList.add('show-modal');
+                document.body.style.overflow = 'hidden'; // Prevent background scroll
+            } else {
+                console.warn('Modal element #equipmentModal not found, redirecting...');
+                window.location.href = 'equipment-create.php';
+            }
+        });
+    });
+
+    // Close modal function
+    function closeModal() {
+        if (!equipmentModal) return;
+        equipmentModal.classList.remove('show-modal');
+        document.body.style.overflow = ''; // Restore scroll
+        if (equipmentForm) {
+            equipmentForm.reset();
+            if (typeof clearImagePreviews === 'function') clearImagePreviews();
+        }
+    }
+
+    if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+    // Close on overlay click
+    if (equipmentModal) {
+        equipmentModal.addEventListener('click', (e) => {
+            if (e.target === equipmentModal) {
+                closeModal();
+            }
+        });
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && equipmentModal && equipmentModal.classList.contains('show-modal')) {
+            closeModal();
+        }
+    });
+
+    // Form submission
+    if (equipmentForm) {
+        equipmentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span>Listing...</span>';
+            }
+            
+            // Clear previous errors
+            document.querySelectorAll('.form-error-msg').forEach(el => el.remove());
+            document.querySelectorAll('.has-error').forEach(el => el.classList.remove('has-error'));
+            
+            try {
+                const formData = new FormData(equipmentForm);
+                
+                const response = await fetch('api/create-equipment.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    if (result.new_csrf) {
+                        const csrfInput = document.getElementById('csrfToken');
+                        if (csrfInput) csrfInput.value = result.new_csrf;
+                    }
+                    alert(result.message);
+                    closeModal();
+                    window.location.reload();
+                } else if (result.errors) {
+                    for (const [field, msg] of Object.entries(result.errors)) {
+                        const input = document.getElementsByName(field)[0];
+                        if (input) {
+                            input.classList.add('has-error');
+                            const errorDiv = document.createElement('div');
+                            errorDiv.className = 'form-error-msg';
+                            errorDiv.style.color = 'var(--danger)';
+                            errorDiv.style.fontSize = '0.75rem';
+                            errorDiv.style.marginTop = '4px';
+                            errorDiv.textContent = msg;
+                            input.parentNode.appendChild(errorDiv);
+                        }
+                    }
+                } else {
+                    alert(result.message || 'Something went wrong.');
+                }
+            } catch (error) {
+                console.error('Submission error:', error);
+                alert('Network error. Please try again.');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            }
+        });
+    }
+});
+
+// Image upload preview (adapted from equipment.js)
+const imageUploadZone = document.getElementById('imageUploadZone');
+const imagePreviewGrid = document.getElementById('imagePreviewGrid');
+const imageInput = document.getElementById('eq-images');
+
+function clearImagePreviews() {
+    if (imagePreviewGrid) imagePreviewGrid.innerHTML = '';
+    if (imageUploadZone) imageUploadZone.classList.remove('dragover');
+}
+
+function showFormErrors(errors) {
+    // Simple error display - you can enhance this
+    let errorMsg = 'Please fix the following errors:\n';
+    for (const [field, msg] of Object.entries(errors)) {
+        errorMsg += `- ${msg}\n`;
+    }
+    alert(errorMsg);
+}
+
+if (imageUploadZone && imageInput) {
+    imageUploadZone.addEventListener('click', () => imageInput.click());
+    
+    imageUploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        imageUploadZone.classList.add('dragover');
+    });
+    
+    imageUploadZone.addEventListener('dragleave', () => {
+        imageUploadZone.classList.remove('dragover');
+    });
+    
+    imageUploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        imageUploadZone.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            imageInput.files = files;
+            // Trigger change event to update previews
+            imageInput.dispatchEvent(new Event('change'));
+        }
+    });
+    
+    imageInput.addEventListener('change', (e) => {
+        const files = e.target.files;
+        if (files.length > 5) {
+            alert('You can upload a maximum of 5 images.');
+            imageInput.value = '';
+            return;
+        }
+        
+        // Clear previous previews
+        clearImagePreviews();
+        
+        // Create previews
+        Array.from(files).forEach((file, index) => {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.width = '60px';
+                    img.style.height = '60px';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '4px';
+                    img.style.margin = '4px';
+                    imagePreviewGrid.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    });
+}
