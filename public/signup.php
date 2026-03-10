@@ -103,22 +103,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* ── Tokens (mirrors dashboard.css) ──────────────── */
+        /* ── Tokens (High Contrast Light) ──────────────── */
         :root {
-            --bg-color:         #F1F0F0;
+            --bg-color:         #EEF2F0;
             --surface-color:    #FFFFFF;
-            --text-main:        #1E2608;
-            --text-muted:       #5A6A5C;
-            --text-subtle:      #8A9E8D;
-            --primary-action:   #13532C;
-            --accent-dark:      #3F5A41;
-            --accent-soft:      #B4CFBF;
-            --secondary-action: #40A190;
-            --border-color:     #D8D5D0;
-            --danger:           #C62828;
-            --primary-10:       rgba(19,83,44,0.10);
-            --secondary-10:     rgba(64,161,144,0.12);
-            --shadow-lg:        0 20px 60px rgba(19,83,44,0.18);
+            --text-main:        #0F1F12;
+            --text-muted:       #334139;
+            --text-subtle:      #47554E;
+            --primary-action:   #0D4223;
+            --accent-dark:      #2B402D;
+            --accent-soft:      #9BB8A8;
+            --secondary-action: #2D7A6D;
+            --border-color:     #B0C4B1;
+            --danger:           #B71C1C;
+            --primary-10:       rgba(13, 66, 35, 0.12);
+            --secondary-10:     rgba(45, 122, 109, 0.12);
+            --shadow-lg:        0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
             --radius:           16px;
             --radius-sm:        10px;
             --font:             'Inter', system-ui, -apple-system, sans-serif;
@@ -151,6 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: var(--radius);
             overflow: hidden;
             box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
             animation: slideUp 0.45s ease forwards;
         }
 

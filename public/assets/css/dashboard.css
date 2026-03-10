@@ -10,54 +10,43 @@
    1. DESIGN TOKENS (CSS Custom Properties)
    ══════════════════════════════════════════════════════════ */
 :root {
-    /* ── Earthy Green Palette (HSL-tuned) ── */
-    --bg-color:            hsl(128, 12%, 92%);
-    --surface-color:       hsl(0, 0%, 100%);
-    --text-main:           hsl(78, 53%, 10%);
-    --primary-action:      hsl(150, 63%, 19%);
-    --secondary-action:    hsl(171, 43%, 44%);
-    --accent-soft:         hsl(150, 22%, 76%);
-    --accent-dark:         hsl(126, 18%, 30%);
+    /* ── High-Contrast Light Palette (Darkened Sage) ── */
+    --bg-color:            #D1DED6; /* Deeper Pastel Sage Green */
+    --surface-color:       #FFFFFF; /* Pure white for pop */
+    --text-main:           #0A1A0F; /* Near black-green */
+    --primary-action:      #08331A; /* Deeper Emerald */
+    --secondary-action:    #1F5C52; /* Deeper Teal */
+    --accent-soft:         #8BA899;
+    --accent-dark:         #1A2B1C;
 
     /* ── Extended Tokens ── */
-    --text-muted:          hsl(135, 9%, 38%);
-    --text-subtle:         hsl(145, 12%, 53%);
-    --border-color:        hsl(132, 11%, 68%);
-    --danger:              #C62828;
-    --amber:               #E8A011;
-    --blue-accent:         #1A6EA0;
-    --purple-accent:       #6B3FA0;
-
-    /* ── Semantic Aliases ── */
-    --c-bg:                var(--bg-color);
-    --c-surface:           var(--surface-color);
-    --c-text:              var(--text-main);
-    --c-text-muted:        var(--text-muted);
-    --c-text-subtle:       var(--text-subtle);
-    --c-border:            var(--border-color);
-    --c-primary:           var(--primary-action);
-    --c-secondary:         var(--secondary-action);
-    --c-danger:            var(--danger);
+    --text-muted:          #2D382F; 
+    --text-subtle:         #3F4D43;
+    --border-color:        #A5B8A7; /* Stronger borders */
+    --danger:              #A31616;
+    --amber:               #9E6607;
+    --blue-accent:         #0E4B6B;
+    --purple-accent:       #412466;
 
     /* ── Alpha helpers ── */
-    --primary-10:          rgba(19, 83, 44, 0.10);
-    --primary-15:          rgba(19, 83, 44, 0.15);
-    --secondary-10:        rgba(64, 161, 144, 0.12);
-    --nav-hover-bg:        rgba(19, 83, 44, 0.18);
+    --primary-10:          rgba(8, 51, 26, 0.12);
+    --primary-15:          rgba(8, 51, 26, 0.18);
+    --secondary-10:        rgba(31, 92, 82, 0.12);
+    --nav-hover-bg:        rgba(8, 51, 26, 0.10);
 
-    /* ── Glassmorphism ── */
-    --glass-bg:            rgba(255, 255, 255, 0.70);
-    --glass-bg-heavy:      rgba(255, 255, 255, 0.85);
-    --glass-border:        rgba(0, 0, 0, 0.06);
-    --glass-blur:          14px;
+    /* ── Glassmorphism (Solid Sidebar/Topbar for Light Mode) ── */
+    --glass-bg:            rgba(255, 255, 255, 0.40);
+    --glass-bg-heavy:      #D1DED6; /* Matches --bg-color exactly */
+    --glass-border:        rgba(10, 26, 15, 0.12); 
+    --glass-blur:          12px;
 
-    /* ── Shadows (soft & luminous) ── */
-    --shadow-sm:           0 1px 3px rgba(30, 38, 8, 0.06), 0 1px 2px rgba(30, 38, 8, 0.04);
-    --shadow-md:           0 4px 14px rgba(30, 38, 8, 0.08), 0 2px 6px rgba(30, 38, 8, 0.04);
-    --shadow-lg:           0 8px 28px rgba(30, 38, 8, 0.10), 0 4px 10px rgba(30, 38, 8, 0.04);
-    --shadow-hover:        0 10px 25px rgba(43, 238, 75, 0.10), 0 4px 12px rgba(30, 38, 8, 0.06);
-    --shadow-card:         0 1px 3px rgba(30, 38, 8, 0.05), 0 0 0 1px rgba(30, 38, 8, 0.04);
-    --glow-primary:        0 0 20px rgba(19, 83, 44, 0.12);
+    /* ── Shadows (Sharper & Deeper) ── */
+    --shadow-sm:           0 1px 2px rgba(0, 0, 0, 0.1), 0 1px 1px rgba(0, 0, 0, 0.06);
+    --shadow-md:           0 4px 6px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
+    --shadow-lg:           0 10px 15px rgba(0, 0, 0, 0.15), 0 4px 6px rgba(0, 0, 0, 0.10);
+    --shadow-hover:        0 20px 40px rgba(13, 66, 35, 0.20), 0 8px 16px rgba(0, 0, 0, 0.12);
+    --shadow-card:         0 0 0 1px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.08);
+    --glow-primary:        0 0 25px rgba(13, 66, 35, 0.25);
 
     /* ── Shape ── */
     --radius:              18px;
@@ -84,24 +73,31 @@
     --text-muted:          hsl(140, 14%, 60%);
     --text-subtle:         hsl(150, 12%, 38%);
     --border-color:        hsl(150, 20%, 16%);
-    --primary-10:          rgba(64, 161, 144, 0.12);
-    --primary-15:          rgba(64, 161, 144, 0.18);
-    --secondary-10:        rgba(64, 161, 144, 0.10);
-    --nav-hover-bg:        rgba(64, 161, 144, 0.10);
+    
+    /* Slightly more muted but visible actions for dark background */
+    --primary-action:      hsl(150, 50%, 45%); 
+    --secondary-action:    hsl(171, 35%, 55%);
+    --accent-soft:         hsl(150, 15%, 25%);
+    --accent-dark:         hsl(150, 50%, 30%);
+
+    --primary-10:          rgba(76, 175, 120, 0.12);
+    --primary-15:          rgba(76, 175, 120, 0.18);
+    --secondary-10:        rgba(90, 180, 170, 0.10);
+    --nav-hover-bg:        rgba(76, 175, 120, 0.08);
 
     /* ── Dark glassmorphism ── */
     --glass-bg:            rgba(15, 30, 18, 0.65);
     --glass-bg-heavy:      rgba(18, 35, 22, 0.80);
-    --glass-border:        rgba(255, 255, 255, 0.05);
+    --glass-border:        rgba(255, 255, 255, 0.08);
     --glass-blur:          16px;
 
     /* ── Dark shadows ── */
-    --shadow-sm:           0 1px 3px rgba(0, 0, 0, 0.20);
-    --shadow-md:           0 4px 14px rgba(0, 0, 0, 0.28);
-    --shadow-lg:           0 8px 28px rgba(0, 0, 0, 0.35);
-    --shadow-hover:        0 10px 25px rgba(43, 238, 75, 0.08), 0 4px 12px rgba(0, 0, 0, 0.20);
-    --shadow-card:         0 1px 4px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.04);
-    --glow-primary:        0 0 24px rgba(64, 161, 144, 0.10);
+    --shadow-sm:           0 1px 3px rgba(0, 0, 0, 0.40);
+    --shadow-md:           0 4px 14px rgba(0, 0, 0, 0.50);
+    --shadow-lg:           0 8px 28px rgba(0, 0, 0, 0.60);
+    --shadow-hover:        0 10px 25px rgba(43, 238, 75, 0.12), 0 4px 12px rgba(0, 0, 0, 0.40);
+    --shadow-card:         0 0 0 1px rgba(255, 255, 255, 0.05), 0 2px 8px rgba(0, 0, 0, 0.40);
+    --glow-primary:        0 0 24px rgba(76, 175, 120, 0.12);
 }
 
 @media (prefers-color-scheme: dark) {
