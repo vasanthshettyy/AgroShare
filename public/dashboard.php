@@ -45,13 +45,60 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
     </script>
     <?php endif; ?>
 
-    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css?v=<?= time() ?>">
 </head>
 <body>
 
 <div class="app-layout">
 
-    <!-- ══ SIDEBAR ═══════════════════════════════════════════ -->
+    <!-- -- TOPBAR -- -->
+    <header class="topbar" role="banner">
+        <div class="topbar-left">
+            <!-- Hamburger (mobile only) -->
+            <button class="hamburger" id="hamburgerBtn" aria-label="Open navigation menu" aria-expanded="false"
+                    aria-controls="sidebar">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round">
+                    <line x1="3" y1="6"  x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
+
+            <p class="topbar-greeting">
+                <?= e($greeting) ?>, <strong><?= e($_SESSION['full_name']) ?></strong>
+            </p>
+        </div>
+
+        <!-- Search bar -->
+        <label class="topbar-search" for="topbar-search-input" aria-label="Search">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input type="search" id="topbar-search-input" placeholder="Search anything…" autocomplete="off">
+        </label>
+
+        <div class="topbar-right">
+            <!-- Notifications -->
+            <button class="btn-icon" aria-label="Notifications" title="Notifications">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                <span class="notif-dot" aria-hidden="true"></span>
+            </button>
+
+            <!-- Avatar -->
+            <div class="avatar" id="avatar-btn" role="button" tabindex="0"
+                 title="Profile — <?= e($_SESSION['full_name']) ?>" aria-label="Open profile">
+                <?= e($initials) ?>
+            </div>
+        </div>
+    </header>
+
+    <!-- -- SIDEBAR -- -->
     <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
 
         <!-- Brand -->
@@ -161,57 +208,10 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
         </div>
     </aside>
 
-    <!-- ══ SIDEBAR OVERLAY (mobile backdrop) ════════════════ -->
+    <!-- -- SIDEBAR OVERLAY -- -->
     <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
 
-    <!-- ══ TOPBAR ════════════════════════════════════════════ -->
-    <header class="topbar" role="banner">
-        <div class="topbar-left">
-            <!-- Hamburger (mobile only) -->
-            <button class="hamburger" id="hamburgerBtn" aria-label="Open navigation menu" aria-expanded="false"
-                    aria-controls="sidebar">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round">
-                    <line x1="3" y1="6"  x2="21" y2="6"/>
-                    <line x1="3" y1="12" x2="21" y2="12"/>
-                    <line x1="3" y1="18" x2="21" y2="18"/>
-                </svg>
-            </button>
-
-            <p class="topbar-greeting">
-                <?= e($greeting) ?>, <strong><?= e($_SESSION['full_name']) ?></strong>
-            </p>
-        </div>
-
-        <!-- Search bar -->
-        <label class="topbar-search" for="topbar-search-input" aria-label="Search">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-            <input type="search" id="topbar-search-input" placeholder="Search anything…" autocomplete="off">
-        </label>
-
-        <div class="topbar-right">
-            <!-- Notifications -->
-            <button class="btn-icon" aria-label="Notifications" title="Notifications">
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                </svg>
-                <span class="notif-dot" aria-hidden="true"></span>
-            </button>
-
-            <!-- Avatar -->
-            <div class="avatar" id="avatar-btn" role="button" tabindex="0"
-                 title="Profile — <?= e($_SESSION['full_name']) ?>" aria-label="Open profile">
-                <?= e($initials) ?>
-            </div>
-        </div>
-    </header>
-
-    <!-- ══ MAIN CONTENT ══════════════════════════════════════ -->
+    <!-- -- MAIN CONTENT -- -->
     <main class="main-content" role="main">
 
         <?= renderFlash() ?>
