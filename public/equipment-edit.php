@@ -105,14 +105,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script>if (!sessionStorage.getItem('agroshare_tab')) window.location.href = 'logout.php';</script>
     <?php endif; ?>
 
-    <link rel="stylesheet" href="assets/css/dashboard.css">
-    <link rel="stylesheet" href="assets/css/equipment.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="assets/css/equipment.css?v=<?= time() ?>">
 </head>
 <body>
 
 <div class="app-layout">
 
-    <!-- ══ SIDEBAR (same as create page) ═════════════════════ -->
+    <!-- -- TOPBAR -------------------------------------------- -->
+    <header class="topbar" role="banner">
+        <div class="topbar-left">
+            <button class="hamburger" id="hamburgerBtn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sidebar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+            <p class="topbar-greeting">Edit Equipment</p>
+        </div>
+        <div class="topbar-right">
+            <div class="avatar" id="avatar-btn" role="button" tabindex="0" title="Profile — <?= e($_SESSION['full_name']) ?>" aria-label="Open profile"><?= e($initials) ?></div>
+        </div>
+    </header>
+
+    <!-- -- SIDEBAR ------------------------------------------- -->
     <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
         <div class="sidebar-brand">
             <div class="brand-mark" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22c1.25-7 6-10 10.5-10S20 9.9 20 5.4c0-2.3-.9-3.9-.9-3.9C17 5 14.8 6 14.8 6 11.4 2.5 7 2 7 2S3 8 3 13c0 3 1.5 5.5 3.5 7"/><path d="M6 22c0-4 2-7 6-9"/></svg></div>
@@ -133,20 +144,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="sidebar-footer"><a href="logout.php" class="nav-link danger"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Log Out</span></a></div>
     </aside>
 
+    <!-- -- SIDEBAR OVERLAY (mobile backdrop) ---------------- -->
     <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
 
-    <!-- ══ TOPBAR ════════════════════════════════════════════ -->
-    <header class="topbar" role="banner">
-        <div class="topbar-left">
-            <button class="hamburger" id="hamburgerBtn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sidebar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-            <p class="topbar-greeting">Edit Equipment</p>
-        </div>
-        <div class="topbar-right">
-            <div class="avatar" id="avatar-btn" role="button" tabindex="0" title="Profile — <?= e($_SESSION['full_name']) ?>" aria-label="Open profile"><?= e($initials) ?></div>
-        </div>
-    </header>
-
-    <!-- ══ MAIN CONTENT ──────────────────────────────────── -->
+    <!-- -- MAIN CONTENT -------------------------------------- -->
     <main class="main-content" role="main">
 
         <?= renderFlash() ?>
@@ -307,8 +308,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
 
     </main>
-</div>
-
+</div><!-- /.app-layout -->
 <script src="assets/js/dashboard.js" defer></script>
 <script src="assets/js/equipment.js" defer></script>
 </body>

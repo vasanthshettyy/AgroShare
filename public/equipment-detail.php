@@ -66,14 +66,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     <script>if (!sessionStorage.getItem('agroshare_tab')) window.location.href = 'logout.php';</script>
     <?php endif; ?>
 
-    <link rel="stylesheet" href="assets/css/dashboard.css">
-    <link rel="stylesheet" href="assets/css/equipment.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="assets/css/equipment.css?v=<?= time() ?>">
 </head>
 <body>
 
 <div class="app-layout">
 
-    <!-- ══ SIDEBAR ═══════════════════════════════════════════ -->
+    <!-- -- TOPBAR -------------------------------------------- -->
+    <header class="topbar" role="banner">
+        <div class="topbar-left">
+            <button class="hamburger" id="hamburgerBtn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sidebar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+            <p class="topbar-greeting">Equipment Details</p>
+        </div>
+        <div class="topbar-right">
+            <div class="avatar" id="avatar-btn" role="button" tabindex="0" title="Profile — <?= e($_SESSION['full_name']) ?>" aria-label="Open profile"><?= e($initials) ?></div>
+        </div>
+    </header>
+
+    <!-- -- SIDEBAR ------------------------------------------- -->
     <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
         <div class="sidebar-brand">
             <div class="brand-mark" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22c1.25-7 6-10 10.5-10S20 9.9 20 5.4c0-2.3-.9-3.9-.9-3.9C17 5 14.8 6 14.8 6 11.4 2.5 7 2 7 2S3 8 3 13c0 3 1.5 5.5 3.5 7"/><path d="M6 22c0-4 2-7 6-9"/></svg></div>
@@ -94,20 +105,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         <div class="sidebar-footer"><a href="logout.php" class="nav-link danger"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Log Out</span></a></div>
     </aside>
 
+    <!-- -- SIDEBAR OVERLAY (mobile backdrop) ---------------- -->
     <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
 
-    <!-- ══ TOPBAR ════════════════════════════════════════════ -->
-    <header class="topbar" role="banner">
-        <div class="topbar-left">
-            <button class="hamburger" id="hamburgerBtn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sidebar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-            <p class="topbar-greeting">Equipment Details</p>
-        </div>
-        <div class="topbar-right">
-            <div class="avatar" id="avatar-btn" role="button" tabindex="0" title="Profile — <?= e($_SESSION['full_name']) ?>" aria-label="Open profile"><?= e($initials) ?></div>
-        </div>
-    </header>
-
-    <!-- ══ MAIN CONTENT ══════════════════════════════════════ -->
+    <!-- -- MAIN CONTENT -------------------------------------- -->
     <main class="main-content" role="main">
 
         <?= renderFlash() ?>
@@ -254,147 +255,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         </div>
 
     </main>
-</div>
-
-<!-- Edit Equipment Modal -->
-<?php if ($isOwner): ?>
-<div id="editEquipmentModal" class="modal-overlay">
-    <div class="modal-content">
-        <button type="button" class="modal-close" id="editModalCloseBtn" aria-label="Close modal">&times;</button>
-        <div class="modal-header">
-            <h2>Edit Equipment</h2>
-            <p>Update the details for your listed equipment.</p>
-        </div>
-        <form id="editEquipmentForm" class="eq-form" method="POST" action="api/edit-equipment.php" enctype="multipart/form-data" novalidate>
-            <input type="hidden" name="csrf_token" id="editCsrfToken" value="<?= generateCsrfToken() ?>">
-            <input type="hidden" name="id" value="<?= $equipmentId ?>">
-            
-            <!-- Equipment Details Section -->
-            <div class="form-section">
-                <h2 class="form-section-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 11V5h9l3 6m0 0H3m12 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m14 0h2a2 2 0 0 1 2 2v4h-3.5"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/></svg>
-                    Equipment Details
-                </h2>
-                <div class="form-grid">
-                    <div class="form-group full-width">
-                        <label for="edit-eq-title" class="form-label">Equipment Title</label>
-                        <input type="text" name="title" id="edit-eq-title" class="form-input" value="<?= e($eq['title']) ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-eq-category" class="form-label">Category</label>
-                        <select name="category" id="edit-eq-category" class="form-input form-select" required>
-                            <?php foreach (['tractor','harvester','seeder','sprayer','other'] as $cat): ?>
-                            <option value="<?= $cat ?>" <?= $eq['category'] === $cat ? 'selected' : '' ?>><?= ucfirst($cat) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-eq-condition" class="form-label">Condition</label>
-                        <select name="condition" id="edit-eq-condition" class="form-input form-select" required>
-                            <?php foreach (['excellent'=>'Excellent','good'=>'Good','fair'=>'Fair'] as $val=>$label): ?>
-                            <option value="<?= $val ?>" <?= $eq['condition'] === $val ? 'selected' : '' ?>><?= $label ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group full-width">
-                        <label for="edit-eq-description" class="form-label">Description</label>
-                        <textarea name="description" id="edit-eq-description" class="form-input form-textarea" rows="4" required><?= e($eq['description']) ?></textarea>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Pricing Section -->
-            <div class="form-section">
-                <h2 class="form-section-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                    Pricing
-                </h2>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="edit-eq-price-hour" class="form-label">Price per Hour (₹)</label>
-                        <input type="number" name="price_per_hour" id="edit-eq-price-hour" class="form-input" value="<?= e($eq['price_per_hour']) ?>" min="0" step="50" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-eq-price-day" class="form-label">Price per Day (₹)</label>
-                        <input type="number" name="price_per_day" id="edit-eq-price-day" class="form-input" value="<?= e($eq['price_per_day']) ?>" min="0" step="100" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-checkbox-label">
-                            <input type="checkbox" name="includes_operator" value="1" class="form-checkbox" <?= $eq['includes_operator'] ? 'checked' : '' ?>>
-                            <span class="checkbox-visual"></span>
-                            <span>Includes Operator</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Location Section -->
-            <div class="form-section">
-                <h2 class="form-section-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                    Location
-                </h2>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="edit-eq-village" class="form-label">Village</label>
-                        <input type="text" name="location_village" id="edit-eq-village" class="form-input" value="<?= e($eq['location_village']) ?>" maxlength="100" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-eq-district" class="form-label">District</label>
-                        <input type="text" name="location_district" id="edit-eq-district" class="form-input" value="<?= e($eq['location_district']) ?>" maxlength="100" required>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Photos Section -->
-            <div class="form-section">
-                <h2 class="form-section-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                    Photos
-                </h2>
-                
-                <?php if (!empty($images)): ?>
-                <div class="existing-images-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-bottom: 1.5rem;">
-                    <?php foreach ($images as $img): ?>
-                    <div class="existing-image-item" style="position:relative; aspect-ratio:1; border-radius:8px; overflow:hidden; border:1px solid var(--border-color);">
-                        <img src="<?= e($img) ?>" alt="Equipment photo" style="width:100%; height:100%; object-fit:cover;">
-                        <label class="remove-image-label" style="position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.6); color:#fff; font-size:0.7rem; padding:4px; display:flex; align-items:center; gap:4px; cursor:pointer;">
-                            <input type="checkbox" name="remove_images[]" value="<?= e($img) ?>">
-                            <span>Remove</span>
-                        </label>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
-
-                <div class="image-upload-zone" id="editImageUploadZone">
-                    <input type="file" name="images[]" id="edit-eq-images" accept="image/jpeg,image/png,image/webp" multiple class="image-upload-input">
-                    <div class="upload-placeholder" id="editUploadPlaceholder">
-                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
-                            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-                            <path d="m21 11-3-3a2 2 0 0 0-2.828 0l-8.086 8.086"/>
-                            <rect x="3" y="3" width="18" height="18" rx="2"/>
-                            <circle cx="8.5" cy="8.5" r="1.5"/>
-                        </svg>
-                        <p>Add more photos (drag & drop or click)</p>
-                        <span>JPEG, PNG, WebP — max 2MB each</span>
-                    </div>
-                    <div class="edit-image-preview-grid" id="editImagePreviewGrid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; margin-top: 1.25rem;"></div>
-                </div>
-            </div>
-            
-            <div class="form-actions">
-                <button type="button" class="btn-secondary" id="editCancelBtn">Cancel</button>
-                <button type="submit" class="btn-primary" id="editSubmitBtn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
-                    Save Changes
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-<?php endif; ?>
-
+</div><!-- /.app-layout -->
 <script src="assets/js/dashboard.js" defer></script>
 <script src="assets/js/equipment.js?v=<?= time() ?>" defer></script>
 </body>

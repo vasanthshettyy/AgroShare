@@ -67,14 +67,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </script>
     <?php endif; ?>
 
-    <link rel="stylesheet" href="assets/css/dashboard.css">
-    <link rel="stylesheet" href="assets/css/equipment.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="assets/css/equipment.css?v=<?= time() ?>">
 </head>
 <body>
 
 <div class="app-layout">
 
-    <!-- ══ SIDEBAR ═══════════════════════════════════════════ -->
+    <!-- -- TOPBAR -------------------------------------------- -->
+    <header class="topbar" role="banner">
+        <div class="topbar-left">
+            <button class="hamburger" id="hamburgerBtn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sidebar">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <p class="topbar-greeting">List New Equipment</p>
+        </div>
+        <div class="topbar-right">
+            <div class="avatar" id="avatar-btn" role="button" tabindex="0"
+    </header>
+
+    <!-- -- SIDEBAR ------------------------------------------- -->
     <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
         <div class="sidebar-brand">
             <div class="brand-mark" aria-hidden="true">
@@ -116,21 +128,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </aside>
 
+    <!-- -- SIDEBAR OVERLAY (mobile backdrop) ---------------- -->
     <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
 
-    <!-- ══ TOPBAR ════════════════════════════════════════════ -->
-    <header class="topbar" role="banner">
-        <div class="topbar-left">
-            <button class="hamburger" id="hamburgerBtn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sidebar">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-            </button>
-            <p class="topbar-greeting">List New Equipment</p>
-        </div>
-        <div class="topbar-right">
-            <div class="avatar" id="avatar-btn" role="button" tabindex="0"
-    </header>
-
-    <!-- ══ MAIN CONTENT ══════════════════════════════════════ -->
+    <!-- -- MAIN CONTENT -------------------------------------- -->
     <main class="main-content" role="main">
 
         <?= renderFlash() ?>
@@ -315,8 +316,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
 
     </main>
-</div>
-
+</div><!-- /.app-layout -->
 <script src="assets/js/dashboard.js" defer></script>
 <script src="assets/js/equipment.js" defer></script>
 </body>
