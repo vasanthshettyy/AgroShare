@@ -57,6 +57,10 @@ if (!$newId) {
 
 // Fetch the created equipment to build the card HTML for DOM insertion
 $eq = getEquipmentById($conn, $newId);
+if (!$eq) {
+    echo json_encode(['success' => false, 'message' => 'Equipment created but could not be loaded.']);
+    exit();
+}
 $images    = $eq['images'] ? json_decode($eq['images'], true) : [];
 $thumbnail = !empty($images) ? htmlspecialchars($images[0], ENT_QUOTES, 'UTF-8') : '';
 
@@ -70,7 +74,10 @@ if ($thumbnail) {
     $cardHtml .= '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 11V5h9l3 6m0 0H3m12 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m14 0h2a2 2 0 0 1 2 2v4h-3.5"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/></svg>';
     $cardHtml .= '</div>';
 }
-$cardHtml .= '<span class="eq-card-badge available">Available</span>';
+$isAvailable = $eq['is_available'] ?? true;
+$badgeClass = $isAvailable ? 'available' : 'unavailable';
+$badgeText = $isAvailable ? 'Available' : 'Unavailable';
+$cardHtml .= '<span class="eq-card-badge ' . $badgeClass . '">' . $badgeText . '</span>';
 $cardHtml .= '</div>';
 
 $cardHtml .= '<div class="eq-card-body">';

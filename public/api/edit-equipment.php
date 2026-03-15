@@ -8,6 +8,8 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/../../src/Controllers/EquipmentController.php';
 
+session_start();
+
 // Must be logged in
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'Not authenticated.']);
@@ -41,7 +43,8 @@ $formData = $_POST;
 $errors   = validateEquipmentData($formData);
 
 // Handle image removals
-$removedImages = $_POST['remove_images'] ?? [];
+$rawRemovedImages = $_POST['remove_images'] ?? [];
+$removedImages = is_array($rawRemovedImages) ? array_intersect($rawRemovedImages, $existingImages) : [];
 $keptImages    = array_values(array_diff($existingImages, $removedImages));
 
 // Process new uploads
@@ -61,6 +64,9 @@ if (!empty($_FILES['images']['name'][0])) {
 
 // Return validation errors
 if (!empty($errors)) {
+    if (!empty($newImagePaths)) {
+        deleteEquipmentImages($newImagePaths);
+    }
     echo json_encode([
         'success' => false,
         'message' => 'Please fix the errors below.',
@@ -73,17 +79,17 @@ if (!empty($errors)) {
 $finalImages = array_merge($keptImages, $newImagePaths);
 $imagesJson  = !empty($finalImages) ? json_encode($finalImages) : null;
 
-// Delete removed images from disk
-if (!empty($removedImages)) {
-    deleteEquipmentImages($removedImages);
-}
-
 // Update
 $updated = updateEquipment($conn, $id, (int)$_SESSION['user_id'], $formData, $imagesJson);
 
 if (!$updated) {
     echo json_encode(['success' => false, 'message' => 'Could not update equipment.']);
     exit();
+}
+
+// Delete removed images from disk
+if (!empty($removedImages)) {
+    deleteEquipmentImages($removedImages);
 }
 
 echo json_encode([

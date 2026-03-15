@@ -52,7 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $errors   = validateEquipmentData($formData);
 
     // Handle image removals
-    $removedImages = $_POST['remove_images'] ?? [];
+    $rawRemovedImages = $_POST['remove_images'] ?? [];
+    $removedImages = is_array($rawRemovedImages) ? array_intersect($rawRemovedImages, $existingImages) : [];
     $keptImages    = array_values(array_diff($existingImages, $removedImages));
 
     // Process new uploads

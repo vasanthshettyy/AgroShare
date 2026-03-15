@@ -87,7 +87,10 @@ function processImageUploads(array $files): array
 
     // Ensure upload directory exists
     if (!is_dir(UPLOAD_DIR)) {
-        mkdir(UPLOAD_DIR, 0755, true);
+        if (!mkdir(UPLOAD_DIR, 0755, true) && !is_dir(UPLOAD_DIR)) {
+            $errors[] = 'Failed to create upload directory.';
+            return ['paths' => $paths, 'errors' => $errors];
+        }
     }
 
     // Normalize $_FILES array for multiple uploads
@@ -113,7 +116,7 @@ function processImageUploads(array $files): array
         // Validate MIME type using finfo (server-side, not extension-based)
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $mimeType = $finfo->file($files['tmp_name'][$i]);
-        if (!in_array($mimeType, ALLOWED_MIME_TYPES, true)) {
+        if (!in_array($mimeType, ALLOWED_MIME_TYPES, true) || @getimagesize($files['tmp_name'][$i]) === false) {
             $errors[] = 'File "' . htmlspecialchars($files['name'][$i]) . '" is not a valid image (JPEG, PNG, or WebP only).';
             continue;
         }
@@ -149,10 +152,10 @@ function processImageUploads(array $files): array
  */
 function deleteEquipmentImages(array $imagePaths): void
 {
-    $publicDir = __DIR__ . '/../../public/';
+    $publicDir = realpath(__DIR__ . '/../../public/');
     foreach ($imagePaths as $path) {
-        $fullPath = $publicDir . $path;
-        if (is_file($fullPath)) {
+        $fullPath = realpath($publicDir . '/' . $path);
+        if ($fullPath && str_starts_with($fullPath, $publicDir) && is_file($fullPath)) {
             unlink($fullPath);
         }
     }
@@ -224,7 +227,7 @@ function updateEquipment(mysqli $conn, int $equipmentId, int $ownerId, array $da
     $condition        = $data['condition'];
 
     $stmt->bind_param(
-        'sssddisssiii',
+        'sssddissssii',
         $title, $category, $description,
         $pricePerHour, $pricePerDay, $includesOperator,
         $village, $district, $imagesJson, $condition,

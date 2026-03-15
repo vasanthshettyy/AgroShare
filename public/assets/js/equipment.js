@@ -87,7 +87,11 @@
     thumbs.forEach(thumb => {
         thumb.addEventListener('click', () => {
             const newSrc = thumb.dataset.src;
-            if (!newSrc || mainImg.src.endsWith(newSrc)) return;
+            if (!newSrc) return;
+            
+            const currentPath = new URL(mainImg.src, window.location.href).pathname;
+            const newPath = new URL(newSrc, window.location.href).pathname;
+            if (currentPath === newPath) return;
 
             // Smooth fade transition
             mainImg.style.opacity = '0';
@@ -120,15 +124,19 @@
         try {
             const formData = new FormData();
             formData.append('equipment_id', equipmentId);
+            
+            const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
+            formData.append('csrf_token', csrfToken);
 
             const res  = await fetch('api/toggle-availability.php', {
                 method: 'POST',
                 body: formData,
             });
+            if (!res.ok) throw new Error('Network response was not ok');
             const data = await res.json();
 
             if (data.success) {
-                const isNowAvailable = data.is_available === 1;
+                const isNowAvailable = Boolean(data.is_available === 1 || data.is_available === true || data.is_available === '1');
 
                 // Update button
                 btn.classList.toggle('is-available', isNowAvailable);
@@ -221,6 +229,7 @@
                     body: formData
                 });
                 
+                if (!response.ok) throw new Error('Network response was not ok');
                 const result = await response.json();
                 
                 if (result.success) {

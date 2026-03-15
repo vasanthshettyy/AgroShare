@@ -22,7 +22,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    $formData = $_POST;
+    $formData = [
+        'title' => $_POST['title'] ?? '',
+        'category' => $_POST['category'] ?? '',
+        'condition' => $_POST['condition'] ?? '',
+        'description' => $_POST['description'] ?? '',
+        'price_per_hour' => $_POST['price_per_hour'] ?? '',
+        'price_per_day' => $_POST['price_per_day'] ?? '',
+        'includes_operator' => $_POST['includes_operator'] ?? '',
+        'location_village' => $_POST['location_village'] ?? '',
+        'location_district' => $_POST['location_district'] ?? '',
+    ];
     $errors   = validateEquipmentData($formData);
 
     // Process images

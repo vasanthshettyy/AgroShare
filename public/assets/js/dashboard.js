@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = ''; // Restore scroll
         if (equipmentForm) {
             equipmentForm.reset();
-            if (typeof clearImagePreviews === 'function') clearImagePreviews();
+            if (typeof window.clearImagePreviews === 'function') window.clearImagePreviews();
         }
     }
 
@@ -252,7 +252,8 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const formData = new FormData(equipmentForm);
                 
-                const response = await fetch('api/create-equipment.php', {
+                const basePath = document.documentElement.dataset.basePath || '';
+                const response = await fetch(`${basePath}/api/create-equipment.php`, {
                     method: 'POST',
                     body: formData
                 });
@@ -306,6 +307,7 @@ function clearImagePreviews() {
     if (imagePreviewGrid) imagePreviewGrid.innerHTML = '';
     if (imageUploadZone) imageUploadZone.classList.remove('dragover');
 }
+window.clearImagePreviews = clearImagePreviews;
 
 function showFormErrors(errors) {
     // Simple error display - you can enhance this
@@ -334,7 +336,11 @@ if (imageUploadZone && imageInput) {
         
         const files = e.dataTransfer.files;
         if (files.length > 0) {
-            imageInput.files = files;
+            const dt = new DataTransfer();
+            for (let i = 0; i < files.length; i++) {
+                dt.items.add(files[i]);
+            }
+            imageInput.files = dt.files;
             // Trigger change event to update previews
             imageInput.dispatchEvent(new Event('change'));
         }
@@ -346,6 +352,20 @@ if (imageUploadZone && imageInput) {
             alert('You can upload a maximum of 5 images.');
             imageInput.value = '';
             return;
+        }
+        
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (!file.type.startsWith('image/')) {
+                alert('Only image files are allowed.');
+                imageInput.value = '';
+                return;
+            }
+            if (file.size > 2 * 1024 * 1024) {
+                alert(`File ${file.name} exceeds 2MB limit.`);
+                imageInput.value = '';
+                return;
+            }
         }
         
         // Clear previous previews

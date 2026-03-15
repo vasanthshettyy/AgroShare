@@ -4,9 +4,10 @@ require_once __DIR__ . '/../src/Controllers/EquipmentController.php';
 requireAuth();
 
 // ── Common layout data ─────────────────────────────────────
-$nameParts = explode(' ', $_SESSION['full_name']);
-$initials  = strtoupper(substr($nameParts[0], 0, 1));
-if (isset($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
+$fullName  = trim($_SESSION['full_name'] ?? '');
+$nameParts = explode(' ', $fullName);
+$initials  = !empty($nameParts[0]) ? strtoupper(substr($nameParts[0], 0, 1)) : '?';
+if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 
 $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
 
@@ -221,7 +222,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     <h2 class="detail-section-title">Owner</h2>
                     <div class="owner-info-card">
                         <div class="owner-avatar">
-                            <?= strtoupper(substr($eq['owner_name'], 0, 1)) ?>
+                            <?= strtoupper(substr(trim($eq['owner_name'] ?? ''), 0, 1)) ?: '?' ?>
                         </div>
                         <div class="owner-details">
                             <strong><?= e($eq['owner_name']) ?></strong>

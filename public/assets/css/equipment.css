@@ -219,7 +219,8 @@
 .filter-bar .filter-select,
 .filter-bar .filter-input {
     width: 100%;
-    padding: 0.75rem 1rem 0.75rem 2.5rem; /* Space for icon */
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    /* Space for icon */
     background: var(--bg-color);
     border: 1px solid var(--border-color);
     border-radius: 10px;
@@ -268,7 +269,8 @@
     gap: 0.75rem;
     cursor: pointer;
     user-select: none;
-    height: 44px; /* Matches input height perfectly */
+    height: 44px;
+    /* Matches input height perfectly */
     padding: 0 0.5rem;
 }
 
@@ -296,15 +298,15 @@
     background-color: var(--text-muted);
     border-radius: 50%;
     transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), background-color 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.custom-toggle input:checked + .toggle-slider {
+.custom-toggle input:checked+.toggle-slider {
     background-color: var(--primary-15);
     border-color: var(--primary-action);
 }
 
-.custom-toggle input:checked + .toggle-slider::before {
+.custom-toggle input:checked+.toggle-slider::before {
     transform: translateX(20px);
     background-color: var(--primary-action);
 }
@@ -316,7 +318,7 @@
     transition: color 0.3s ease;
 }
 
-.custom-toggle input:checked ~ .toggle-label {
+.custom-toggle input:checked~.toggle-label {
     color: var(--primary-action);
 }
 
@@ -395,7 +397,7 @@
     text-transform: uppercase;
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .eq-card-badge.available {
@@ -1342,8 +1344,222 @@
         width: 50px;
         height: 50px;
     }
+}
+
+.pricing-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.pricing-value {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--primary-action);
+}
+
+.detail-description {
+    font-size: 0.88rem;
+    line-height: 1.65;
+    color: var(--text-main);
+    margin: 0;
+}
+
+/* ── Owner Info Card ────────────────────────────────────── */
+.owner-info-card {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.owner-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--primary-action);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+.owner-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.owner-details strong {
+    font-size: 0.9rem;
+    color: var(--text-main);
+}
+
+.verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--secondary-action);
+}
+
+.owner-location {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.owner-trust {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--amber, #F9A825);
+}
+
+/* ══════════════════════════════════════════════════════════
+   11. TOAST NOTIFICATION
+   ══════════════════════════════════════════════════════════ */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 0.85rem 1.25rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #fff;
+    z-index: 10000;
+    animation: toastSlideIn 0.35s ease-out both;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.toast.toast-success {
+    background: rgba(30, 97, 38, 0.9);
+}
+
+.toast.toast-error {
+    background: rgba(198, 40, 40, 0.9);
+}
+
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ══════════════════════════════════════════════════════════
+   12. RESPONSIVE — inherit dashboard breakpoints
+   ══════════════════════════════════════════════════════════ */
+
+@media (max-width: 1280px) {
+    .equipment-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 1024px) {
+    .equipment-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .detail-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .equipment-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .detail-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .page-header {
+        flex-direction: column;
+    }
+
+    .filter-bar {
+        flex-direction: column;
+        gap: 0.85rem;
+    }
+
+    .filter-group {
+        min-width: 100%;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full-width {
+        grid-column: 1;
+    }
+
+    .owner-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .pricing-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .eq-form {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .equipment-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pricing-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .gallery-thumb {
+        width: 50px;
+        height: 50px;
+    }
 
     .page-header-text h1 {
         font-size: 1.25rem;
     }
+}
+
+/* ==========================================================================
+   13. ACCESSIBILITY
+   ========================================================================== */
+.breadcrumb-link:focus-visible,
+.gallery-thumb:focus-visible,
+.form-checkbox:focus-visible+.checkbox-visual,
+.eq-card:focus-visible,
+.page-link:focus-visible,
+.image-upload-zone:focus-visible,
+button:focus-visible,
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible,
+.btn-danger:focus-visible,
+.btn-filter:focus-visible,
+.custom-toggle input:focus-visible+.toggle-slider {
+    outline: 2px solid var(--primary-action);
+    outline-offset: 2px;
 }

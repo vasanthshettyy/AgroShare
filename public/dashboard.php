@@ -247,7 +247,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         </svg>
                     </div>
                 </div>
-                <div class="kpi-value" data-target="<?= $totalEquipment ?>"><?= $totalEquipment ?></div>
+                <div class="kpi-value" data-target="<?= e($totalEquipment) ?>"><?= e($totalEquipment) ?></div>
                 <div class="kpi-trend neutral">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                          stroke-linecap="round" aria-hidden="true">
@@ -276,7 +276,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         </svg>
                     </a>
                 </div>
-                <div class="kpi-value" data-target="<?= $activeRentals ?>"><?= $activeRentals ?></div>
+                <div class="kpi-value" data-target="<?= e($activeRentals) ?>"><?= e($activeRentals) ?></div>
                 <div class="kpi-trend neutral">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                          stroke-linecap="round" aria-hidden="true">
@@ -304,7 +304,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         </svg>
                     </a>
                 </div>
-                <div class="kpi-value" data-target="<?= $poolCount ?>"><?= $poolCount ?></div>
+                <div class="kpi-value" data-target="<?= e($poolCount) ?>"><?= e($poolCount) ?></div>
                 <div class="kpi-trend neutral">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                          stroke-linecap="round" aria-hidden="true">
@@ -333,7 +333,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         </svg>
                     </a>
                 </div>
-                <div class="kpi-value"><?= number_format($trustScore, 1) ?></div>
+                <div class="kpi-value" data-target="<?= e(number_format($trustScore, 1)) ?>"><?= e(number_format($trustScore, 1)) ?></div>
                 <div class="kpi-trend neutral">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                          stroke-linecap="round" aria-hidden="true">
