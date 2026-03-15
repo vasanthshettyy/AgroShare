@@ -35,8 +35,7 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
     <meta name="description" content="<?= e(APP_NAME) ?> — find and rent agricultural equipment near you.">
 
     <script>
-        const _saved = localStorage.getItem('theme');
-        if (_saved) document.documentElement.setAttribute('data-theme', _saved);
+        document.documentElement.setAttribute('data-theme', 'dark');
     </script>
 
     <?php if ($needsTabCheck): ?>
@@ -45,8 +44,8 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
     </script>
     <?php endif; ?>
 
-    <link rel="stylesheet" href="assets/css/dashboard.css">
-    <link rel="stylesheet" href="assets/css/equipment.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="assets/css/equipment.css?v=<?= time() ?>">
 </head>
 <body>
 
@@ -178,24 +177,6 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
         </label>
 
         <div class="topbar-right">
-            <button class="btn-icon" id="theme-toggle" aria-label="Toggle colour theme" title="Toggle theme">
-                <svg id="theme-moon" width="17" height="17" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-                <svg id="theme-sun" width="17" height="17" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                     style="display:none;" aria-hidden="true">
-                    <circle cx="12" cy="12" r="5"/>
-                    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </svg>
-            </button>
-
             <button class="btn-icon" aria-label="Notifications" title="Notifications">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -244,47 +225,66 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
         <form class="filter-bar" method="GET" action="equipment-browse.php" aria-label="Filter equipment">
             <div class="filter-group">
                 <label for="filter-category" class="filter-label">Category</label>
-                <select name="category" id="filter-category" class="form-input form-select">
-                    <option value="">All Categories</option>
-                    <?php foreach (['tractor','harvester','seeder','sprayer','other'] as $cat): ?>
-                    <option value="<?= $cat ?>" <?= ($filters['category'] ?? '') === $cat ? 'selected' : '' ?>>
-                        <?= ucfirst($cat) ?>
-                    </option>
-                    <?php endforeach; ?>
-                </select>
+                <div class="filter-input-wrapper">
+                    <svg class="filter-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                        <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <select name="category" id="filter-category" class="form-input form-select filter-select">
+                        <option value="">All Categories</option>
+                        <?php foreach (['tractor','harvester','seeder','sprayer','other'] as $cat): ?>
+                        <option value="<?= $cat ?>" <?= ($filters['category'] ?? '') === $cat ? 'selected' : '' ?>>
+                            <?= ucfirst($cat) ?>
+                        </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
             </div>
 
             <div class="filter-group">
                 <label for="filter-district" class="filter-label">District</label>
-                <input type="text" name="district" id="filter-district" class="form-input"
-                       placeholder="e.g. Dharwad" value="<?= e($filters['district'] ?? '') ?>">
+                <div class="filter-input-wrapper">
+                    <svg class="filter-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    <input type="text" name="district" id="filter-district" class="form-input filter-input"
+                           placeholder="e.g. Dharwad" value="<?= e($filters['district'] ?? '') ?>">
+                </div>
             </div>
 
             <div class="filter-group">
                 <label for="filter-price" class="filter-label">Max ₹/Day</label>
-                <input type="number" name="max_price" id="filter-price" class="form-input"
-                       placeholder="5000" min="0" step="100" value="<?= e($filters['max_price'] ?? '') ?>">
+                <div class="filter-input-wrapper">
+                    <svg class="filter-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M6 3h12"></path><path d="M6 8h12"></path><path d="m6 13 8.5 8"></path><path d="M6 13a6 6 0 0 0 0-10"></path>
+                    </svg>
+                    <input type="number" name="max_price" id="filter-price" class="form-input filter-input"
+                           placeholder="5000" min="0" step="100" value="<?= e($filters['max_price'] ?? '') ?>">
+                </div>
             </div>
 
-            <div class="filter-group filter-checkbox-group">
-                <label class="form-checkbox-label">
-                    <input type="checkbox" name="has_operator" value="1" class="form-checkbox"
+            <div class="filter-group filter-toggle-group">
+                <span class="filter-label">Includes</span>
+                <label class="custom-toggle" for="filter-operator">
+                    <input type="checkbox" name="has_operator" id="filter-operator" value="1" 
                            <?= !empty($filters['has_operator']) ? 'checked' : '' ?>>
-                    <span>Operator Included</span>
+                    <div class="toggle-slider"></div>
+                    <span class="toggle-label">Operator</span>
                 </label>
             </div>
 
-            <button type="submit" class="btn-filter">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                </svg>
-                Search
-            </button>
+            <div class="filter-actions">
+                <button type="submit" class="btn-filter">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    Search
+                </button>
 
-            <?php if (!empty($filters)): ?>
-            <a href="equipment-browse.php" class="btn-clear-filters">Clear Filters</a>
-            <?php endif; ?>
+                <?php if (!empty($filters)): ?>
+                <a href="equipment-browse.php" class="btn-clear-filters" title="Reset Filters">Clear Filters</a>
+                <?php endif; ?>
+            </div>
         </form>
         <?php endif; ?>
 

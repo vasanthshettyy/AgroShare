@@ -79,25 +79,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* ── Tokens (High Contrast Light) ──────────────── */
+        /* ── Tokens (AgroShare Dark Only) ──────────────── */
         :root {
-            --bg-color:         #EEF2F0;
-            --surface-color:    #FFFFFF;
-            --text-main:        #0F1F12;
-            --text-muted:       #334139;
-            --text-subtle:      #47554E;
-            --primary-action:   #0D4223;
-            --accent-dark:      #2B402D;
-            --accent-soft:      #9BB8A8;
-            --secondary-action: #2D7A6D;
-            --border-color:     #B0C4B1;
-            --danger:           #B71C1C;
-            --primary-10:       rgba(13, 66, 35, 0.12);
-            --secondary-10:     rgba(45, 122, 109, 0.12);
-            --shadow-lg:        0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
-            --radius:           16px;
-            --radius-sm:        10px;
-            --font:             'Inter', system-ui, -apple-system, sans-serif;
+            --bg-color:            hsl(144, 28%, 6%);
+            --surface-color:       hsl(150, 24%, 10%);
+            --text-main:           hsl(90, 20%, 90%);
+            --text-muted:          hsl(140, 14%, 60%);
+            --text-subtle:         hsl(150, 12%, 38%);
+            --border-color:        hsl(150, 20%, 16%);
+            --primary-action:      hsl(150, 50%, 45%); 
+            --secondary-action:    hsl(171, 35%, 55%);
+            --accent-dark:         hsl(150, 50%, 30%);
+            --accent-soft:         hsl(150, 15%, 25%);
+            --danger:              #E11D48;
+            --primary-10:          rgba(76, 175, 120, 0.12);
+            --secondary-10:        rgba(90, 180, 170, 0.10);
+            --shadow-lg:           0 10px 25px rgba(0, 0, 0, 0.5);
+            --radius:              18px;
+            --radius-sm:           12px;
+            --font:                'Inter', system-ui, -apple-system, sans-serif;
         }
 
         /* ── Reset ────────────────────────────────────────── */

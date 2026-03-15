@@ -4,21 +4,11 @@
  */
 'use strict';
 
-/* ── 1. Theme Toggle ──────────────────────────────────────────
-   Toggles data-theme="dark"/"light" on <html>.
-   Animations are handled in CSS based on this attribute.
+/* ── 1. Theme Persistence ──────────────────────────────────────
+   Force dark mode as the default theme.
    ─────────────────────────────────────────────────────────── */
-const html = document.documentElement;
-const themeBtn = document.getElementById('theme-toggle');
-
-if (themeBtn) {
-    themeBtn.addEventListener('click', () => {
-        const current = html.getAttribute('data-theme');
-        const next = current === 'dark' ? 'light' : 'dark';
-        html.setAttribute('data-theme', next);
-        localStorage.setItem('theme', next);
-    });
-}
+document.documentElement.setAttribute('data-theme', 'dark');
+localStorage.setItem('theme', 'dark');
 
 /* ── 2. Sidebar Toggle (mobile) ───────────────────────────────
    Hamburger opens the drawer.

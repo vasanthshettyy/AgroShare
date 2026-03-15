@@ -10,63 +10,7 @@
    1. DESIGN TOKENS (CSS Custom Properties)
    ══════════════════════════════════════════════════════════ */
 :root {
-    /* ── High-Contrast Light Palette (Darkened Sage) ── */
-    --bg-color:            #D1DED6; /* Deeper Pastel Sage Green */
-    --surface-color:       #FFFFFF; /* Pure white for pop */
-    --text-main:           #0A1A0F; /* Near black-green */
-    --primary-action:      #08331A; /* Deeper Emerald */
-    --secondary-action:    #1F5C52; /* Deeper Teal */
-    --accent-soft:         #8BA899;
-    --accent-dark:         #1A2B1C;
-
-    /* ── Extended Tokens ── */
-    --text-muted:          #2D382F; 
-    --text-subtle:         #3F4D43;
-    --border-color:        #A5B8A7; /* Stronger borders */
-    --danger:              #A31616;
-    --amber:               #9E6607;
-    --blue-accent:         #0E4B6B;
-    --purple-accent:       #412466;
-
-    /* ── Alpha helpers ── */
-    --primary-10:          rgba(8, 51, 26, 0.12);
-    --primary-15:          rgba(8, 51, 26, 0.18);
-    --secondary-10:        rgba(31, 92, 82, 0.12);
-    --nav-hover-bg:        rgba(8, 51, 26, 0.10);
-
-    /* ── Glassmorphism (Solid Sidebar/Topbar for Light Mode) ── */
-    --glass-bg:            rgba(255, 255, 255, 0.40);
-    --glass-bg-heavy:      #D1DED6; /* Matches --bg-color exactly */
-    --glass-border:        rgba(10, 26, 15, 0.12); 
-    --glass-blur:          12px;
-
-    /* ── Shadows (Sharper & Deeper) ── */
-    --shadow-sm:           0 1px 2px rgba(0, 0, 0, 0.1), 0 1px 1px rgba(0, 0, 0, 0.06);
-    --shadow-md:           0 4px 6px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
-    --shadow-lg:           0 10px 15px rgba(0, 0, 0, 0.15), 0 4px 6px rgba(0, 0, 0, 0.10);
-    --shadow-hover:        0 20px 40px rgba(13, 66, 35, 0.20), 0 8px 16px rgba(0, 0, 0, 0.12);
-    --shadow-card:         0 0 0 1px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.08);
-    --glow-primary:        0 0 25px rgba(13, 66, 35, 0.25);
-
-    /* ── Shape ── */
-    --radius:              18px;
-    --radius-sm:           12px;
-    --radius-xs:           8px;
-
-    /* ── Layout ── */
-    --sidebar-w:           260px;
-    --topbar-h:            70px;
-
-    /* ── Typography ── */
-    --font:                'Inter', system-ui, -apple-system, sans-serif;
-
-    /* ── Timing ── */
-    --ease-out:            cubic-bezier(0.22, 1, 0.36, 1);
-    --transition-base:     all 0.3s var(--ease-out);
-}
-
-/* ── Dark Mode Overrides ─────────────────────────────────── */
-[data-theme="dark"] {
+    /* ── High-Contrast Dark Palette (AgroShare Dark) ── */
     --bg-color:            hsl(144, 28%, 6%);
     --surface-color:       hsl(150, 24%, 10%);
     --text-main:           hsl(90, 20%, 90%);
@@ -74,7 +18,7 @@
     --text-subtle:         hsl(150, 12%, 38%);
     --border-color:        hsl(150, 20%, 16%);
     
-    /* Slightly more muted but visible actions for dark background */
+    /* Muted but visible actions for dark background */
     --primary-action:      hsl(150, 50%, 45%); 
     --secondary-action:    hsl(171, 35%, 55%);
     --accent-soft:         hsl(150, 15%, 25%);
@@ -98,32 +42,28 @@
     --shadow-hover:        0 10px 25px rgba(43, 238, 75, 0.12), 0 4px 12px rgba(0, 0, 0, 0.40);
     --shadow-card:         0 0 0 1px rgba(255, 255, 255, 0.05), 0 2px 8px rgba(0, 0, 0, 0.40);
     --glow-primary:        0 0 24px rgba(76, 175, 120, 0.12);
-}
 
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-        --bg-color:        hsl(144, 28%, 6%);
-        --surface-color:   hsl(150, 24%, 10%);
-        --text-main:       hsl(90, 20%, 90%);
-        --text-muted:      hsl(140, 14%, 60%);
-        --text-subtle:     hsl(150, 12%, 38%);
-        --border-color:    hsl(150, 20%, 16%);
-        --primary-10:      rgba(64, 161, 144, 0.12);
-        --primary-15:      rgba(64, 161, 144, 0.18);
-        --secondary-10:    rgba(64, 161, 144, 0.10);
+    /* ── Common Utilities ── */
+    --danger:              #A31616;
+    --amber:               #9E6607;
+    --blue-accent:         #0E4B6B;
+    --purple-accent:       #412466;
 
-        --glass-bg:        rgba(15, 30, 18, 0.65);
-        --glass-bg-heavy:  rgba(18, 35, 22, 0.80);
-        --glass-border:    rgba(255, 255, 255, 0.05);
-        --glass-blur:      16px;
+    /* ── Shape ── */
+    --radius:              18px;
+    --radius-sm:           12px;
+    --radius-xs:           8px;
 
-        --shadow-sm:       0 1px 3px rgba(0, 0, 0, 0.20);
-        --shadow-md:       0 4px 14px rgba(0, 0, 0, 0.28);
-        --shadow-lg:       0 8px 28px rgba(0, 0, 0, 0.35);
-        --shadow-hover:    0 10px 25px rgba(43, 238, 75, 0.08), 0 4px 12px rgba(0, 0, 0, 0.20);
-        --shadow-card:     0 1px 4px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.04);
-        --glow-primary:    0 0 24px rgba(64, 161, 144, 0.10);
-    }
+    /* ── Layout ── */
+    --sidebar-w:           260px;
+    --topbar-h:            70px;
+
+    /* ── Typography ── */
+    --font:                'Inter', system-ui, -apple-system, sans-serif;
+
+    /* ── Timing ── */
+    --ease-out:            cubic-bezier(0.22, 1, 0.36, 1);
+    --transition-base:     all 0.3s var(--ease-out);
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1173,15 +1113,11 @@ input[type="number"].form-input::-webkit-inner-spin-button {
     cursor: pointer;
     appearance: none;
     -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='hsl(150, 63%, 19%)'%3e%3cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m19 9-7 7-7-7'/%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='hsl(90, 20%, 90%)'%3e%3cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m19 9-7 7-7-7'/%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 1rem center;
     background-size: 1.1rem;
     padding-right: 2.8rem;
-}
-
-[data-theme="dark"] .form-select {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='hsl(90, 20%, 90%)'%3e%3cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m19 9-7 7-7-7'/%3e%3c/svg%3e");
 }
 
 /* ── Custom Premium Checkbox ── */
@@ -1706,27 +1642,7 @@ input[type="number"].form-input::-webkit-inner-spin-button {
 }
 
 /* Transitions based on theme */
-[data-theme="dark"] .sun-group {
-    transform: scale(0) rotate(45deg);
-    opacity: 0;
-}
-
-[data-theme="dark"] .sun-core, 
-[data-theme="dark"] .sun-ray {
-    stroke-dashoffset: 100;
-}
-
-[data-theme="dark"] .moon-path {
-    stroke-dashoffset: 0;
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-}
-
-[data-theme="light"] .moon-path {
-    stroke-dashoffset: 100;
-    opacity: 0;
-    transform: scale(0) rotate(-45deg);
-}
+/* Removed theme-specific transitions as dark mode is now the only mode */
 
 /* ─────────────────────────────────────────────────────────── */
 
@@ -1756,7 +1672,8 @@ input[type="number"].form-input::-webkit-inner-spin-button {
 
 /* Modal Content Styling */
 .modal-content {
-    background: var(--surface-color);
+    background: var(--glass-bg-heavy);
+    backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--border-color);
     border-radius: var(--radius);
     padding: 2rem;
@@ -1772,31 +1689,6 @@ input[type="number"].form-input::-webkit-inner-spin-button {
     /* Firefox Scrollbar Styling */
     scrollbar-width: thin;
     scrollbar-color: var(--border-color) transparent;
-}
-
-/* Webkit Scrollbar (Chrome, Safari, Edge) */
-.modal-content::-webkit-scrollbar {
-    width: 6px;
-}
-
-.modal-content::-webkit-scrollbar-track {
-    background: transparent;
-    margin: 10px 0;
-}
-
-.modal-content::-webkit-scrollbar-thumb {
-    background-color: var(--border-color);
-    border-radius: 10px;
-    transition: background 0.3s;
-}
-
-.modal-content::-webkit-scrollbar-thumb:hover {
-    background-color: var(--primary-action);
-}
-
-[data-theme="dark"] .modal-content {
-    background: var(--glass-bg-heavy);
-    backdrop-filter: blur(var(--glass-blur));
 }
 
 .modal-overlay.show-modal .modal-content {
