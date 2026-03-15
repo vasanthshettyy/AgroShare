@@ -287,7 +287,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="image-upload-zone" id="imageUploadZone">
                     <input type="file" name="images[]" id="eq-images" accept="image/jpeg,image/png,image/webp"
                            multiple class="image-upload-input">
-                    <div class="upload-placeholder" id="uploadPlaceholder">
+                    <div class="upload-placeholder">
                         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/><path d="m21 11-3-3a2 2 0 0 0-2.828 0l-8.086 8.086"/><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>
                         <p>Add more photos (drag & drop or click)</p>
                         <span>JPEG, PNG, WebP — max 2MB each</span>
@@ -310,6 +310,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     </main>
 </div><!-- /.app-layout -->
+<?php require_once __DIR__ . '/includes/profile-modal.php'; ?>
 <script src="assets/js/dashboard.js" defer></script>
 <script src="assets/js/equipment.js" defer></script>
 </body>

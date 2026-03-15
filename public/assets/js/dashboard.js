@@ -182,16 +182,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelBtn = document.getElementById('cancelBtn');
     const equipmentForm = document.getElementById('equipmentForm');
 
-    console.log('AgroShare Modal: Initializing...', {
-        btnsFound: listEquipmentBtns.length,
-        modalFound: !!equipmentModal
-    });
-
     // Open modal
     listEquipmentBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            console.log('AgroShare Modal: Open button clicked');
             
             if (equipmentModal) {
                 equipmentModal.classList.add('show-modal');
@@ -271,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (result.errors) {
                     for (const [field, msg] of Object.entries(result.errors)) {
                         const input = document.getElementsByName(field)[0];
-                        if (input) {
+                        if (input && input.parentNode) {
                             input.classList.add('has-error');
                             const errorDiv = document.createElement('div');
                             errorDiv.className = 'form-error-msg';
@@ -296,6 +290,156 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // ── Profile Modal Logic ──────────────────────────────────
+    const profileModal = document.getElementById('profileModal');
+    const profileForm = document.getElementById('profileForm');
+
+    const openProfileModal = async (e) => {
+        if (e) e.preventDefault();
+        
+        // Find modal again in case DOM was updated
+        const modal = document.getElementById('profileModal');
+        if (!modal) {
+            console.error('Profile modal not found in DOM.');
+            return;
+        }
+
+        try {
+            // Use absolute-style relative path from public root
+            const response = await fetch('api/get-profile.php');
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const result = await response.json();
+
+            if (result.success) {
+                const user = result.data;
+                
+                // Safe population helper
+                const setVal = (id, val) => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = val || '';
+                };
+
+                setVal('prof-name', user.full_name);
+                setVal('prof-phone', user.phone);
+                setVal('prof-email', user.email);
+                setVal('prof-village', user.village);
+                setVal('prof-district', user.district);
+                setVal('prof-state', user.state);
+                
+                // Avatar preview
+                const preview = document.getElementById('prof-photo-preview');
+                if (preview && user.profile_photo) {
+                    preview.src = user.profile_photo;
+                }
+                
+                // Badges
+                const badgeContainer = document.getElementById('prof-badges');
+                if (badgeContainer) {
+                    badgeContainer.innerHTML = '';
+                    if (parseInt(user.is_verified)) {
+                        const vBadge = document.createElement('span');
+                        vBadge.className = 'profile-trust-badge verified';
+                        vBadge.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Verified Farmer`;
+                        badgeContainer.appendChild(vBadge);
+                    }
+                    const tBadge = document.createElement('span');
+                    tBadge.className = 'profile-trust-badge';
+                    tBadge.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> ${user.trust_score} Trust`;
+                    badgeContainer.appendChild(tBadge);
+                }
+
+                modal.classList.add('show-modal');
+                document.body.style.overflow = 'hidden';
+            } else {
+                alert(result.message);
+            }
+        } catch (error) {
+            console.error('Profile fetch error:', error);
+            alert('Could not load profile. Please check your connection.');
+        }
+    };
+
+    // Use event delegation or multiple listeners for triggers
+    document.addEventListener('click', (e) => {
+        const target = e.target.closest('#profile-btn, #avatar-btn, #edit-profile-quick-action');
+        if (target) {
+            openProfileModal(e);
+        }
+    });
+    
+    const closeProfileModal = () => {
+        const modal = document.getElementById('profileModal');
+        if (modal) {
+            modal.classList.remove('show-modal');
+            document.body.style.overflow = '';
+        }
+    };
+
+    // Close listeners
+    document.addEventListener('click', (e) => {
+        if (e.target.matches('#profileModalCloseBtn, #profileCancelBtn') || e.target.matches('#profileModal')) {
+            closeProfileModal();
+        }
+    });
+
+    // Photo preview change
+    document.addEventListener('change', (e) => {
+        if (e.target.id === 'prof-photo-input') {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const preview = document.getElementById('prof-photo-preview');
+                    if (preview) preview.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    });
+
+    // Profile form submission
+    document.addEventListener('submit', async (e) => {
+        if (e.target.id === 'profileForm') {
+            e.preventDefault();
+            const form = e.target;
+            const submitBtn = document.getElementById('profileSubmitBtn');
+            const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Update Profile';
+            
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = 'Updating...';
+            }
+
+            try {
+                const formData = new FormData(form);
+                const response = await fetch('api/update-profile.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(result.message);
+                    const greetings = document.querySelectorAll('.topbar-greeting strong');
+                    greetings.forEach(el => el.textContent = result.full_name);
+                    closeProfileModal();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Profile update error:', error);
+                alert('Update failed. Check your connection.');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
+            }
+        }
+    });
 });
 
 // Image upload preview (adapted from equipment.js)
@@ -308,15 +452,6 @@ function clearImagePreviews() {
     if (imageUploadZone) imageUploadZone.classList.remove('dragover');
 }
 window.clearImagePreviews = clearImagePreviews;
-
-function showFormErrors(errors) {
-    // Simple error display - you can enhance this
-    let errorMsg = 'Please fix the following errors:\n';
-    for (const [field, msg] of Object.entries(errors)) {
-        errorMsg += `- ${msg}\n`;
-    }
-    alert(errorMsg);
-}
 
 if (imageUploadZone && imageInput) {
     imageUploadZone.addEventListener('click', () => imageInput.click());

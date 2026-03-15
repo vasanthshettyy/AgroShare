@@ -132,8 +132,15 @@
                 method: 'POST',
                 body: formData,
             });
-            if (!res.ok) throw new Error('Network response was not ok');
-            const data = await res.json();
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            
+            let data;
+            try {
+                data = await res.json();
+            } catch (jsonErr) {
+                console.error('JSON Parse Error:', jsonErr);
+                throw new Error('Server returned an invalid response. Please check server logs.');
+            }
 
             if (data.success) {
                 const isNowAvailable = Boolean(data.is_available === 1 || data.is_available === true || data.is_available === '1');

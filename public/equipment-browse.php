@@ -529,6 +529,7 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
     </div>
 </div>
 
+<?php require_once __DIR__ . '/includes/profile-modal.php'; ?>
 <script src="assets/js/dashboard.js" defer></script>
 <script src="assets/js/equipment.js?v=<?= time() ?>" defer></script>
 </body>

@@ -257,6 +257,130 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
     </main>
 </div><!-- /.app-layout -->
+
+<!-- Edit Equipment Modal -->
+<div id="editEquipmentModal" class="modal-overlay">
+    <div class="modal-content">
+        <button type="button" class="modal-close" id="editModalCloseBtn" aria-label="Close modal">&times;</button>
+        <div class="modal-header">
+            <h2>Edit Equipment</h2>
+            <p>Update details for your <?= e($eq['title']) ?>.</p>
+        </div>
+        <form id="editEquipmentForm" class="eq-form" method="POST" action="api/edit-equipment.php" enctype="multipart/form-data" novalidate>
+            <input type="hidden" name="csrf_token" id="editCsrfToken" value="<?= generateCsrfToken() ?>">
+            <input type="hidden" name="id" value="<?= (int)$eq['id'] ?>">
+            
+            <div class="form-section">
+                <h2 class="form-section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 11V5h9l3 6m0 0H3m12 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m14 0h2a2 2 0 0 1 2 2v4h-3.5"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/></svg>
+                    Equipment Details
+                </h2>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="edit-eq-title" class="form-label">Equipment Title</label>
+                        <input type="text" name="title" id="edit-eq-title" class="form-input" value="<?= e($eq['title']) ?>" maxlength="150" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-eq-category" class="form-label">Category</label>
+                        <select name="category" id="edit-eq-category" class="form-input form-select" required>
+                            <?php foreach (['tractor','harvester','seeder','sprayer','other'] as $cat): ?>
+                            <option value="<?= $cat ?>" <?= $eq['category'] === $cat ? 'selected' : '' ?>><?= ucfirst($cat) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-eq-condition" class="form-label">Condition</label>
+                        <select name="condition" id="edit-eq-condition" class="form-input form-select" required>
+                            <?php foreach (['excellent'=>'Excellent','good'=>'Good','fair'=>'Fair'] as $val=>$label): ?>
+                            <option value="<?= $val ?>" <?= $eq['condition'] === $val ? 'selected' : '' ?>><?= $label ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="edit-eq-description" class="form-label">Description</label>
+                        <textarea name="description" id="edit-eq-description" class="form-input form-textarea" rows="4" required><?= e($eq['description']) ?></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2 class="form-section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    Pricing
+                </h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="edit-eq-price-hour" class="form-label">Price per Hour (₹)</label>
+                        <input type="number" name="price_per_hour" id="edit-eq-price-hour" class="form-input" value="<?= (float)$eq['price_per_hour'] ?>" min="0" step="50" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-eq-price-day" class="form-label">Price per Day (₹)</label>
+                        <input type="number" name="price_per_day" id="edit-eq-price-day" class="form-input" value="<?= (float)$eq['price_per_day'] ?>" min="0" step="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-checkbox-label">
+                            <input type="checkbox" name="includes_operator" value="1" class="form-checkbox" <?= $eq['includes_operator'] ? 'checked' : '' ?>>
+                            <span class="checkbox-visual"></span>
+                            <span>Includes Operator</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2 class="form-section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    Location
+                </h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="edit-eq-village" class="form-label">Village</label>
+                        <input type="text" name="location_village" id="edit-eq-village" class="form-input" value="<?= e($eq['location_village']) ?>" maxlength="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-eq-district" class="form-label">District</label>
+                        <input type="text" name="location_district" id="edit-eq-district" class="form-input" value="<?= e($eq['location_district']) ?>" maxlength="100" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2 class="form-section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    Photos
+                </h2>
+                <?php if (!empty($images)): ?>
+                <div class="existing-images-grid" style="grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));">
+                    <?php foreach ($images as $img): ?>
+                    <div class="existing-image-item">
+                        <img src="<?= e($img) ?>" alt="Equipment photo">
+                        <label class="remove-image-label">
+                            <input type="checkbox" name="remove_images[]" value="<?= e($img) ?>">
+                            <span class="remove-badge">✕ Remove</span>
+                        </label>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
+                <div class="image-upload-zone" id="editImageUploadZone">
+                    <input type="file" name="images[]" id="edit-eq-images" accept="image/jpeg,image/png,image/webp" multiple class="image-upload-input">
+                    <div class="upload-placeholder">
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/><path d="m21 11-3-3a2 2 0 0 0-2.828 0l-8.086 8.086"/><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>
+                        <p style="font-size:0.8rem;">Add more photos</p>
+                    </div>
+                    <div class="image-preview-grid" id="editImagePreviewGrid"></div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" id="editCancelBtn">Cancel</button>
+                <button type="submit" class="btn-primary" id="editSubmitBtn">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<?php require_once __DIR__ . '/includes/profile-modal.php'; ?>
 <script src="assets/js/dashboard.js" defer></script>
 <script src="assets/js/equipment.js?v=<?= time() ?>" defer></script>
 </body>

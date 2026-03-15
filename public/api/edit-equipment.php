@@ -8,8 +8,6 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/../../src/Controllers/EquipmentController.php';
 
-session_start();
-
 // Must be logged in
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'Not authenticated.']);

@@ -189,7 +189,7 @@ function createEquipment(mysqli $conn, array $data, array $imagePaths): int|fals
     $condition        = $data['condition'];
 
     $stmt->bind_param(
-        'isssddiisss',
+        'isssddissss',
         $ownerId, $title, $category, $description,
         $pricePerHour, $pricePerDay, $includesOperator,
         $village, $district, $imagesJson, $condition
@@ -280,24 +280,20 @@ function deleteEquipment(mysqli $conn, int $equipmentId, int $ownerId): bool
  */
 function toggleAvailability(mysqli $conn, int $equipmentId, int $ownerId): ?int
 {
+    // 1. Try to toggle if owned by this user
     $stmt = $conn->prepare("UPDATE equipment SET is_available = NOT is_available WHERE id = ? AND owner_id = ?");
     $stmt->bind_param('ii', $equipmentId, $ownerId);
     $stmt->execute();
-
-    if ($stmt->affected_rows <= 0) {
-        $stmt->close();
-        return null;
-    }
     $stmt->close();
 
-    // Fetch the new value
-    $stmt = $conn->prepare("SELECT is_available FROM equipment WHERE id = ?");
-    $stmt->bind_param('i', $equipmentId);
+    // 2. Fetch the current state (this confirms the row exists and is owned by the user)
+    $stmt = $conn->prepare("SELECT is_available FROM equipment WHERE id = ? AND owner_id = ?");
+    $stmt->bind_param('ii', $equipmentId, $ownerId);
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
     $stmt->close();
 
-    return $row ? (int)$row['is_available'] : null;
+    return ($row !== null) ? (int)$row['is_available'] : null;
 }
 
 /**

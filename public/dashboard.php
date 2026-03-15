@@ -495,7 +495,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 </div>
             </a>
 
-            <a href="#" class="action-card">
+            <a href="#" class="action-card" id="edit-profile-quick-action">
                 <div class="action-icon-wrap purple" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -649,6 +649,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
     </div>
 </div>
 
+<?php require_once __DIR__ . '/includes/profile-modal.php'; ?>
 <script src="assets/js/dashboard.js?v=<?= time() ?>" defer></script>
 </body>
 </html>
