@@ -2140,3 +2140,29 @@ input[type="number"].form-input::-webkit-inner-spin-button {
         justify-content: center;
     }
 }
+
+/* ── Premium Contact Button ── */
+.btn-contact {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    padding: 0.35rem 0.8rem;
+    border-radius: 8px;
+    background: rgba(46, 125, 50, 0.15); /* Subtle translucent green */
+    border: 1px solid var(--primary-action);
+    color: var(--primary-action);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.btn-contact:hover {
+    background: var(--primary-action);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+}
+.btn-contact:active {
+    transform: translateY(0);
+}

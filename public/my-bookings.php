@@ -342,16 +342,19 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                         <div class="card-body">
                             <div class="info-row">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                <span class="info-label">Owner:</span> <span><?= e($b['owner_name']) ?></span>
+                                <span class="info-label">Owner:</span> 
+                                <span><?= e($b['owner_name']) ?></span>
                             </div>
                             <div class="info-row">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                                 <span class="info-label">Dates:</span> <span><?= date('d M', strtotime($b['start_datetime'])) ?> - <?= date('d M', strtotime($b['end_datetime'])) ?></span>
                             </div>
                         </div>
-                        <div class="card-footer">
-                            <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
-                            <div class="actions-wrap">
+                        <div class="card-footer" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
+                            </div>
+                            <div class="actions-wrap" style="margin-left: auto;">
                                 <?php if (in_array($b['status'], ['pending', 'confirmed'])): ?>
                                     <button class="btn-secondary btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="cancelled">Cancel</button>
                                 <?php endif; ?>
@@ -380,16 +383,27 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                         <div class="card-body">
                             <div class="info-row">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                <span class="info-label">Renter:</span> <span><?= e($b['renter_name']) ?> (<?= e($b['renter_phone']) ?>)</span>
+                                <span class="info-label">Renter:</span> 
+                                <span><?= e($b['renter_name']) ?></span>
                             </div>
                             <div class="info-row">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                                 <span class="info-label">Dates:</span> <span><?= date('d M', strtotime($b['start_datetime'])) ?> - <?= date('d M', strtotime($b['end_datetime'])) ?></span>
                             </div>
                         </div>
-                        <div class="card-footer">
-                            <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
-                            <div class="actions-wrap">
+                        <div class="card-footer" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
+                                <?php if ($b['status'] === 'confirmed'): ?>
+                                    <div class="contact-reveal-container">
+                                        <button type="button" class="btn-contact btn-reveal-contact" data-phone="<?= e($b['renter_phone'] ?? '') ?>">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                            Contact Info
+                                        </button>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <div class="actions-wrap" style="margin-left: auto;">
                                 <?php if ($b['status'] === 'pending'): ?>
                                     <button class="btn-primary btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="confirmed">Accept</button>
                                     <button class="btn-danger btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="rejected">Reject</button>
@@ -417,6 +431,29 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             document.querySelectorAll('.tab-btn, .booking-grid').forEach(el => el.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById(btn.dataset.tab).classList.add('active');
+        });
+    });
+
+    // Reveal Contact Info Logic
+    document.querySelectorAll('.btn-reveal-contact').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const phone = this.dataset.phone;
+            const container = this.parentElement;
+            
+            // Create the tel link dynamically
+            const link = document.createElement('a');
+            link.href = `tel:${phone}`;
+            link.style.color = 'var(--secondary-action)';
+            link.style.fontWeight = 'bold';
+            link.style.fontSize = '0.9rem';
+            link.style.textDecoration = 'none';
+            link.style.display = 'inline-flex';
+            link.style.alignItems = 'center';
+            link.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> ${phone}`;
+            
+            // Replace button with link
+            container.innerHTML = '';
+            container.appendChild(link);
         });
     });
 

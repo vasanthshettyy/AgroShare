@@ -58,7 +58,7 @@ function hasBookingConflict(mysqli $conn, int $equipmentId, string $start, strin
  */
 function getRentalsForUser(mysqli $conn, int $userId): array 
 {
-    $sql = "SELECT b.*, e.title as equipment_title, u.full_name as owner_name 
+    $sql = "SELECT b.*, e.title as equipment_title, u.full_name as owner_name, u.phone as owner_phone 
             FROM bookings b
             JOIN equipment e ON b.equipment_id = e.id
             JOIN users u ON b.owner_id = u.id
@@ -124,7 +124,7 @@ function updateBookingStatus(mysqli $conn, int $bookingId, int $userId, string $
     // Begin Transaction for atomicity (Status + Equipment availability)
     $conn->begin_transaction();
     try {
-        $stmt = $conn->prepare("UPDATE bookings SET status = ?, updated_at = NOW() WHERE id = ?");
+        $stmt = $conn->prepare("UPDATE bookings SET status = ? WHERE id = ?");
         $stmt->bind_param('si', $newStatus, $bookingId);
         $stmt->execute();
 
