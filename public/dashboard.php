@@ -138,12 +138,10 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 <span>My Equipment</span>
             </a>
 
-            <a href="#" class="nav-link">
+            <a href="my-bookings.php" class="nav-link">
                 <!-- calendar-check icon -->
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
-                    <path d="m9 16 2 2 4-4"/>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/>
                 </svg>
                 <span>My Bookings</span>
             </a>
@@ -551,6 +549,18 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                             <option value="harvester">Harvester</option>
                             <option value="seeder">Seeder</option>
                             <option value="sprayer">Sprayer</option>
+                            <option value="plough">Plough</option>
+                            <option value="chain_saw">Chain Saw</option>
+                            <option value="rotavator">Rotavator</option>
+                            <option value="cultivator">Cultivator</option>
+                            <option value="thresher">Thresher</option>
+                            <option value="water_pump">Water Pump</option>
+                            <option value="earth_auger">Earth Auger</option>
+                            <option value="baler">Baler</option>
+                            <option value="trolley">Trolley</option>
+                            <option value="brush_cutter">Brush Cutter</option>
+                            <option value="power_tiller">Power Tiller</option>
+                            <option value="chaff_cutter">Chaff Cutter</option>
                             <option value="other">Other</option>
                         </select>
                     </div>

@@ -128,11 +128,9 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
                 <span>My Equipment</span>
             </a>
 
-            <a href="#" class="nav-link">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
-                    <path d="m9 16 2 2 4-4"/>
+            <a href="my-bookings.php" class="nav-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/>
                 </svg>
                 <span>My Bookings</span>
             </a>
@@ -232,9 +230,9 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
                     </svg>
                     <select name="category" id="filter-category" class="form-input form-select filter-select">
                         <option value="">All Categories</option>
-                        <?php foreach (['tractor','harvester','seeder','sprayer','other'] as $cat): ?>
+                        <?php foreach (['tractor','harvester','seeder','sprayer','plough','chain_saw','rotavator','cultivator','thresher','water_pump','earth_auger','baler','trolley','brush_cutter','power_tiller','chaff_cutter','other'] as $cat): ?>
                         <option value="<?= $cat ?>" <?= ($filters['category'] ?? '') === $cat ? 'selected' : '' ?>>
-                            <?= ucfirst($cat) ?>
+                            <?= ucfirst(str_replace('_', ' ', $cat)) ?>
                         </option>
                         <?php endforeach; ?>
                     </select>

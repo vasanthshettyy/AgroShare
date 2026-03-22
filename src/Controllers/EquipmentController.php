@@ -34,7 +34,7 @@ function validateEquipmentData(array $data): array
     }
 
     // Category
-    $validCategories = ['tractor', 'harvester', 'seeder', 'sprayer', 'other'];
+    $validCategories = ['tractor', 'harvester', 'seeder', 'sprayer', 'plough', 'chain_saw', 'rotavator', 'cultivator', 'thresher', 'water_pump', 'earth_auger', 'baler', 'trolley', 'brush_cutter', 'power_tiller', 'chaff_cutter', 'other'];
     if (!in_array($data['category'] ?? '', $validCategories, true)) {
         $errors['category'] = 'Please select a valid category.';
     }

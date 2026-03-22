@@ -889,14 +889,191 @@
 }
 
 /* ══════════════════════════════════════════════════════════
-   10. DETAIL PAGE LAYOUT
+   10. DETAIL PAGE SPLIT LAYOUT (Modern Grid)
    ══════════════════════════════════════════════════════════ */
-.detail-layout {
+.detail-layout-grid {
     display: grid;
-    grid-template-columns: 1.3fr 1fr;
-    gap: 1.5rem;
+    grid-template-columns: 2fr 1.1fr; /* 2/3 and 1/3 split approx */
+    gap: 2rem;
     align-items: start;
+    margin-bottom: 2rem;
 }
+
+.detail-main-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.detail-side-col {
+    position: sticky;
+    top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    z-index: 10;
+}
+
+/* ── Calendar Widget ────────────────────────────────────── */
+.calendar-widget {
+    padding: 1.5rem;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.calendar-month-year {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.calendar-nav {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.calendar-nav-btn {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.calendar-nav-btn:hover {
+    background: var(--surface-color);
+    border-color: var(--primary-action);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    gap: 4px;
+}
+
+.calendar-day-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    padding-bottom: 0.5rem;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+    border: 1px solid transparent;
+}
+
+.calendar-day:hover:not(.disabled):not(.booked) {
+    background: var(--primary-15);
+    color: var(--primary-action);
+}
+
+.calendar-day.today {
+    color: var(--secondary-action);
+    font-weight: 800;
+    text-decoration: underline;
+}
+
+.calendar-day.selected {
+    background: var(--primary-action) !important;
+    color: #FFF !important;
+    font-weight: 700;
+}
+
+.calendar-day.range-start {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    background: var(--primary-action) !important;
+}
+
+.calendar-day.range-mid {
+    background: var(--primary-15) !important;
+    color: var(--primary-action);
+    border-radius: 0;
+}
+
+.calendar-day.range-end {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    background: var(--primary-action) !important;
+}
+
+.calendar-day.disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+.calendar-day.booked {
+    background: rgba(120, 120, 120, 0.1);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    position: relative;
+    overflow: hidden;
+}
+
+.calendar-day.booked::after {
+    content: '';
+    position: absolute;
+    width: 140%;
+    height: 1.5px;
+    background: var(--text-muted);
+    transform: rotate(-45deg);
+    opacity: 0.4;
+}
+
+.calendar-availability-hint {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.avail-highlight {
+    color: var(--primary-action);
+    font-weight: 700;
+}
+
+/* ══════════════════════════════════════════════════════════
+   12. RESPONSIVE (Detail Specific)
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+    .detail-layout-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .detail-side-col {
+        position: static;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════
+   13. ACCESSIBILITY / LEGACY
+   ══════════════════════════════════════════════════════════ */
 
 /* ── Owner Actions ──────────────────────────────────────── */
 .owner-actions {

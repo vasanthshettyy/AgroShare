@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             <span class="nav-section-label">Main</span>
             <a href="dashboard.php" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Dashboard</span></a>
             <a href="equipment-browse.php?mine=1" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11V5h9l3 6m0 0H3m12 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m14 0h2a2 2 0 0 1 2 2v4h-3.5"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/></svg><span>My Equipment</span></a>
-            <a href="#" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg><span>My Bookings</span></a>
+            <a href="my-bookings.php" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg><span>My Bookings</span></a>
             <span class="nav-section-label">Community</span>
             <a href="#" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Pooling</span></a>
             <a href="equipment-browse.php" class="nav-link active" aria-current="page"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>Browse</span></a>
@@ -147,40 +147,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             <?php endif; ?>
         </div>
 
-        <div class="detail-layout">
+        <div class="detail-layout-grid">
 
-            <!-- ── Image Gallery ──────────────────────────── -->
-            <div class="detail-gallery glass-card">
-                <?php if (!empty($images)): ?>
-                <div class="gallery-main">
-                    <img src="<?= e($images[0]) ?>" alt="<?= e($eq['title']) ?>" id="galleryMainImg" class="gallery-main-img">
+            <!-- ── LEFT COLUMN: Main Info ────────────────────────── -->
+            <div class="detail-main-col">
+                <!-- Image Gallery -->
+                <div class="detail-gallery glass-card">
+                    <?php if (!empty($images)): ?>
+                    <div class="gallery-main">
+                        <img src="<?= e($images[0]) ?>" alt="<?= e($eq['title']) ?>" id="galleryMainImg" class="gallery-main-img">
+                    </div>
+                    <?php if (count($images) > 1): ?>
+                    <div class="gallery-thumbs">
+                        <?php foreach ($images as $i => $img): ?>
+                        <button class="gallery-thumb <?= $i === 0 ? 'active' : '' ?>"
+                                data-src="<?= e($img) ?>" aria-label="View photo <?= $i+1 ?>">
+                            <img src="<?= e($img) ?>" alt="Photo <?= $i+1 ?>" loading="lazy">
+                        </button>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
+                    <?php else: ?>
+                    <div class="gallery-empty">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent-soft)" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <p>No photos uploaded</p>
+                    </div>
+                    <?php endif; ?>
                 </div>
-                <?php if (count($images) > 1): ?>
-                <div class="gallery-thumbs">
-                    <?php foreach ($images as $i => $img): ?>
-                    <button class="gallery-thumb <?= $i === 0 ? 'active' : '' ?>"
-                            data-src="<?= e($img) ?>" aria-label="View photo <?= $i+1 ?>">
-                        <img src="<?= e($img) ?>" alt="Photo <?= $i+1 ?>" loading="lazy">
-                    </button>
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
-                <?php else: ?>
-                <div class="gallery-empty">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent-soft)" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                    <p>No photos uploaded</p>
-                </div>
-                <?php endif; ?>
-            </div>
-
-            <!-- ── Details Panel ─────────────────────────── -->
-            <div class="detail-info">
 
                 <!-- Specs -->
                 <div class="detail-section glass-card">
                     <h2 class="detail-section-title">Specifications</h2>
                     <table class="specs-table">
-                        <tr><th>Category</th><td><?= e(ucfirst($eq['category'])) ?></td></tr>
+                        <tr><th>Category</th><td><?= e(ucfirst(str_replace('_', ' ', $eq['category']))) ?></td></tr>
                         <tr><th>Condition</th><td><span class="condition-badge condition-<?= e($eq['condition']) ?>"><?= e(ucfirst($eq['condition'])) ?></span></td></tr>
                         <tr><th>Operator</th><td><?= $eq['includes_operator'] ? '✅ Included' : '—' ?></td></tr>
                         <tr>
@@ -194,21 +193,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         <tr><th>Location</th><td><?= e($eq['location_village']) ?>, <?= e($eq['location_district']) ?></td></tr>
                         <tr><th>Listed</th><td><?= date('d M Y', strtotime($eq['created_at'])) ?></td></tr>
                     </table>
-                </div>
-
-                <!-- Pricing -->
-                <div class="detail-section glass-card">
-                    <h2 class="detail-section-title">Pricing</h2>
-                    <div class="pricing-grid">
-                        <div class="pricing-card">
-                            <span class="pricing-label">Per Hour</span>
-                            <span class="pricing-value">₹<?= number_format($eq['price_per_hour'], 0) ?></span>
-                        </div>
-                        <div class="pricing-card pricing-card-highlight">
-                            <span class="pricing-label">Per Day</span>
-                            <span class="pricing-value">₹<?= number_format($eq['price_per_day'], 0) ?></span>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Description -->
@@ -242,15 +226,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Book CTA (placeholder for Module 5) -->
-                <?php if (!$isOwner && $eq['is_available']): ?>
-                <button class="btn-primary btn-book-cta" disabled title="Booking coming soon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                    Book This Equipment
-                    <small style="font-size:0.7rem;opacity:0.7;margin-left:0.25rem;">(Coming Soon)</small>
-                </button>
-                <?php endif; ?>
+            <!-- ── RIGHT COLUMN: Booking Sidebar ────────────────── -->
+            <div class="detail-side-col">
+                
+                <!-- Pricing Card -->
+                <div class="detail-section glass-card">
+                    <h2 class="detail-section-title">Pricing</h2>
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            <span class="pricing-label">Per Hour</span>
+                            <span class="pricing-value">₹<?= number_format($eq['price_per_hour'], 0) ?></span>
+                        </div>
+                        <div class="pricing-card pricing-card-highlight">
+                            <span class="pricing-label">Per Day</span>
+                            <span class="pricing-value">₹<?= number_format($eq['price_per_day'], 0) ?></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Booking Calendar -->
+                <div class="calendar-widget glass-card">
+                    <div class="calendar-header">
+                        <span class="calendar-month-year" id="calMonthYear">March 2026</span>
+                        <div class="calendar-nav">
+                            <button class="calendar-nav-btn" id="calPrev" title="Previous Month">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                            </button>
+                            <button class="calendar-nav-btn" id="calNext" title="Next Month">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="calendar-grid" id="calGrid">
+                        <!-- Labels -->
+                        <div class="calendar-day-label">Mo</div>
+                        <div class="calendar-day-label">Tu</div>
+                        <div class="calendar-day-label">We</div>
+                        <div class="calendar-day-label">Th</div>
+                        <div class="calendar-day-label">Fr</div>
+                        <div class="calendar-day-label">Sa</div>
+                        <div class="calendar-day-label">Su</div>
+                        <!-- Days injected via JS -->
+                    </div>
+
+                    <div id="calHint" class="calendar-availability-hint" style="display: none;">
+                        ✨ <span id="calHintText">Available for up to 5 consecutive days</span>
+                    </div>
+
+                    <div id="est-result" class="est-result" style="display: none; margin-top: 1.25rem; padding: 1.25rem; background: var(--primary-10); border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.85rem; color: var(--text-muted);">Estimated Total</span>
+                            <strong id="est-total" style="font-size: 1.35rem; color: var(--primary-action);">₹0</strong>
+                        </div>
+                        <p id="est-breakdown" style="font-size: 0.75rem; color: var(--text-subtle); margin-top: 4px;"></p>
+                    </div>
+
+                    <input type="hidden" id="est-start" value="">
+                    <input type="hidden" id="est-end" value="">
+
+                    <?php if (!$isOwner && $eq['is_available']): ?>
+                    <button class="btn-primary btn-book-cta" id="btnBookNow" disabled title="Select dates to book">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                        Book Now
+                    </button>
+                    <?php endif; ?>
+                </div>
 
             </div>
         </div>
@@ -283,8 +326,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     <div class="form-group">
                         <label for="edit-eq-category" class="form-label">Category</label>
                         <select name="category" id="edit-eq-category" class="form-input form-select" required>
-                            <?php foreach (['tractor','harvester','seeder','sprayer','other'] as $cat): ?>
-                            <option value="<?= $cat ?>" <?= $eq['category'] === $cat ? 'selected' : '' ?>><?= ucfirst($cat) ?></option>
+                            <?php foreach (['tractor','harvester','seeder','sprayer','plough','chain_saw','rotavator','cultivator','thresher','water_pump','earth_auger','baler','trolley','brush_cutter','power_tiller','chaff_cutter','other'] as $cat): ?>
+                            <option value="<?= $cat ?>" <?= $eq['category'] === $cat ? 'selected' : '' ?>><?= ucfirst(str_replace('_', ' ', $cat)) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -383,5 +426,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 <?php require_once __DIR__ . '/includes/profile-modal.php'; ?>
 <script src="assets/js/dashboard.js" defer></script>
 <script src="assets/js/equipment.js?v=<?= time() ?>" defer></script>
+<script src="assets/js/calendar.js?v=<?= time() ?>" defer></script>
 </body>
 </html>

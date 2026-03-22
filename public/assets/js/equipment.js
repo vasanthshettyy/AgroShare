@@ -330,7 +330,54 @@
     }
 })();
 
-// ── 5. Auto-open Modal from URL ──────────────────────────────
+// ── 5. Price Estimator Logic ────────────────────────────────
+window.calculatePricing = async () => {
+    const startInput = document.getElementById('est-start');
+    const endInput   = document.getElementById('est-end');
+    const resultDiv  = document.getElementById('est-result');
+    const totalEl    = document.getElementById('est-total');
+    const breakEl    = document.getElementById('est-breakdown');
+    
+    const eqId = document.getElementById('toggleAvailBtn')?.dataset.id || 
+                 new URLSearchParams(window.location.search).get('id');
+
+    if (!startInput || !endInput || !eqId) return;
+
+    const start = startInput.value;
+    const end   = endInput.value;
+
+    if (!start || !end) {
+        resultDiv.style.display = 'none';
+        return;
+    }
+
+    try {
+        const res = await fetch(`api/calculate-price.php?equipment_id=${eqId}&start_datetime=${encodeURIComponent(start)}&end_datetime=${encodeURIComponent(end)}`);
+        const data = await res.json();
+
+        if (data.success) {
+            totalEl.textContent = `₹${new Intl.NumberFormat('en-IN').format(data.total_price)}`;
+            breakEl.textContent = data.breakdown;
+            resultDiv.style.display = 'block';
+        } else {
+            resultDiv.style.display = 'none';
+        }
+    } catch (err) {
+        console.error('Pricing error:', err);
+    }
+};
+
+(function initPriceEstimator() {
+    const startInput = document.getElementById('est-start');
+    const endInput   = document.getElementById('est-end');
+    
+    if (!startInput || !endInput) return;
+
+    startInput.addEventListener('change', window.calculatePricing);
+    endInput.addEventListener('change', window.calculatePricing);
+})();
+
+// ── 6. Auto-open Modal from URL ──────────────────────────────
 (function initAutoOpen() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('action') === 'list') {
