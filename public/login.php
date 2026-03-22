@@ -314,7 +314,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             outline: none;
             border-color: var(--primary-action);
             box-shadow: 0 0 0 4px var(--primary-10);
-            background: #FFF;
+            background: var(--bg-color);
+            color: var(--text-main);
         }
         .form-input.is-invalid {
             border-color: var(--danger);
@@ -322,6 +323,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .form-input.has-icon { padding-left: 42px; }
         .form-input.has-suffix { padding-right: 46px; }
+
+        /* Override Chrome Autofill White Background */
+        .form-input:-webkit-autofill,
+        .form-input:-webkit-autofill:hover, 
+        .form-input:-webkit-autofill:focus, 
+        .form-input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px var(--bg-color) inset !important;
+            -webkit-text-fill-color: var(--text-main) !important;
+            transition: background-color 5000s ease-in-out 0s;
+            border-color: var(--border-color);
+        }
 
         /* Input icon (left) */
         .input-icon {

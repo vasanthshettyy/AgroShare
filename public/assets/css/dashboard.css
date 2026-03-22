@@ -1262,9 +1262,12 @@ img {
 }
 
 .form-input:focus {
-    border-color: var(--primary-action);
-    background: var(--surface-color);
-    box-shadow: 0 0 0 4px var(--primary-10), var(--glow-primary);
+    background-color: var(--bg-color) !important;
+    color: var(--text-main) !important;
+    border-color: var(--primary-action) !important;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(76, 175, 120, 0.25) !important; /* Emerald glow */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 /* ── Number Input (Remove spin buttons) ── */
@@ -1983,10 +1986,11 @@ input[type="number"].form-input::-webkit-inner-spin-button {
 }
 
 .eq-form .form-input:focus {
+    background-color: var(--bg-color) !important;
+    color: var(--text-main) !important;
+    border-color: var(--primary-action) !important;
     outline: none;
-    border-color: var(--primary-action);
-    background: var(--surface-color);
-    box-shadow: 0 0 0 4px var(--primary-10);
+    box-shadow: 0 0 0 3px rgba(76, 175, 120, 0.25) !important;
 }
 
 .eq-form .form-input.has-error {
