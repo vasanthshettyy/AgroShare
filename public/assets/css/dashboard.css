@@ -342,10 +342,99 @@ img {
     right: 7px;
     width: 8px;
     height: 8px;
-    background: var(--amber);
+    background: var(--danger);
     border-radius: 50%;
     border: 2px solid var(--surface-color);
     animation: subtlePulse 2s ease-in-out infinite;
+}
+
+/* ── Notifications Dropdown ───────────────────────────────── */
+.topbar-right {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.notif-dropdown {
+    position: absolute;
+    top: 110%;
+    right: 50px;
+    width: 320px;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    z-index: 300;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    animation: fadeSlideUp 0.3s ease-out forwards;
+}
+
+.notif-dropdown.show {
+    display: flex;
+}
+
+.notif-header {
+    padding: 1rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-main);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--glass-bg-heavy);
+}
+
+.notif-list {
+    max-height: 350px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-action) var(--bg-color);
+}
+
+.notif-item {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--glass-border);
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.notif-item:last-child {
+    border-bottom: none;
+}
+
+.notif-item:hover {
+    background: var(--primary-10);
+    color: var(--text-main);
+}
+
+.notif-item.unread {
+    border-left: 3px solid var(--primary-action);
+    color: var(--text-main);
+    background: rgba(76, 175, 120, 0.04);
+}
+
+.notif-item.unread:hover {
+    background: var(--primary-10);
+}
+
+.notif-time {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-subtle);
+    margin-top: 0.35rem;
+}
+
+.notif-empty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
 }
 
 /* Avatar — gradient ring */

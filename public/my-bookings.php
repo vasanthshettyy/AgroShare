@@ -198,7 +198,25 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             </p>
         </div>
 
-        <div class="topbar-right">
+        <div class="topbar-right" style="position: relative;">
+            <!-- Notifications -->
+            <button class="btn-icon" id="notifBtn" aria-label="Notifications" title="Notifications">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                <span class="notif-dot" id="notifDot" aria-hidden="true" style="display: none;"></span>
+            </button>
+
+            <!-- Notifications Dropdown -->
+            <div class="notif-dropdown" id="notifDropdown">
+                <div class="notif-header">Notifications</div>
+                <div class="notif-list" id="notifList">
+                    <div class="notif-empty">Loading...</div>
+                </div>
+            </div>
+
             <!-- Avatar -->
             <div class="avatar" id="avatar-btn" role="button" tabindex="0"
                  title="Profile — <?= e($_SESSION['full_name']) ?>" aria-label="Open profile">
@@ -423,7 +441,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 <input type="hidden" id="csrf_token" value="<?= generateCsrfToken() ?>">
 
 <?php require_once __DIR__ . '/includes/profile-modal.php'; ?>
-<script src="assets/js/dashboard.js"></script>
+<script src="assets/js/dashboard.js" defer></script>
 <script>
     // Tab Switching Logic
     document.querySelectorAll('.tab-btn').forEach(btn => {

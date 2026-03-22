@@ -4,6 +4,101 @@
  */
 'use strict';
 
+/* ── 0. Notifications Logic ────────────────────────────────────
+   Fetches notifications, updates dot, and handles dropdown.
+   ─────────────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+    const notifBtn = document.getElementById('notifBtn');
+    const notifDropdown = document.getElementById('notifDropdown');
+    const notifDot = document.getElementById('notifDot');
+    const notifList = document.getElementById('notifList');
+
+    if (notifBtn && notifDropdown && notifList) {
+        // Toggle dropdown
+        notifBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            notifDropdown.classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!notifBtn.contains(e.target) && !notifDropdown.contains(e.target)) {
+                notifDropdown.classList.remove('show');
+            }
+        });
+
+        // Fetch notifications
+        async function fetchNotifications() {
+            try {
+                const res = await fetch('api/get-notifications.php');
+                const data = await res.json();
+
+                if (data.success) {
+                    if (data.unread_count > 0) {
+                        notifDot.style.display = 'block';
+                    } else {
+                        notifDot.style.display = 'none';
+                    }
+
+                    if (data.notifications.length === 0) {
+                        notifList.innerHTML = '<div class="notif-empty">No new notifications</div>';
+                        return;
+                    }
+
+                    notifList.innerHTML = '';
+                    data.notifications.forEach(n => {
+                        const item = document.createElement('div');
+                        item.className = `notif-item ${n.is_read == 0 ? 'unread' : ''}`;
+                        item.dataset.id = n.id;
+                        
+                        // Parse date
+                        const d = new Date(n.created_at);
+                        const timeStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+                        item.innerHTML = `
+                            <div>${n.message}</div>
+                            <span class="notif-time">${timeStr}</span>
+                        `;
+
+                        // Mark as read on click
+                        if (n.is_read == 0) {
+                            item.addEventListener('click', async () => {
+                                try {
+                                    const formData = new FormData();
+                                    formData.append('id', n.id);
+                                    
+                                    const mRes = await fetch('api/mark-notification-read.php', { method: 'POST', body: formData });
+                                    const mData = await mRes.json();
+                                    
+                                    if (mData.success) {
+                                        item.classList.remove('unread');
+                                        // Update dot counter visually
+                                        let currentUnread = Array.from(notifList.children).filter(el => el.classList.contains('unread')).length;
+                                        if (currentUnread === 0) {
+                                            notifDot.style.display = 'none';
+                                        }
+                                    }
+                                } catch (err) { console.error('Error marking read:', err); }
+                            });
+                        }
+
+                        notifList.appendChild(item);
+                    });
+                }
+            } catch (err) {
+                console.error('Failed to fetch notifications:', err);
+                notifList.innerHTML = '<div class="notif-empty">Error loading notifications</div>';
+            }
+        }
+
+        // Fetch initially
+        fetchNotifications();
+        
+        // Optional: Poll every 30 seconds
+        setInterval(fetchNotifications, 30000);
+    }
+});
+
 /* ── 1. Theme Persistence ──────────────────────────────────────
    Force dark mode as the default theme.
    ─────────────────────────────────────────────────────────── */

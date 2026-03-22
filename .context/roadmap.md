@@ -107,7 +107,7 @@ Design all tables with relationships **before** writing any PHP.
 | id | INT UNSIGNED PK AUTO_INCREMENT | |
 | owner_id | INT UNSIGNED FK → users.id | |
 | title | VARCHAR(150) | e.g. "Mahindra 475 DI Tractor" |
-| category | ENUM('tractor','harvester','seeder','sprayer','other') | |
+| category | ENUM('tractor','harvester','seeder','sprayer','plough','chain_saw','rotavator','cultivator','thresher','water_pump','earth_auger','baler','trolley','brush_cutter','power_tiller','chaff_cutter','other') | |
 | description | TEXT | |
 | price_per_hour | DECIMAL(8,2) | |
 | price_per_day | DECIMAL(8,2) | |
@@ -173,6 +173,24 @@ Design all tables with relationships **before** writing any PHP.
 | quantity_pledged | INT UNSIGNED | |
 | created_at | TIMESTAMP | |
 | UNIQUE KEY | (campaign_id, farmer_id) | One pledge per farmer per campaign |
+
+**Table: `site_settings`**
+| Column | Type | Notes |
+|---|---|---|
+| id | INT UNSIGNED PK AUTO_INCREMENT | |
+| setting_key | VARCHAR(100) UNIQUE | e.g. "contact_email", "pooling_enabled" |
+| setting_value | TEXT | |
+| updated_at | TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | |
+
+**Table: `audit_logs`**
+| Column | Type | Notes |
+|---|---|---|
+| id | INT UNSIGNED PK AUTO_INCREMENT | |
+| admin_id | INT UNSIGNED FK → users.id | |
+| action_type | VARCHAR(50) | e.g. "user_banned", "setting_changed" |
+| target_id | INT UNSIGNED NULLABLE | ID of user/equipment affected |
+| description | TEXT | |
+| created_at | TIMESTAMP DEFAULT CURRENT_TIMESTAMP | |
 
 ### 1.3 — Define All API Endpoints (PHP Routes)
 Map every user action to a PHP handler before building anything:
@@ -353,16 +371,18 @@ Step-by-step logic for `AuthController::register()`:
 ## Module 3 — Responsive UI Shell & Design System
 *Goal: Build the visual skeleton that all features will live inside.*
 
-### 3.1 — Design Tokens (CSS Variables)
-Define in `:root` before writing any component styles:
+### 3.1 — Design Tokens (CSS Variables) / "Emerald Harvest" Theme
+Define in `:root` before writing any component styles. The application heavily uses a premium dark theme logic ("Emerald Harvest") extending these base variables with `.card` floats and animated `.btn-contact` styles:
 ```
 --color-primary: #2E7D32      (deep agricultural green)
 --color-accent: #F9A825       (harvest amber/gold)
---color-bg: #F5F5F0           (off-white — easy on eyes outdoors)
---color-text: #1A1A1A         (near-black for contrast)
+--color-bg: #F5F5F0           (off-white / mapped to dark #121212 in theme.js)
+--color-surface: #FFFFFF      (mapped to #1E1E1E in theme.js)
+--color-text: #1A1A1A         (near-black for contrast / mapped to #F0F0F0)
+--color-text-muted: #555555   (mapped to #AAAAAA)
+--color-border: #DDDDDD       (mapped to #333333)
 --color-danger: #C62828
---color-card-bg: #FFFFFF
---shadow-card: 0 2px 8px rgba(0,0,0,0.10)
+--shadow-card: 0 2px 8px rgba(0,0,0,0.10) (mapped to 0.40 opacity in dark mode)
 --radius: 8px
 --font-primary: 'Noto Sans', sans-serif   (supports Kannada/Devanagari)
 --font-size-base: 16px        (WCAG minimum for accessibility)
@@ -546,14 +566,14 @@ When a user selects date/time on the booking form, PHP calculates:
 
 ### 4.5 — Test & Verify: Equipment Module
 **Do not proceed to Module 5 until ALL of these pass:**
-- [ ] Create equipment listing with image upload → row in DB, images in `/uploads/equipment/`
-- [ ] Edit equipment → DB row updated correctly
-- [ ] Delete equipment → row removed, images deleted from disk
-- [ ] Toggle availability via AJAX → `is_available` flips in DB without page reload
-- [ ] Browse page with filters → correct results returned, pagination works
-- [ ] Browse page at 375px → cards stack to 1-column, filter panel collapses
-- [ ] Non-owner tries to edit/delete → rejected with error
-- [ ] Image upload with invalid type (e.g., .php file) → rejected
+- [x] Create equipment listing with image upload → row in DB, images in `/uploads/equipment/`
+- [x] Edit equipment → DB row updated correctly
+- [x] Delete equipment → row removed, images deleted from disk
+- [x] Toggle availability via AJAX → `is_available` flips in DB without page reload
+- [x] Browse page with filters → correct results returned, pagination works
+- [x] Browse page at 375px → cards stack to 1-column, filter panel collapses
+- [x] Non-owner tries to edit/delete → rejected with error
+- [x] Image upload with invalid type (e.g., .php file) → rejected
 
 ---
 
@@ -614,14 +634,14 @@ confirmed → cancelled (before start, with optional reason)
 
 ### 5.6 — Test & Verify: Booking Module
 **Do not proceed to Module 6 until ALL of these pass:**
-- [ ] Book Equipment A from Jan 10 9am–12pm, then try Jan 10 10am–2pm → **must be rejected** (overlap)
-- [ ] Book Equipment A Jan 10 9am–12pm, then Jan 10 12pm–3pm → **must succeed** (adjacent)
-- [ ] Book Equipment A Jan 10 9am–12pm, then Jan 10 7am–9am → **must succeed** (before)
-- [ ] Booking calendar shows booked dates as blocked
-- [ ] Live price calculator returns correct hourly vs daily pricing
-- [ ] Status transitions enforce state machine (e.g., completed → active rejected)
-- [ ] Notifications created for owner on new booking, renter on confirmation
-- [ ] My Bookings page renders correctly on mobile
+- [x] Book Equipment A from Jan 10 9am–12pm, then try Jan 10 10am–2pm → **must be rejected** (overlap)
+- [x] Book Equipment A Jan 10 9am–12pm, then Jan 10 12pm–3pm → **must succeed** (adjacent)
+- [x] Book Equipment A Jan 10 9am–12pm, then Jan 10 7am–9am → **must succeed** (before)
+- [x] Booking calendar shows booked dates as blocked
+- [x] Live price calculator returns correct hourly vs daily pricing
+- [x] Status transitions enforce state machine (e.g., completed → active rejected)
+- [x] Notifications created for owner on new booking, renter on confirmation
+- [x] My Bookings page renders correctly on mobile
 
 ---
 
@@ -719,48 +739,45 @@ Display as a star rating (1–5) with total review count. Show on all equipment 
 
 ---
 
-## Module 8 — Admin Panel (Vertical Slice)
-*Goal: Admin oversight and moderation — fully working from UI to database.*
+## Module 8 — Super Admin Operations Center (Vertical Slice)
+*Goal: Give the admin FULL GUI power to run the business, modify content, and moderate users without touching code.*
 
-### 8.1 — UI: Admin Dashboard & Management Pages
-- **Admin Dashboard** (`admin-dashboard.php`) — stats widgets grid showing key metrics
-- **User Management page** (`admin-users.php`) — paginated table with search by name/phone/district, action buttons (verify, view profile, deactivate)
-- **Equipment Moderation page** (`admin-equipment.php`) — all listings with owner name, flag/remove actions
-- **Booking Overview page** (`admin-bookings.php`) — all platform bookings with status filters
-- All pages use design system data tables with mobile card collapse
+### 8.1 — Global "Settings" Engine (GUI for Site Configuration)
+- **Settings Dashboard** (`admin-settings.php`): A GUI interacting with the `site_settings` table.
+- **Toggle Features:** Checkboxes to turn modules on/off (e.g., Disable Pooling Campaigns temporarily).
+- **Edit Homepage Content:** Text areas to change the main landing page headline, subtext, and 'About Us' descriptions directly.
+- **System Controls:** Change the support email address, phone numbers, or social media links that appear in the footer.
+- **Maintenance Mode:** A master toggle that puts the public site into "Under Maintenance" mode while allowing admins to log in via a hidden route.
 
-### 8.2 — Backend: Dashboard Metrics (PHP + mysqli)
-Display live stats using prepared statements:
-- Total registered users / new this week
-- Total equipment listings / currently available
-- Total bookings / by status breakdown
-- Active pooling campaigns / threshold met count
-- Total platform reviews / average rating
+### 8.2 — Advanced User Control & Security
+- **User Management** (`admin-users.php`): Extended paginated table with search & filtering.
+- **The Ban Hammer:** Ability to permanently ban or temporarily suspend malicious users (`is_active = 0`).
+- **Trust Override:** Manually adjust a user's trust score or revoke their "Verified Farmer" badge if they violate terms.
+- **Password Controls:** Send forced password-reset links (or override) for users locked out of accounts.
 
-### 8.3 — Backend: User & Equipment Management (PHP + mysqli)
-**User Management:**
-- Verify user: `UPDATE users SET is_verified = 1 WHERE id = ?`
-- View profile: link to public profile page
-- Deactivate account: check for active bookings before allowing
+### 8.3 — Equipment, Content Moderation & Bookings
+- **Equipment Moderation** (`admin-equipment.php`): Full visibility into all tools.
+- **Feature Listings:** A star/pin button next to an equipment listing that forces it to appear at the very top of the public "Browse" page (`is_featured = 1`).
+- **Direct Edit/Delete:** Full power to dive into any user's equipment listing and edit inappropriate descriptions, remove bad images, or hard-delete the listing.
+- **Booking Dispute Resolution:** Admins can view *all* active or pending bookings and force a status change (e.g., forcefully cancel a booking to resolve a dispute between two users using `admin_override = 1`).
 
-**Equipment Moderation:**
-- List all equipment with owner name (JOIN query)
-- Flag/remove listings that violate platform rules
-- Toggle availability on behalf of owner if reported as unavailable
+### 8.4 — Audit & Error Logs (No-Code Debugging)
+- **Activity Ledger** (`admin-logs.php`): A read-only GUI table rendering the `audit_logs` database.
+- Tracks sensitive actions: "Admin X deleted User Y", "Setting Z changed to False".
+- Allows monitoring the health and security of the app without ever opening a server log file.
 
-### 8.4 — Admin Role Protection
-- Every admin route wrapped in `requireRole('admin')` — if non-admin tries to access, redirect to farmer dashboard with error message
-- Admin cannot be created via public registration — only via direct DB seed or a one-time setup script
+### 8.5 — Admin Role Protection & Dashboard Metrics
+- Every admin route strictly wrapped in `requireRole('admin')`.
+- Displays live, heavy metrics using optimized `mysqli` aggregation queries on the main dashboard screen (Total Users, Active Bookings, Total Transactions Value, Campaign Success Rates).
 
-### 8.5 — Test & Verify: Admin Module
+### 8.6 — Test & Verify: Admin Module
 **Do not proceed to Module 9 until ALL of these pass:**
-- [ ] Admin dashboard displays correct live metrics (cross-check with DB)
-- [ ] Verify user → `is_verified` = 1 in DB, verified badge appears on profile
-- [ ] Deactivate user with active bookings → rejected with error
-- [ ] Non-admin accesses `/admin/*` → redirect to farmer dashboard
-- [ ] User search by name/phone/district returns correct results
-- [ ] Equipment moderation: flag/remove listing → DB updated
-- [ ] Admin pages render correctly on mobile (data tables collapse to cards)
+- [ ] Change a global setting in GUI → completely visual change on frontend.
+- [ ] Ban a user → user cannot log in, their equipment disappears from public browse.
+- [ ] Feature an equipment listing → appears first on the browse page.
+- [ ] Admin dashboard displays correct live metrics (cross-check with DB).
+- [ ] Non-admin accesses `/admin/*` → redirect to farmer dashboard.
+- [ ] Admin actions successfully register a row in the `audit_logs` table.
 
 ---
 

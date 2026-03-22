@@ -327,7 +327,7 @@
    ══════════════════════════════════════════════════════════ */
 .equipment-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 1.5rem;
 }
 
@@ -1027,21 +1027,29 @@
 }
 
 .calendar-day.booked {
-    background: rgba(120, 120, 120, 0.1);
-    color: var(--text-muted);
+    background: rgba(198, 40, 40, 0.05); /* Subtle red */
+    color: var(--danger);
+    text-decoration: line-through;
+    opacity: 0.6;
     cursor: not-allowed;
     position: relative;
     overflow: hidden;
 }
 
 .calendar-day.booked::after {
-    content: '';
-    position: absolute;
-    width: 140%;
-    height: 1.5px;
-    background: var(--text-muted);
-    transform: rotate(-45deg);
-    opacity: 0.4;
+    display: none; /* Removed diagonal line in favor of line-through */
+}
+
+.calendar-day.available {
+    color: var(--primary-action);
+    font-weight: 600;
+    background: rgba(76, 175, 120, 0.05);
+    border: 1px solid rgba(76, 175, 120, 0.15);
+}
+
+.calendar-day.available:hover {
+    background: var(--primary-15);
+    border-color: var(--primary-action);
 }
 
 .calendar-availability-hint {

@@ -54,6 +54,15 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param('iiisss', $eqId, $userId, $ownerId, $start, $end, $totalPrice);
 
 if ($stmt->execute()) {
+    // Notify Owner
+    $eqTitleStmt = $conn->prepare("SELECT title FROM equipment WHERE id = ?");
+    $eqTitleStmt->bind_param('i', $eqId);
+    $eqTitleStmt->execute();
+    $eqTitle = $eqTitleStmt->get_result()->fetch_column();
+    
+    $notifMsg = "You have a new booking request for '$eqTitle'.";
+    createNotification($conn, $ownerId, $notifMsg);
+
     echo json_encode(['success' => true, 'message' => 'Booking request sent successfully!']);
 } else {
     echo json_encode(['success' => false, 'message' => 'Server error. Please try again.']);

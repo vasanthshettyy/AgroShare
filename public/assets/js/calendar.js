@@ -160,6 +160,7 @@ class BookingCalendar {
             } else if (this.isDateBooked(date)) {
                 dayEl.classList.add('booked');
             } else {
+                dayEl.classList.add('available');
                 if (date.getTime() === this.today.getTime()) dayEl.classList.add('today');
                 dayEl.addEventListener('click', () => this.handleDateClick(date));
                 

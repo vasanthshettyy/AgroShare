@@ -77,15 +77,22 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
             <input type="search" id="topbar-search-input" placeholder="Search equipment…" autocomplete="off">
         </label>
 
-        <div class="topbar-right">
-            <button class="btn-icon" aria-label="Notifications" title="Notifications">
+        <div class="topbar-right" style="position: relative;">
+            <button class="btn-icon" id="notifBtn" aria-label="Notifications" title="Notifications">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                     <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                 </svg>
-                <span class="notif-dot" aria-hidden="true"></span>
+                <span class="notif-dot" id="notifDot" aria-hidden="true" style="display: none;"></span>
             </button>
+
+            <div class="notif-dropdown" id="notifDropdown">
+                <div class="notif-header">Notifications</div>
+                <div class="notif-list" id="notifList">
+                    <div class="notif-empty">Loading...</div>
+                </div>
+            </div>
 
             <div class="avatar" id="avatar-btn" role="button" tabindex="0"
                  title="Profile — <?= e($_SESSION['full_name']) ?>" aria-label="Open profile">

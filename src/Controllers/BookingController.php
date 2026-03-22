@@ -88,6 +88,16 @@ function getRequestsForOwner(mysqli $conn, int $userId): array
 }
 
 /**
+ * Helper: Create a notification.
+ */
+function createNotification(mysqli $conn, int $userId, string $message): void 
+{
+    $stmt = $conn->prepare("INSERT INTO notifications (user_id, message) VALUES (?, ?)");
+    $stmt->bind_param('is', $userId, $message);
+    $stmt->execute();
+}
+
+/**
  * Update booking status with state machine enforcement.
  */
 function updateBookingStatus(mysqli $conn, int $bookingId, int $userId, string $newStatus): bool 
@@ -96,7 +106,7 @@ function updateBookingStatus(mysqli $conn, int $bookingId, int $userId, string $
     if (!in_array($newStatus, $validStatuses)) return false;
 
     // Fetch booking details to verify ownership/rentership
-    $stmt = $conn->prepare("SELECT status, owner_id, renter_id, equipment_id FROM bookings WHERE id = ?");
+    $stmt = $conn->prepare("SELECT b.status, b.owner_id, b.renter_id, b.equipment_id, e.title as eq_title FROM bookings b JOIN equipment e ON b.equipment_id = e.id WHERE b.id = ?");
     $stmt->bind_param('i', $bookingId);
     $stmt->execute();
     $booking = $stmt->get_result()->fetch_assoc();
@@ -121,7 +131,7 @@ function updateBookingStatus(mysqli $conn, int $bookingId, int $userId, string $
         if ((!$isOwner && !$isRenter) || !in_array($current, ['confirmed', 'active'])) return false;
     }
 
-    // Begin Transaction for atomicity (Status + Equipment availability)
+    // Begin Transaction for atomicity (Status + Equipment availability + Notifications)
     $conn->begin_transaction();
     try {
         $stmt = $conn->prepare("UPDATE bookings SET status = ? WHERE id = ?");
@@ -133,6 +143,23 @@ function updateBookingStatus(mysqli $conn, int $bookingId, int $userId, string $
             $stmt = $conn->prepare("UPDATE equipment SET is_available = 1 WHERE id = ?");
             $stmt->bind_param('i', $booking['equipment_id']);
             $stmt->execute();
+        }
+
+        // --- Notifications ---
+        $eqTitle = $booking['eq_title'];
+        
+        if ($newStatus === 'confirmed') {
+            createNotification($conn, $booking['renter_id'], "Your booking request for '$eqTitle' was confirmed!");
+        } elseif ($newStatus === 'rejected') {
+            createNotification($conn, $booking['renter_id'], "Your booking request for '$eqTitle' was rejected.");
+        } elseif ($newStatus === 'cancelled') {
+            $targetUserId = $isOwner ? $booking['renter_id'] : $booking['owner_id'];
+            $actor = $isOwner ? "Owner" : "Renter";
+            createNotification($conn, $targetUserId, "The booking for '$eqTitle' was cancelled by the $actor.");
+        } elseif ($newStatus === 'completed') {
+            $targetUserId = $isOwner ? $booking['renter_id'] : $booking['owner_id'];
+            $actor = $isOwner ? "Owner" : "Renter";
+            createNotification($conn, $targetUserId, "The booking for '$eqTitle' was marked as completed by the $actor.");
         }
 
         $conn->commit();
