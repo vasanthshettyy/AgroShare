@@ -1200,6 +1200,25 @@ input[type="number"].form-input::-webkit-inner-spin-button {
     background-position: right 1rem center;
     background-size: 1.1rem;
     padding-right: 2.8rem;
+    
+    /* Firefox Custom Scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-action) var(--bg-color);
+}
+
+/* Chrome/Edge/Safari Custom Scrollbar for Dropdowns */
+.form-select::-webkit-scrollbar {
+    width: 8px;
+}
+.form-select::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+.form-select::-webkit-scrollbar-thumb {
+    background-color: var(--primary-action);
+    border-radius: 4px;
+}
+.form-select::-webkit-scrollbar-thumb:hover {
+    background-color: var(--secondary-action);
 }
 
 /* ── Custom Premium Checkbox ── */

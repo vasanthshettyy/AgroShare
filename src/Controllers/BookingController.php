@@ -90,26 +90,55 @@ function getRequestsForOwner(mysqli $conn, int $userId): array
 /**
  * Update booking status with state machine enforcement.
  */
-function updateBookingStatus(mysqli $conn, int $bookingId, int $ownerId, string $newStatus): bool 
+function updateBookingStatus(mysqli $conn, int $bookingId, int $userId, string $newStatus): bool 
 {
     $validStatuses = ['confirmed', 'rejected', 'completed', 'cancelled'];
     if (!in_array($newStatus, $validStatuses)) return false;
 
-    // Fetch current status and verify ownership
-    $stmt = $conn->prepare("SELECT status, owner_id, renter_id FROM bookings WHERE id = ?");
+    // Fetch booking details to verify ownership/rentership
+    $stmt = $conn->prepare("SELECT status, owner_id, renter_id, equipment_id FROM bookings WHERE id = ?");
     $stmt->bind_param('i', $bookingId);
     $stmt->execute();
     $booking = $stmt->get_result()->fetch_assoc();
 
-    if (!$booking || (int)$booking['owner_id'] !== $ownerId) return false;
+    if (!$booking) return false;
 
-    // State machine transitions
-    $current = $booking['status'];
-    if ($current === 'pending' && !in_array($newStatus, ['confirmed', 'rejected'])) return false;
-    if ($current === 'confirmed' && !in_array($newStatus, ['completed', 'cancelled'])) return false;
-    if (in_array($current, ['rejected', 'completed', 'cancelled'])) return false; // Terminal states
+    $isOwner  = (int)$booking['owner_id'] === $userId;
+    $isRenter = (int)$booking['renter_id'] === $userId;
+    $current  = $booking['status'];
 
-    $stmt = $conn->prepare("UPDATE bookings SET status = ?, updated_at = NOW() WHERE id = ?");
-    $stmt->bind_param('si', $newStatus, $bookingId);
-    return $stmt->execute();
+    // State Machine & Permission Enforcement
+    if ($newStatus === 'confirmed' || $newStatus === 'rejected') {
+        if (!$isOwner || $current !== 'pending') return false;
+    }
+    
+    if ($newStatus === 'cancelled') {
+        if ((!$isRenter && !$isOwner) || !in_array($current, ['pending', 'confirmed'])) return false;
+    }
+
+    if ($newStatus === 'completed') {
+        // Either party can mark as completed if it was confirmed or active
+        if ((!$isOwner && !$isRenter) || !in_array($current, ['confirmed', 'active'])) return false;
+    }
+
+    // Begin Transaction for atomicity (Status + Equipment availability)
+    $conn->begin_transaction();
+    try {
+        $stmt = $conn->prepare("UPDATE bookings SET status = ?, updated_at = NOW() WHERE id = ?");
+        $stmt->bind_param('si', $newStatus, $bookingId);
+        $stmt->execute();
+
+        // If completed or cancelled (after being confirmed), free up the equipment
+        if ($newStatus === 'completed' || ($newStatus === 'cancelled' && $current === 'confirmed')) {
+            $stmt = $conn->prepare("UPDATE equipment SET is_available = 1 WHERE id = ?");
+            $stmt->bind_param('i', $booking['equipment_id']);
+            $stmt->execute();
+        }
+
+        $conn->commit();
+        return true;
+    } catch (Exception $e) {
+        $conn->rollback();
+        return false;
+    }
 }
