@@ -327,10 +327,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: var(--bg-color);
             color: var(--text-main);
         }
-        .form-input.is-invalid {
-            border-color: var(--danger);
-            box-shadow: 0 0 0 4px rgba(198,40,40,0.12);
+
+        /* ── Autofill Hardening ────────────────────────── */
+        .form-input:-webkit-autofill,
+        .form-input:-webkit-autofill:hover, 
+        .form-input:-webkit-autofill:focus, 
+        .form-input:-webkit-autofill:active,
+        .form-input:autofill {
+            -webkit-text-fill-color: var(--text-main) !important;
+            -webkit-box-shadow: 0 0 0 1000px var(--bg-color) inset !important;
+            box-shadow: 0 0 0 1000px var(--bg-color) inset !important;
+            background-color: var(--bg-color) !important;
+            border-color: var(--border-color);
+            caret-color: var(--text-main);
+            transition: background-color 5000s ease-in-out 0s;
         }
+
+        .form-input:-webkit-autofill:focus,
+        .form-input:autofill:focus {
+            border-color: var(--primary-action) !important;
+            -webkit-box-shadow: 0 0 0 1000px var(--bg-color) inset, 0 0 0 4px var(--primary-10) !important;
+            box-shadow: 0 0 0 1000px var(--bg-color) inset, 0 0 0 4px var(--primary-10) !important;
+        }
+
+        .form-input.is-invalid {
         .form-input.has-suffix { padding-right: 44px; }
 
         /* Override Chrome Autofill White Background */

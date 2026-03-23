@@ -1,0 +1,15 @@
+# AgroShare — Public Directory Protection
+# Module 2.9 Security Configuration
+
+# 1. Disable directory listing
+Options -Indexes
+
+# 2. Block direct access to hidden files (except .well-known)
+<FilesMatch "^\.(?!well-known/)">
+    Require all denied
+</FilesMatch>
+
+# 3. Block direct access to sensitive extensions
+<FilesMatch "\.(env|ini|log|sql|sh|bat|ps1|md|json)$">
+    Require all denied
+</FilesMatch>

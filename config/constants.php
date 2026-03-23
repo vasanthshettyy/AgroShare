@@ -15,8 +15,9 @@ define('DB_PASS', '');          // WAMP default: no password
 define('DB_NAME', 'agroshare');
 
 // Application settings
-define('APP_NAME', 'AgroShare');
-define('APP_URL',  'http://localhost/agroshare');
+define('APP_NAME',     'AgroShare');
+define('APP_URL',      'http://localhost/agroshare');
+define('APP_TIMEZONE', 'Asia/Kolkata');
 
 // Session settings
 define('SESSION_LIFETIME', 3600); // 1 hour in seconds

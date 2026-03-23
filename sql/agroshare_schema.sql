@@ -50,7 +50,7 @@ CREATE TABLE equipment (
     id                  INT UNSIGNED        NOT NULL AUTO_INCREMENT,
     owner_id            INT UNSIGNED        NOT NULL,
     title               VARCHAR(150)        NOT NULL COMMENT 'e.g. Mahindra 475 DI Tractor',
-    category            ENUM('tractor','harvester','seeder','sprayer','other') NOT NULL,
+    category            ENUM('tractor','harvester','seeder','sprayer','plough','chain_saw','rotavator','cultivator','thresher','water_pump','earth_auger','baler','trolley','brush_cutter','power_tiller','chaff_cutter','other') NOT NULL,
     description         TEXT                NOT NULL,
     price_per_hour      DECIMAL(8,2)        NOT NULL,
     price_per_day       DECIMAL(8,2)        NOT NULL,
@@ -87,7 +87,7 @@ CREATE TABLE bookings (
     end_datetime    DATETIME            NOT NULL,
     pricing_mode    ENUM('hourly','daily') NOT NULL,
     total_price     DECIMAL(10,2)       NOT NULL COMMENT 'PHP-calculated at booking time',
-    status          ENUM('pending','confirmed','active','completed','cancelled') NOT NULL DEFAULT 'pending',
+    status          ENUM('pending','confirmed','active','completed','cancelled','rejected') NOT NULL DEFAULT 'pending',
     notes           TEXT                NULL DEFAULT NULL COMMENT 'Renter special requests',
     created_at      TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

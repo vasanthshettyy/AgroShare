@@ -36,6 +36,41 @@ function requireRole(string $role): void
     }
 }
 
+/**
+ * Enforce session idle timeout based on SESSION_LIFETIME.
+ * Redirects to login if the user has been inactive for too long.
+ */
+function enforceSessionIdleTimeout(): void
+{
+    // If not logged in, nothing to enforce
+    if (!isset($_SESSION['user_id'])) {
+        return;
+    }
+
+    $now = time();
+    if (isset($_SESSION['last_activity']) && ($now - $_SESSION['last_activity']) > SESSION_LIFETIME) {
+        // Safe logout sequence:
+        $_SESSION = [];
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params["path"], $params["domain"],
+                $params["secure"], $params["httponly"]
+            );
+        }
+        session_destroy();
+
+        // Start fresh session just to show the error
+        session_start();
+        setFlash('error', 'Session expired due to inactivity. Please log in again.');
+        header('Location: ' . getBasePath() . '/public/login.php');
+        exit();
+    }
+
+    // Otherwise update activity time
+    $_SESSION['last_activity'] = $now;
+}
+
 // ── CSRF Protection ────────────────────────────────────────
 
 /**
@@ -122,6 +157,17 @@ function renderFlash(): string
 }
 
 // ── Utility ────────────────────────────────────────────────
+
+/**
+ * Apply global security headers to protect against clickjacking and MIME sniffing.
+ */
+function applySecurityHeaders(): void
+{
+    if (!headers_sent()) {
+        header('X-Frame-Options: DENY');
+        header('X-Content-Type-Options: nosniff');
+    }
+}
 
 /**
  * Get the base path for URL redirects.

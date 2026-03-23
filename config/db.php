@@ -16,6 +16,13 @@ require_once __DIR__ . '/constants.php';
 
 // Load helper functions (auth, CSRF, flash messages)
 require_once __DIR__ . '/../src/Helpers/auth.php';
+require_once __DIR__ . '/../src/Helpers/audit.php';
+
+// Apply global security headers (X-Frame-Options, X-Content-Type-Options)
+applySecurityHeaders();
+
+// Set application timezone (deterministic IST behavior)
+date_default_timezone_set(APP_TIMEZONE);
 
 // ── Session Configuration ──────────────────────────────────
 if (session_status() === PHP_SESSION_NONE) {
@@ -25,6 +32,9 @@ if (session_status() === PHP_SESSION_NONE) {
     ini_set('session.use_strict_mode', 1);   // Reject uninitialized session IDs
     session_start();
 }
+
+// Enforce session idle timeout (1-hour check)
+enforceSessionIdleTimeout();
 
 // ── Database Connection (OO mysqli) ────────────────────────
 // Enable strict error reporting BEFORE creating the connection

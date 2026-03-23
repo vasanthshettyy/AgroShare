@@ -43,10 +43,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($user && password_verify($password, $user['password_hash'])) {
             session_regenerate_id(true);
-            $_SESSION['user_id']   = $user['id'];
-            $_SESSION['role']      = $user['role'];
-            $_SESSION['full_name'] = $user['full_name'];
-            $_SESSION['persist']   = $remember;
+            $_SESSION['user_id']       = $user['id'];
+            $_SESSION['role']          = $user['role'];
+            $_SESSION['full_name']     = $user['full_name'];
+            $_SESSION['persist']       = $remember;
+            $_SESSION['last_activity'] = time();
+
+            // Log successful login
+            logAuditEvent($conn, [
+                'actor_user_id' => $user['id'],
+                'action_type'   => 'login_success',
+                'description'   => "User logged in successfully: " . $user['full_name']
+            ]);
 
             $redirect = ($user['role'] === 'admin')
                 ? getBasePath() . '/public/admin/dashboard.php'
@@ -63,6 +71,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         } else {
             $errors['general'] = 'Invalid phone number or password.';
+
+            // Log failed login attempt
+            $maskedPhone = (strlen($phone) >= 2) ? str_repeat('*', strlen($phone)-2) . substr($phone, -2) : $phone;
+            logAuditEvent($conn, [
+                'action_type'   => 'login_failed',
+                'description'   => "Failed login attempt for phone: " . $maskedPhone,
+                'metadata'      => [
+                    'attempted_phone' => $maskedPhone,
+                    'reason' => ($user) ? 'invalid_password' : 'unknown_user'
+                ]
+            ]);
         }
     }
 }
@@ -317,23 +336,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: var(--bg-color);
             color: var(--text-main);
         }
-        .form-input.is-invalid {
-            border-color: var(--danger);
-            box-shadow: 0 0 0 4px rgba(198,40,40,0.12);
-        }
-        .form-input.has-icon { padding-left: 42px; }
-        .form-input.has-suffix { padding-right: 46px; }
 
-        /* Override Chrome Autofill White Background */
+        /* ── Autofill Hardening ────────────────────────── */
         .form-input:-webkit-autofill,
         .form-input:-webkit-autofill:hover, 
         .form-input:-webkit-autofill:focus, 
-        .form-input:-webkit-autofill:active {
-            -webkit-box-shadow: 0 0 0 30px var(--bg-color) inset !important;
+        .form-input:-webkit-autofill:active,
+        .form-input:autofill {
             -webkit-text-fill-color: var(--text-main) !important;
-            transition: background-color 5000s ease-in-out 0s;
+            -webkit-box-shadow: 0 0 0 1000px var(--bg-color) inset !important;
+            box-shadow: 0 0 0 1000px var(--bg-color) inset !important;
+            background-color: var(--bg-color) !important;
             border-color: var(--border-color);
+            caret-color: var(--text-main);
+            transition: background-color 5000s ease-in-out 0s;
         }
+
+        .form-input:-webkit-autofill:focus,
+        .form-input:autofill:focus {
+            border-color: var(--primary-action) !important;
+            -webkit-box-shadow: 0 0 0 1000px var(--bg-color) inset, 0 0 0 4px var(--primary-10) !important;
+            box-shadow: 0 0 0 1000px var(--bg-color) inset, 0 0 0 4px var(--primary-10) !important;
+        }
+
+        .form-input.is-invalid {
 
         /* Input icon (left) */
         .input-icon {

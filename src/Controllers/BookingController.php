@@ -102,7 +102,7 @@ function createNotification(mysqli $conn, int $userId, string $message): void
  */
 function updateBookingStatus(mysqli $conn, int $bookingId, int $userId, string $newStatus): bool 
 {
-    $validStatuses = ['confirmed', 'rejected', 'completed', 'cancelled'];
+    $validStatuses = ['confirmed', 'completed', 'cancelled'];
     if (!in_array($newStatus, $validStatuses)) return false;
 
     // Fetch booking details to verify ownership/rentership
@@ -118,11 +118,12 @@ function updateBookingStatus(mysqli $conn, int $bookingId, int $userId, string $
     $current  = $booking['status'];
 
     // State Machine & Permission Enforcement
-    if ($newStatus === 'confirmed' || $newStatus === 'rejected') {
+    if ($newStatus === 'confirmed') {
         if (!$isOwner || $current !== 'pending') return false;
     }
     
     if ($newStatus === 'cancelled') {
+        // Owner or Renter can cancel a 'pending' or 'confirmed' booking.
         if ((!$isRenter && !$isOwner) || !in_array($current, ['pending', 'confirmed'])) return false;
     }
 
@@ -150,12 +151,16 @@ function updateBookingStatus(mysqli $conn, int $bookingId, int $userId, string $
         
         if ($newStatus === 'confirmed') {
             createNotification($conn, $booking['renter_id'], "Your booking request for '$eqTitle' was confirmed!");
-        } elseif ($newStatus === 'rejected') {
-            createNotification($conn, $booking['renter_id'], "Your booking request for '$eqTitle' was rejected.");
         } elseif ($newStatus === 'cancelled') {
             $targetUserId = $isOwner ? $booking['renter_id'] : $booking['owner_id'];
             $actor = $isOwner ? "Owner" : "Renter";
-            createNotification($conn, $targetUserId, "The booking for '$eqTitle' was cancelled by the $actor.");
+            
+            // Tailor message if owner declines a pending request
+            if ($isOwner && $current === 'pending') {
+                createNotification($conn, $booking['renter_id'], "Your booking request for '$eqTitle' was declined by the owner.");
+            } else {
+                createNotification($conn, $targetUserId, "The booking for '$eqTitle' was cancelled by the $actor.");
+            }
         } elseif ($newStatus === 'completed') {
             $targetUserId = $isOwner ? $booking['renter_id'] : $booking['owner_id'];
             $actor = $isOwner ? "Owner" : "Renter";
