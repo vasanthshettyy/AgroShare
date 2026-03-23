@@ -1,4 +1,5 @@
-﻿# Agent and Context folders
+$content = @"
+# Agent and Context folders
 .agents/
 .context/
 
@@ -24,3 +25,5 @@ node_modules/
 
 # Logs
 *.log
+"@
+$content | Out-File -FilePath ".gitignore" -Encoding utf8
