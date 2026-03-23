@@ -19,8 +19,26 @@ $equipmentList = getEquipmentForAdmin($conn);
         th, td { padding: 12px; border-bottom: 1px solid var(--border-color); }
         th { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
         td { color: var(--text-main); font-size: 0.9rem; }
-        .action-btn { background: var(--primary-10); color: var(--primary-action); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
-        .action-btn:hover { background: var(--primary-action); color: #fff; }
+        
+        /* Stateful Action Buttons */
+        .btn-action { font-family: inherit; font-weight: 600; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; border: 1px solid transparent; transition: all 0.2s ease; outline-offset: 2px; }
+        .btn-action:focus-visible { outline: 2px solid var(--primary-action); }
+        
+        /* Positive action */
+        .btn-positive { background: var(--primary-10); color: var(--primary-action); border-color: var(--primary-10); }
+        .btn-positive:hover { background: var(--primary-action); color: #fff; border-color: var(--primary-action); }
+        
+        /* Warning/Neutral action */
+        .btn-warning { background: rgba(244, 67, 54, 0.1); color: #e53935; border-color: rgba(244, 67, 54, 0.1); }
+        .btn-warning:hover { background: #e53935; color: #fff; border-color: #e53935; }
+
+        /* Status Chips & Badges */
+        .chip { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .chip-success { background: rgba(76, 175, 80, 0.15); color: #4CAF50; border: 1px solid rgba(76, 175, 80, 0.2); }
+        .chip-neutral { background: rgba(158, 158, 158, 0.15); color: #9E9E9E; border: 1px solid rgba(158, 158, 158, 0.2); }
+        .chip-accent { background: rgba(33, 150, 243, 0.15); color: #2196F3; border: 1px solid rgba(33, 150, 243, 0.2); }
+        
+        .row-featured { background: rgba(33, 150, 243, 0.05); }
     </style>
 </head>
 <body data-theme="dark">
@@ -89,17 +107,34 @@ $equipmentList = getEquipmentForAdmin($conn);
                 </thead>
                 <tbody>
                     <?php foreach ($equipmentList as $eq): ?>
-                    <tr>
+                    <tr class="<?= $eq['is_featured'] ? 'row-featured' : '' ?>">
                         <td><?= (int)$eq['id'] ?></td>
-                        <td><?= e($eq['title']) ?></td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <?= e($eq['title']) ?>
+                                <?php if ($eq['is_featured']): ?>
+                                    <span class="chip chip-accent" style="font-size: 0.65rem; padding: 2px 6px;">Featured</span>
+                                <?php endif; ?>
+                            </div>
+                        </td>
                         <td><?= e($eq['owner_name']) ?></td>
                         <td><?= e($eq['category']) ?></td>
-                        <td><?= $eq['is_available'] ? 'Available' : 'Unavailable' ?></td>
                         <td>
-                            <form method="POST" action="api/toggle-featured-equipment.php" style="display:inline;">
+                            <?php if ($eq['is_available']): ?>
+                                <span class="chip chip-success">Available</span>
+                            <?php else: ?>
+                                <span class="chip chip-neutral">Unavailable</span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <form method="POST" action="api/toggle-featured-equipment.php" style="margin:0;">
                                 <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
                                 <input type="hidden" name="equipment_id" value="<?= (int)$eq['id'] ?>">
-                                <button type="submit" class="action-btn">Toggle Feature</button>
+                                <?php if ($eq['is_featured']): ?>
+                                    <button type="submit" class="btn-action btn-warning" onclick="return confirm('Remove this listing from the featured section?');">Unfeature Listing</button>
+                                <?php else: ?>
+                                    <button type="submit" class="btn-action btn-positive">Feature Listing</button>
+                                <?php endif; ?>
                             </form>
                         </td>
                     </tr>

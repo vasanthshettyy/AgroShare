@@ -19,9 +19,25 @@ $users = getUsersForAdmin($conn);
         th, td { padding: 12px; border-bottom: 1px solid var(--border-color); }
         th { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
         td { color: var(--text-main); font-size: 0.9rem; }
-        .action-btn { background: var(--primary-10); color: var(--primary-action); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
-        .action-btn:hover { background: var(--primary-action); color: #fff; }
         
+        /* Stateful Action Buttons */
+        .btn-action { font-family: inherit; font-weight: 600; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; border: 1px solid transparent; transition: all 0.2s ease; outline-offset: 2px; }
+        .btn-action:focus-visible { outline: 2px solid var(--primary-action); }
+        
+        /* Positive action (e.g., Verify, Activate) */
+        .btn-positive { background: var(--primary-10); color: var(--primary-action); border-color: var(--primary-10); }
+        .btn-positive:hover { background: var(--primary-action); color: #fff; border-color: var(--primary-action); }
+        
+        /* Warning/Neutral action (e.g., Revoke, Deactivate) */
+        .btn-warning { background: rgba(244, 67, 54, 0.1); color: #e53935; border-color: rgba(244, 67, 54, 0.1); }
+        .btn-warning:hover { background: #e53935; color: #fff; border-color: #e53935; }
+
+        /* Status Chips */
+        .chip { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .chip-success { background: rgba(76, 175, 80, 0.15); color: #4CAF50; border: 1px solid rgba(76, 175, 80, 0.2); }
+        .chip-neutral { background: rgba(158, 158, 158, 0.15); color: #9E9E9E; border: 1px solid rgba(158, 158, 158, 0.2); }
+        .chip-danger { background: rgba(244, 67, 54, 0.15); color: #F44336; border: 1px solid rgba(244, 67, 54, 0.2); }
+
         /* Modal Styles */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); pointer-events: none; opacity: 0; visibility: hidden; }
         .modal-overlay.active,
@@ -100,7 +116,7 @@ $users = getUsersForAdmin($conn);
                         <th>Name</th>
                         <th>Phone</th>
                         <th>Location</th>
-                        <th>Verified</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -111,20 +127,43 @@ $users = getUsersForAdmin($conn);
                         <td><?= e($u['full_name']) ?></td>
                         <td><?= e($u['phone']) ?></td>
                         <td><?= e($u['village']) ?>, <?= e($u['district']) ?></td>
-                        <td><?= $u['is_verified'] ? 'Yes' : 'No' ?></td>
                         <td>
-                            <form method="POST" action="api/verify-user.php" style="display:inline;">
-                                <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-                                <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
-                                <input type="hidden" name="status" value="<?= $u['is_verified'] ? '0' : '1' ?>">
-                                <button type="submit" class="action-btn">Toggle Verify</button>
-                            </form>
-                            <form method="POST" action="api/toggle-user-active.php" style="display:inline;">
-                                <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-                                <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
-                                <!-- Assuming status column will be handled safely if missing -->
-                                <button type="submit" class="action-btn">Toggle Active</button>
-                            </form>
+                            <div style="display: flex; gap: 6px; flex-direction: column; align-items: flex-start;">
+                                <?php if ($u['is_verified']): ?>
+                                    <span class="chip chip-success">Verified</span>
+                                <?php else: ?>
+                                    <span class="chip chip-neutral">Unverified</span>
+                                <?php endif; ?>
+                                
+                                <?php if (isset($u['is_active']) && $u['is_active'] == 0): ?>
+                                    <span class="chip chip-danger">Inactive</span>
+                                <?php else: ?>
+                                    <span class="chip chip-success">Active</span>
+                                <?php endif; ?>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <form method="POST" action="api/verify-user.php" style="margin:0;">
+                                    <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+                                    <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
+                                    <input type="hidden" name="status" value="<?= $u['is_verified'] ? '0' : '1' ?>">
+                                    <?php if ($u['is_verified']): ?>
+                                        <button type="submit" class="btn-action btn-warning" onclick="return confirm('Are you sure you want to revoke verification for this user?');">Revoke Verification</button>
+                                    <?php else: ?>
+                                        <button type="submit" class="btn-action btn-positive">Verify User</button>
+                                    <?php endif; ?>
+                                </form>
+                                <form method="POST" action="api/toggle-user-active.php" style="margin:0;">
+                                    <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+                                    <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
+                                    <?php if (isset($u['is_active']) && $u['is_active'] == 0): ?>
+                                        <button type="submit" class="btn-action btn-positive">Activate User</button>
+                                    <?php else: ?>
+                                        <button type="submit" class="btn-action btn-warning" onclick="return confirm('Are you sure you want to deactivate this user? They will not be able to log in.');">Deactivate User</button>
+                                    <?php endif; ?>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     <?php endforeach; ?>

@@ -18,8 +18,160 @@ $settings = getSettings($conn);
         .form-group { margin-bottom: 16px; }
         .form-label { display: block; margin-bottom: 6px; color: var(--text-main); font-weight: 600; font-size: 0.9rem; }
         .form-input { width: 100%; padding: 10px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-main); font-family: inherit; }
-        .btn-submit { background: var(--primary-action); color: #fff; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .btn-submit { background: var(--primary-action); color: #fff; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s ease; }
         .btn-submit:hover { background: var(--accent-dark); }
+        .btn-submit.is-saving { opacity: 0.7; pointer-events: none; }
+
+        .setting-card {
+            margin-bottom: 18px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: linear-gradient(160deg, rgba(24, 38, 29, 0.9), rgba(18, 30, 22, 0.9));
+        }
+        .setting-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .setting-title {
+            color: var(--text-main);
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+        .status-pill {
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 2px 10px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+        }
+        .status-pill.on {
+            color: #8EEFA8;
+            border-color: rgba(76, 175, 120, 0.45);
+            background: rgba(76, 175, 120, 0.14);
+            box-shadow: 0 0 0 1px rgba(76, 175, 120, 0.15), 0 0 12px rgba(76, 175, 120, 0.18);
+        }
+        .status-pill.off {
+            color: #C5D0C8;
+            border-color: rgba(180, 195, 184, 0.35);
+            background: rgba(180, 195, 184, 0.10);
+        }
+        .setting-help {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            margin-bottom: 12px;
+        }
+
+        .switch-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .switch {
+            --switch-w: 62px;
+            --switch-h: 34px;
+            width: var(--switch-w);
+            height: var(--switch-h);
+            border-radius: 999px;
+            border: 1px solid rgba(180, 195, 184, 0.35);
+            background: rgba(98, 112, 101, 0.35);
+            position: relative;
+            transition: background 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease, transform 0.18s ease;
+            cursor: pointer;
+        }
+        .switch:hover {
+            transform: translateY(-1px);
+        }
+        .switch:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(76, 175, 120, 0.28);
+        }
+        .switch-thumb {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #F1F6F2;
+            transition: transform 0.28s ease, box-shadow 0.28s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        .switch.is-on {
+            background: linear-gradient(130deg, #2F8A4A, #45A866);
+            border-color: rgba(76, 175, 120, 0.8);
+            box-shadow: 0 0 16px rgba(76, 175, 120, 0.22);
+        }
+        .switch.is-on .switch-thumb {
+            transform: translateX(28px);
+            box-shadow: 0 2px 12px rgba(26, 82, 44, 0.45);
+        }
+        .switch.is-saving {
+            cursor: progress;
+            opacity: 0.85;
+        }
+        .switch.is-saving .switch-thumb {
+            animation: pulseThumb 0.8s ease-in-out infinite;
+        }
+        @keyframes pulseThumb {
+            0%, 100% { transform: translateX(0) scale(1); }
+            50% { transform: translateX(0) scale(0.94); }
+        }
+        .switch.is-on.is-saving .switch-thumb {
+            animation: pulseThumbOn 0.8s ease-in-out infinite;
+        }
+        @keyframes pulseThumbOn {
+            0%, 100% { transform: translateX(28px) scale(1); }
+            50% { transform: translateX(28px) scale(0.94); }
+        }
+
+        .save-state {
+            min-height: 18px;
+            font-size: 0.76rem;
+            color: var(--text-subtle);
+        }
+        .save-state.ok {
+            color: #8EEFA8;
+        }
+        .save-state.err {
+            color: #FF8C8C;
+        }
+
+        .toast {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 1200;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.84rem;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+            background: rgba(17, 30, 22, 0.94);
+            color: var(--text-main);
+            box-shadow: 0 8px 22px rgba(0,0,0,0.38);
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .toast.success {
+            border-color: rgba(76, 175, 120, 0.55);
+            color: #8EEFA8;
+        }
+        .toast.error {
+            border-color: rgba(220, 86, 86, 0.6);
+            color: #FF8C8C;
+        }
     </style>
 </head>
 <body data-theme="dark">
@@ -75,20 +227,40 @@ $settings = getSettings($conn);
         <?= renderFlash() ?>
 
         <div class="form-container">
-            <form method="POST" action="api/update-setting.php">
+            <form method="POST" action="api/update-setting.php" id="settingsForm">
                 <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+                <input type="hidden" id="maintenance_mode" name="maintenance_mode" value="<?= (isset($settings['maintenance_mode']) && $settings['maintenance_mode'] == '1') ? '1' : '0' ?>">
+
+                <div class="setting-card">
+                    <div class="setting-head">
+                        <h2 class="setting-title">Maintenance Mode</h2>
+                        <span id="maintenanceStatusPill" class="status-pill <?= (isset($settings['maintenance_mode']) && $settings['maintenance_mode'] == '1') ? 'on' : 'off' ?>">
+                            <?= (isset($settings['maintenance_mode']) && $settings['maintenance_mode'] == '1') ? 'ON' : 'OFF' ?>
+                        </span>
+                    </div>
+                    <p id="maintenanceHelper" class="setting-help">
+                        <?= (isset($settings['maintenance_mode']) && $settings['maintenance_mode'] == '1')
+                            ? 'Public pages are blocked. Admin access remains available.'
+                            : 'Platform is live for all users.' ?>
+                    </p>
+                    <div class="switch-row">
+                        <button
+                            type="button"
+                            id="maintenanceSwitch"
+                            class="switch <?= (isset($settings['maintenance_mode']) && $settings['maintenance_mode'] == '1') ? 'is-on' : '' ?>"
+                            role="switch"
+                            aria-checked="<?= (isset($settings['maintenance_mode']) && $settings['maintenance_mode'] == '1') ? 'true' : 'false' ?>"
+                            aria-label="Maintenance Mode"
+                        >
+                            <span class="switch-thumb" aria-hidden="true"></span>
+                        </button>
+                        <span id="maintenanceSaveState" class="save-state"></span>
+                    </div>
+                </div>
                 
                 <div class="form-group">
                     <label class="form-label" for="site_name">Site Name</label>
                     <input type="text" id="site_name" name="site_name" class="form-input" value="<?= e($settings['site_name'] ?? APP_NAME) ?>">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="maintenance_mode">Maintenance Mode</label>
-                    <select id="maintenance_mode" name="maintenance_mode" class="form-input">
-                        <option value="0" <?= (isset($settings['maintenance_mode']) && $settings['maintenance_mode'] == '0') ? 'selected' : '' ?>>Disabled</option>
-                        <option value="1" <?= (isset($settings['maintenance_mode']) && $settings['maintenance_mode'] == '1') ? 'selected' : '' ?>>Enabled</option>
-                    </select>
                 </div>
 
                 <button type="submit" class="btn-submit">Save Settings</button>
@@ -96,6 +268,104 @@ $settings = getSettings($conn);
         </div>
     </main>
 </div>
+
+<div id="settingsToast" class="toast" aria-live="polite"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('settingsForm');
+    const switchBtn = document.getElementById('maintenanceSwitch');
+    const maintenanceInput = document.getElementById('maintenance_mode');
+    const helper = document.getElementById('maintenanceHelper');
+    const pill = document.getElementById('maintenanceStatusPill');
+    const saveState = document.getElementById('maintenanceSaveState');
+    const toast = document.getElementById('settingsToast');
+    const siteNameInput = document.getElementById('site_name');
+
+    if (!form || !switchBtn || !maintenanceInput) return;
+
+    const showToast = (message, type) => {
+        if (!toast) return;
+        toast.textContent = message;
+        toast.className = `toast ${type} show`;
+        window.clearTimeout(window.__settingsToastTimer);
+        window.__settingsToastTimer = window.setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2400);
+    };
+
+    const setUiState = (isOn) => {
+        maintenanceInput.value = isOn ? '1' : '0';
+        switchBtn.classList.toggle('is-on', isOn);
+        switchBtn.setAttribute('aria-checked', isOn ? 'true' : 'false');
+        pill.textContent = isOn ? 'ON' : 'OFF';
+        pill.classList.toggle('on', isOn);
+        pill.classList.toggle('off', !isOn);
+        helper.textContent = isOn
+            ? 'Public pages are blocked. Admin access remains available.'
+            : 'Platform is live for all users.';
+    };
+
+    const saveMaintenanceMode = async (nextValue) => {
+        const previousValue = maintenanceInput.value;
+        setUiState(nextValue === '1');
+        switchBtn.classList.add('is-saving');
+        saveState.textContent = 'Saving...';
+        saveState.className = 'save-state';
+
+        try {
+            const payload = new FormData();
+            payload.append('csrf_token', form.querySelector('input[name="csrf_token"]').value);
+            payload.append('site_name', siteNameInput ? siteNameInput.value : '');
+            payload.append('maintenance_mode', nextValue);
+
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: payload
+            });
+
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Could not save maintenance mode.');
+            }
+
+            saveState.textContent = 'Saved';
+            saveState.classList.add('ok');
+            showToast('Maintenance mode updated.', 'success');
+        } catch (error) {
+            setUiState(previousValue === '1');
+            saveState.textContent = 'Save failed';
+            saveState.classList.add('err');
+            showToast(error.message || 'Failed to save setting.', 'error');
+        } finally {
+            switchBtn.classList.remove('is-saving');
+        }
+    };
+
+    switchBtn.addEventListener('click', () => {
+        if (switchBtn.classList.contains('is-saving')) return;
+        const next = maintenanceInput.value === '1' ? '0' : '1';
+        saveMaintenanceMode(next);
+    });
+
+    switchBtn.addEventListener('keydown', (event) => {
+        if (event.key !== ' ' && event.key !== 'Enter') return;
+        event.preventDefault();
+        switchBtn.click();
+    });
+
+    form.addEventListener('submit', () => {
+        const submitBtn = form.querySelector('.btn-submit');
+        if (submitBtn) {
+            submitBtn.classList.add('is-saving');
+            submitBtn.textContent = 'Saving...';
+        }
+    });
+});
+</script>
 
 </body>
 </html>

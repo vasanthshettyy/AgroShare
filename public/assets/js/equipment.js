@@ -148,7 +148,7 @@
                 // Update button
                 btn.classList.toggle('is-available', isNowAvailable);
                 btn.classList.toggle('is-unavailable', !isNowAvailable);
-                if (labelEl) labelEl.textContent = isNowAvailable ? 'Available' : 'Unavailable';
+                if (labelEl) labelEl.textContent = isNowAvailable ? 'Available for Booking' : 'Unavailable';
 
                 // Update badge
                 if (statusBadge) {
@@ -156,7 +156,7 @@
                     statusBadge.className = 'badge ' + (isNowAvailable ? 'badge-active' : 'badge-cancelled');
                 }
 
-                showToast('success', data.message || 'Availability updated.');
+                showToast('success', isNowAvailable ? 'Listing is now available for booking.' : 'Listing is now marked unavailable.');
             } else {
                 showToast('error', data.message || 'Could not update availability.');
             }

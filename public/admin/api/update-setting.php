@@ -9,7 +9,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
+$isAjax = strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'xmlhttprequest';
+
 if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
+    if ($isAjax) {
+        http_response_code(400);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'message' => 'Invalid security token.']);
+        exit();
+    }
     setFlash('error', 'Invalid security token.');
     header('Location: ../settings.php');
     exit();
@@ -18,7 +26,7 @@ if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
 // Ensure settings table exists, or catch error gracefully
 try {
     $siteName = trim($_POST['site_name'] ?? APP_NAME);
-    $maintenanceMode = (int)($_POST['maintenance_mode'] ?? 0);
+    $maintenanceMode = (($_POST['maintenance_mode'] ?? '0') === '1') ? 1 : 0;
 
     // Simplistic approach for two settings using REPLACE INTO or INSERT ON DUPLICATE KEY UPDATE
     // Assumes `settings` table has `setting_key` (VARCHAR, UNIQUE) and `setting_value` (VARCHAR)
@@ -40,13 +48,41 @@ try {
         $stmt->close();
 
         logAuditEvent($conn, 'admin_update_settings', null, "Admin updated global settings", $_SESSION['user_id']);
+
+        if ($isAjax) {
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success' => true,
+                'message' => 'Settings saved successfully.',
+                'maintenance_mode' => (string)$maintenanceMode
+            ]);
+            exit();
+        }
         setFlash('success', "Settings saved successfully.");
     } else {
+        if ($isAjax) {
+            http_response_code(500);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['success' => false, 'message' => 'Settings table may not exist in schema yet.']);
+            exit();
+        }
         setFlash('error', "Settings table may not exist in schema yet.");
     }
 } catch (Exception $e) {
+    if ($isAjax) {
+        http_response_code(500);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'message' => "Database error: " . $e->getMessage()]);
+        exit();
+    }
     setFlash('error', "Database error: " . $e->getMessage());
 } catch (Error $e) {
+    if ($isAjax) {
+        http_response_code(500);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'message' => "Database error: " . $e->getMessage()]);
+        exit();
+    }
     setFlash('error', "Database error: " . $e->getMessage());
 }
 
