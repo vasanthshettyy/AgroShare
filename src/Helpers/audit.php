@@ -11,42 +11,27 @@
  * Safety: This function swallows all internal exceptions. It will NEVER
  * break the application flow if the database or table is missing.
  * 
- * @param mysqli $conn The database connection.
- * @param array $event {
- *   actor_user_id: int|null,
- *   action_type: string (required),
- *   target_type: string|null,
- *   target_id: int|null,
- *   description: string (required),
- *   ip_address: string|null,
- *   user_agent: string|null,
- *   metadata: array|null (will be JSON-encoded)
- * }
+ * @param mysqli $conn        The database connection.
+ * @param string $actionType  Type of action (e.g. 'login_failed').
+ * @param int|null $targetId  Optional target ID (e.g. user ID).
+ * @param string $description Detailed description.
+ * @param int|null $adminId   Optional admin ID performing the action.
  */
-function logAuditEvent(mysqli $conn, array $event): void
+function logAuditEvent(mysqli $conn, string $actionType, ?int $targetId, string $description, ?int $adminId = null): void
 {
     try {
         $sql = "INSERT INTO audit_logs 
-                (actor_user_id, action_type, target_type, target_id, description, ip_address, user_agent, metadata_json)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                (admin_id, action_type, target_id, description)
+                VALUES (?, ?, ?, ?)";
 
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
             return; // Fail silently
         }
 
-        $actorId     = $event['actor_user_id'] ?? null;
-        $actionType  = $event['action_type'];
-        $targetType  = $event['target_type'] ?? null;
-        $targetId    = $event['target_id'] ?? null;
-        $description = $event['description'];
-        $ipAddress   = $event['ip_address'] ?? $_SERVER['REMOTE_ADDR'] ?? null;
-        $userAgent   = $event['user_agent'] ?? $_SERVER['HTTP_USER_AGENT'] ?? null;
-        $metadata    = !empty($event['metadata']) ? json_encode($event['metadata']) : null;
-
         $stmt->bind_param(
-            'ississss',
-            $actorId, $actionType, $targetType, $targetId, $description, $ipAddress, $userAgent, $metadata
+            'isis',
+            $adminId, $actionType, $targetId, $description
         );
 
         $stmt->execute();

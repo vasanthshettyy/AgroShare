@@ -19,7 +19,7 @@ if ($id <= 0) {
 $sql = "SELECT start_datetime, end_datetime 
         FROM bookings 
         WHERE equipment_id = ? 
-        AND status IN ('confirmed', 'active')
+        AND status IN ('pending', 'confirmed', 'active')
         AND end_datetime >= CURRENT_DATE
         ORDER BY start_datetime ASC";
 

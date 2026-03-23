@@ -54,10 +54,47 @@ function hasBookingConflict(mysqli $conn, int $equipmentId, string $start, strin
 }
 
 /**
+ * Automatically promote booking statuses based on current time.
+ */
+function autoPromoteBookings(mysqli $conn, int $userId): void
+{
+    $now = date('Y-m-d H:i:s');
+    
+    // pending/confirmed -> active
+    $sql1 = "UPDATE bookings 
+             SET status = 'active' 
+             WHERE (renter_id = ? OR owner_id = ?) 
+             AND status IN ('pending', 'confirmed') 
+             AND start_datetime <= ? 
+             AND end_datetime > ?";
+    $stmt1 = $conn->prepare($sql1);
+    if ($stmt1) {
+        $stmt1->bind_param('iiss', $userId, $userId, $now, $now);
+        $stmt1->execute();
+        $stmt1->close();
+    }
+
+    // active -> completed
+    $sql2 = "UPDATE bookings 
+             SET status = 'completed' 
+             WHERE (renter_id = ? OR owner_id = ?) 
+             AND status = 'active' 
+             AND end_datetime <= ?";
+    $stmt2 = $conn->prepare($sql2);
+    if ($stmt2) {
+        $stmt2->bind_param('iis', $userId, $userId, $now);
+        $stmt2->execute();
+        $stmt2->close();
+    }
+}
+
+/**
  * Fetch bookings where the user is the Renter.
  */
 function getRentalsForUser(mysqli $conn, int $userId): array 
 {
+    autoPromoteBookings($conn, $userId);
+    
     $sql = "SELECT b.*, e.title as equipment_title, u.full_name as owner_name, u.phone as owner_phone 
             FROM bookings b
             JOIN equipment e ON b.equipment_id = e.id
@@ -75,6 +112,8 @@ function getRentalsForUser(mysqli $conn, int $userId): array
  */
 function getRequestsForOwner(mysqli $conn, int $userId): array 
 {
+    autoPromoteBookings($conn, $userId);
+    
     $sql = "SELECT b.*, e.title as equipment_title, u.full_name as renter_name, u.phone as renter_phone
             FROM bookings b
             JOIN equipment e ON b.equipment_id = e.id

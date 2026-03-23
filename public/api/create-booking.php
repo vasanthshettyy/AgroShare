@@ -36,6 +36,28 @@ if (hasBookingConflict($conn, $eqId, $start, $end)) {
 // 2. Pricing (Server-side calculation only)
 $totalPrice = calculateServerSidePrice($conn, $eqId, $start, $end);
 
+// Derive pricing_mode based on identical logic
+$stmtEq = $conn->prepare("SELECT price_per_hour, price_per_day FROM equipment WHERE id = ?");
+$stmtEq->bind_param('i', $eqId);
+$stmtEq->execute();
+$eq = $stmtEq->get_result()->fetch_assoc();
+
+$startTime = strtotime($start);
+$endTime   = strtotime($end);
+$durationHours = ($endTime - $startTime) / 3600;
+$pricingMode = 'hourly';
+
+if ($eq) {
+    if ($durationHours >= 8) {
+        $hourlyTotal = ceil($durationHours) * (float)$eq['price_per_hour'];
+        $dayCount    = ceil($durationHours / 24);
+        $dailyTotal  = $dayCount * (float)$eq['price_per_day'];
+        if ($dailyTotal < $hourlyTotal) {
+            $pricingMode = 'daily';
+        }
+    }
+}
+
 // 3. Get Owner ID
 $stmt = $conn->prepare("SELECT owner_id FROM equipment WHERE id = ?");
 $stmt->bind_param('i', $eqId);
@@ -48,10 +70,10 @@ if ($ownerId == $userId) {
 }
 
 // 4. Insert
-$sql = "INSERT INTO bookings (equipment_id, renter_id, owner_id, start_datetime, end_datetime, total_price, status) 
-        VALUES (?, ?, ?, ?, ?, ?, 'pending')";
+$sql = "INSERT INTO bookings (equipment_id, renter_id, owner_id, start_datetime, end_datetime, pricing_mode, total_price, status) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param('iiisss', $eqId, $userId, $ownerId, $start, $end, $totalPrice);
+$stmt->bind_param('iiisssd', $eqId, $userId, $ownerId, $start, $end, $pricingMode, $totalPrice);
 
 if ($stmt->execute()) {
     // Notify Owner

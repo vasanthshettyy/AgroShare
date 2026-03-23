@@ -50,14 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['last_activity'] = time();
 
             // Log successful login
-            logAuditEvent($conn, [
-                'actor_user_id' => $user['id'],
-                'action_type'   => 'login_success',
-                'description'   => "User logged in successfully: " . $user['full_name']
-            ]);
+            logAuditEvent($conn, 'login_success', $user['id'], "User logged in successfully: " . $user['full_name']);
 
             $redirect = ($user['role'] === 'admin')
-                ? getBasePath() . '/public/admin/dashboard.php'
+                ? getBasePath() . '/public/dashboard.php' // TODO: switch back to /public/admin/dashboard.php once implemented
                 : 'dashboard.php';
 
             if (!$remember) {
@@ -74,14 +70,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Log failed login attempt
             $maskedPhone = (strlen($phone) >= 2) ? str_repeat('*', strlen($phone)-2) . substr($phone, -2) : $phone;
-            logAuditEvent($conn, [
-                'action_type'   => 'login_failed',
-                'description'   => "Failed login attempt for phone: " . $maskedPhone,
-                'metadata'      => [
-                    'attempted_phone' => $maskedPhone,
-                    'reason' => ($user) ? 'invalid_password' : 'unknown_user'
-                ]
-            ]);
+            $ip = $_SERVER['REMOTE_ADDR'] ?? 'Unknown IP';
+            logAuditEvent($conn, 'login_failed', null, "Failed login attempt for phone: " . $maskedPhone . " from IP: " . $ip);
         }
     }
 }

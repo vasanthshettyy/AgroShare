@@ -251,6 +251,22 @@ CREATE TABLE notifications (
 
 
 -- ============================================================
+-- TABLE 9: audit_logs
+-- Lightweight audit logging for auth failures and critical events.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id              INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+    admin_id        INT UNSIGNED    NULL DEFAULT NULL,
+    action_type     VARCHAR(50)     NOT NULL,
+    target_id       INT UNSIGNED    NULL DEFAULT NULL,
+    description     TEXT            NOT NULL,
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================================
 -- VERIFICATION: Show all tables created
 -- ============================================================
 SHOW TABLES;
