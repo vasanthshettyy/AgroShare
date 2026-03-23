@@ -618,3 +618,12 @@ $displayId = format_id($user['id'], 'user'); // "uid1001"
 ---
 
 *Log written by Antigravity AI at end of session — 2026-03-02 14:49 IST*
+
+
+---
+
+## Session: 2026-03-22 (14:56 IST)
+
+**Agent:** Gemini CLI / Antigravity AI
+**Resume Command:** `gemini --resume '456a700c-adce-428e-95b4-667791ab02a2'`
+**Notes:** Session was paused. Use the command above in the terminal to resume the CLI context for this exact session.

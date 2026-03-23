@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "../../../saas/brandsync"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.css": "tailwindcss"
+		}
+	}
+}
