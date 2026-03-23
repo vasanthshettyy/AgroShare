@@ -175,7 +175,7 @@ function applySecurityHeaders(): void
  */
 function getBasePath(): string
 {
-    return '/agroshare';
+    return '/agroshare3';
 }
 
 /**

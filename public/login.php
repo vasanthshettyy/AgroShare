@@ -3,7 +3,10 @@ require_once __DIR__ . '/../config/db.php';
 
 // Redirect if already logged in
 if (isset($_SESSION['user_id'])) {
-    header('Location: dashboard.php');
+    $redirect = (isset($_SESSION['role']) && $_SESSION['role'] === 'admin')
+        ? getBasePath() . '/public/admin/dashboard.php'
+        : 'dashboard.php';
+    header('Location: ' . $redirect);
     exit();
 }
 
@@ -53,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             logAuditEvent($conn, 'login_success', $user['id'], "User logged in successfully: " . $user['full_name']);
 
             $redirect = ($user['role'] === 'admin')
-                ? getBasePath() . '/public/dashboard.php' // TODO: switch back to /public/admin/dashboard.php once implemented
+                ? getBasePath() . '/public/admin/dashboard.php'
                 : 'dashboard.php';
 
             if (!$remember) {
@@ -350,6 +353,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .form-input.is-invalid {
+            border-color: var(--danger);
+            box-shadow: 0 0 0 4px rgba(198,40,40,0.12);
+        }
+        .form-input.has-icon { padding-left: 42px; }
+        .form-input.has-suffix { padding-right: 46px; }
 
         /* Input icon (left) */
         .input-icon {

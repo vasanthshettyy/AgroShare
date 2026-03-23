@@ -34,6 +34,7 @@ CREATE TABLE users (
     profile_photo   VARCHAR(255)        NULL DEFAULT NULL COMMENT 'Relative path to uploaded photo',
     trust_score     DECIMAL(3,2)        NOT NULL DEFAULT 0.00 COMMENT 'Computed average from reviews (1.00-5.00)',
     is_verified     TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Admin can verify a farmer',
+    is_active       TINYINT(1) UNSIGNED NOT NULL DEFAULT 1 COMMENT 'Admin can suspend/ban a user by setting to 0',
     created_at      TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
@@ -60,6 +61,7 @@ CREATE TABLE equipment (
     images              JSON                NULL DEFAULT NULL COMMENT 'JSON array of image file paths',
     `condition`         ENUM('excellent','good','fair') NOT NULL DEFAULT 'good',
     is_available        TINYINT(1) UNSIGNED NOT NULL DEFAULT 1,
+    is_featured         TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Admin can pin listing to top of browse page',
     created_at          TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
@@ -88,6 +90,8 @@ CREATE TABLE bookings (
     pricing_mode    ENUM('hourly','daily') NOT NULL,
     total_price     DECIMAL(10,2)       NOT NULL COMMENT 'PHP-calculated at booking time',
     status          ENUM('pending','confirmed','active','completed','cancelled','rejected') NOT NULL DEFAULT 'pending',
+    admin_override  TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '1 when status was changed by admin override',
+    admin_override_reason VARCHAR(255)  NULL DEFAULT NULL COMMENT 'Optional reason for admin-forced booking action',
     notes           TEXT                NULL DEFAULT NULL COMMENT 'Renter special requests',
     created_at      TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
