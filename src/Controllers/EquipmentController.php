@@ -386,7 +386,7 @@ function browseEquipment(mysqli $conn, array $filters = [], int $page = 1, int $
              FROM equipment e
              JOIN users u ON e.owner_id = u.id
              WHERE {$whereClause}
-             ORDER BY e.created_at DESC
+             ORDER BY e.is_featured DESC, e.created_at DESC
              LIMIT ? OFFSET ?";
 
     $fetchTypes  = $types . 'ii';

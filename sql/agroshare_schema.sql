@@ -255,7 +255,20 @@ CREATE TABLE notifications (
 
 
 -- ============================================================
--- TABLE 9: audit_logs
+-- TABLE 9: settings
+-- Global platform settings.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS settings (
+    setting_key     VARCHAR(50)     NOT NULL,
+    setting_value   TEXT            NULL,
+    updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (setting_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================================
+-- TABLE 10: audit_logs
 -- Lightweight audit logging for auth failures and critical events.
 -- ============================================================
 CREATE TABLE IF NOT EXISTS audit_logs (

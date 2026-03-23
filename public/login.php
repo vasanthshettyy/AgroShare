@@ -38,36 +38,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
-        $stmt = $conn->prepare("SELECT id, full_name, password_hash, role FROM users WHERE phone = ?");
+        $stmt = $conn->prepare("SELECT id, full_name, password_hash, role, is_active FROM users WHERE phone = ?");
         $stmt->bind_param('s', $phone);
         $stmt->execute();
         $user = $stmt->get_result()->fetch_assoc();
         $stmt->close();
 
         if ($user && password_verify($password, $user['password_hash'])) {
-            session_regenerate_id(true);
-            $_SESSION['user_id']       = $user['id'];
-            $_SESSION['role']          = $user['role'];
-            $_SESSION['full_name']     = $user['full_name'];
-            $_SESSION['persist']       = $remember;
-            $_SESSION['last_activity'] = time();
+            if (isset($user['is_active']) && $user['is_active'] == 0) {
+                $errors['general'] = 'Your account has been deactivated. Please contact support.';
+                // Log failed login attempt due to deactivation
+                $maskedPhone = (strlen($phone) >= 2) ? str_repeat('*', strlen($phone)-2) . substr($phone, -2) : $phone;
+                $ip = $_SERVER['REMOTE_ADDR'] ?? 'Unknown IP';
+                logAuditEvent($conn, 'login_failed', $user['id'], "Failed login attempt (Account Deactivated) for phone: " . $maskedPhone . " from IP: " . $ip);
+            } else {
+                session_regenerate_id(true);
+                $_SESSION['user_id']       = $user['id'];
+                $_SESSION['role']          = $user['role'];
+                $_SESSION['full_name']     = $user['full_name'];
+                $_SESSION['persist']       = $remember;
+                $_SESSION['last_activity'] = time();
 
-            // Log successful login
-            logAuditEvent($conn, 'login_success', $user['id'], "User logged in successfully: " . $user['full_name']);
+                // Log successful login
+                logAuditEvent($conn, 'login_success', $user['id'], "User logged in successfully: " . $user['full_name']);
 
-            $redirect = ($user['role'] === 'admin')
-                ? getBasePath() . '/public/admin/dashboard.php'
-                : 'dashboard.php';
+                $redirect = ($user['role'] === 'admin')
+                    ? getBasePath() . '/public/admin/dashboard.php'
+                    : 'dashboard.php';
 
-            if (!$remember) {
-                echo '<!DOCTYPE html><html><head><script>';
-                echo 'sessionStorage.setItem("agroshare_tab","1");';
-                echo 'window.location.href="' . $redirect . '";';
-                echo '</script></head><body></body></html>';
+                if (!$remember) {
+                    echo '<!DOCTYPE html><html><head><script>';
+                    echo 'sessionStorage.setItem("agroshare_tab","1");';
+                    echo 'window.location.href="' . $redirect . '";';
+                    echo '</script></head><body></body></html>';
+                    exit();
+                }
+                header('Location: ' . $redirect);
                 exit();
             }
-            header('Location: ' . $redirect);
-            exit();
         } else {
             $errors['general'] = 'Invalid phone number or password.';
 
