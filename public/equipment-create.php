@@ -27,12 +27,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'category' => $_POST['category'] ?? '',
         'condition' => $_POST['condition'] ?? '',
         'description' => $_POST['description'] ?? '',
-        'price_per_hour' => $_POST['price_per_hour'] ?? '',
         'price_per_day' => $_POST['price_per_day'] ?? '',
         'includes_operator' => $_POST['includes_operator'] ?? '',
         'location_village' => $_POST['location_village'] ?? '',
         'location_district' => $_POST['location_district'] ?? '',
     ];
+    // Auto-derive hourly rate from daily (daily/8) to keep DB column populated
+    $formData['price_per_hour'] = is_numeric($formData['price_per_day']) ? round((float)$formData['price_per_day'] / 8, 2) : '';
     $errors   = validateEquipmentData($formData);
 
     // Process images
@@ -246,16 +247,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </h2>
 
                 <div class="form-grid">
-                    <div class="form-group">
-                        <label for="eq-price-hour" class="form-label">Price per Hour (₹)</label>
-                        <input type="number" name="price_per_hour" id="eq-price-hour" class="form-input <?= isset($errors['price_per_hour']) ? 'has-error' : '' ?>"
-                               placeholder="500" min="0" step="50"
-                               value="<?= e($formData['price_per_hour'] ?? '') ?>" required>
-                        <?php if (isset($errors['price_per_hour'])): ?>
-                        <span class="form-error"><?= e($errors['price_per_hour']) ?></span>
-                        <?php endif; ?>
-                    </div>
-
                     <div class="form-group">
                         <label for="eq-price-day" class="form-label">Price per Day (₹)</label>
                         <input type="number" name="price_per_day" id="eq-price-day" class="form-input <?= isset($errors['price_per_day']) ? 'has-error' : '' ?>"

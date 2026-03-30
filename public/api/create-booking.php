@@ -27,6 +27,12 @@ if ($eqId <= 0 || !$start || !$end) {
     exit();
 }
 
+// Validate date order
+if (strtotime($start) === false || strtotime($end) === false || strtotime($end) <= strtotime($start)) {
+    echo json_encode(['success' => false, 'message' => 'End date must be after start date.']);
+    exit();
+}
+
 // 1. Conflict Check (Server-side)
 if (hasBookingConflict($conn, $eqId, $start, $end)) {
     echo json_encode(['success' => false, 'message' => 'Dates unavailable. Someone else booked these slots.']);
@@ -36,27 +42,8 @@ if (hasBookingConflict($conn, $eqId, $start, $end)) {
 // 2. Pricing (Server-side calculation only)
 $totalPrice = calculateServerSidePrice($conn, $eqId, $start, $end);
 
-// Derive pricing_mode based on identical logic
-$stmtEq = $conn->prepare("SELECT price_per_hour, price_per_day FROM equipment WHERE id = ?");
-$stmtEq->bind_param('i', $eqId);
-$stmtEq->execute();
-$eq = $stmtEq->get_result()->fetch_assoc();
-
-$startTime = strtotime($start);
-$endTime   = strtotime($end);
-$durationHours = ($endTime - $startTime) / 3600;
-$pricingMode = 'hourly';
-
-if ($eq) {
-    if ($durationHours >= 8) {
-        $hourlyTotal = ceil($durationHours) * (float)$eq['price_per_hour'];
-        $dayCount    = ceil($durationHours / 24);
-        $dailyTotal  = $dayCount * (float)$eq['price_per_day'];
-        if ($dailyTotal < $hourlyTotal) {
-            $pricingMode = 'daily';
-        }
-    }
-}
+// Derive pricing_mode (always daily now)
+$pricingMode = 'daily';
 
 // 3. Get Owner ID
 $stmt = $conn->prepare("SELECT owner_id FROM equipment WHERE id = ?");
@@ -76,16 +63,32 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param('iiisssd', $eqId, $userId, $ownerId, $start, $end, $pricingMode, $totalPrice);
 
 if ($stmt->execute()) {
-    // Notify Owner
+    // Get owner details for the success confirmation card
+    $ownerStmt = $conn->prepare("SELECT full_name, phone FROM users WHERE id = ?");
+    $ownerStmt->bind_param('i', $ownerId);
+    $ownerStmt->execute();
+    $ownerInfo = $ownerStmt->get_result()->fetch_assoc();
+
+    // Get equipment title for notification
     $eqTitleStmt = $conn->prepare("SELECT title FROM equipment WHERE id = ?");
     $eqTitleStmt->bind_param('i', $eqId);
     $eqTitleStmt->execute();
     $eqTitle = $eqTitleStmt->get_result()->fetch_column();
     
+    // Notify Owner
     $notifMsg = "You have a new booking request for '$eqTitle'.";
     createNotification($conn, $ownerId, $notifMsg);
 
-    echo json_encode(['success' => true, 'message' => 'Booking request sent successfully!']);
+    echo json_encode([
+        'success' => true, 
+        'message' => 'Booking request sent successfully!',
+        'owner_name' => $ownerInfo['full_name'] ?? '',
+        'owner_phone' => $ownerInfo['phone'] ?? '',
+        'equipment_title' => $eqTitle,
+        'total_price' => $totalPrice,
+        'start_date' => $start,
+        'end_date' => $end
+    ]);
 } else {
     echo json_encode(['success' => false, 'message' => 'Server error. Please try again.']);
 }

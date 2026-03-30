@@ -127,6 +127,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
     <!-- -- MAIN CONTENT -------------------------------------- -->
     <main class="main-content" role="main">
+        <!-- Global CSRF token for booking AJAX (accessible to all users) -->
+        <input type="hidden" id="global-csrf-token" name="csrf_token" value="<?= generateCsrfToken() ?>">
 
         <?= renderFlash() ?>
 
@@ -254,10 +256,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 <div class="detail-section glass-card">
                     <h2 class="detail-section-title">Pricing</h2>
                     <div class="pricing-grid">
-                        <div class="pricing-card">
-                            <span class="pricing-label">Per Hour</span>
-                            <span class="pricing-value">₹<?= number_format($eq['price_per_hour'], 0) ?></span>
-                        </div>
                         <div class="pricing-card pricing-card-highlight">
                             <span class="pricing-label">Per Day</span>
                             <span class="pricing-value">₹<?= number_format($eq['price_per_day'], 0) ?></span>
@@ -371,10 +369,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     Pricing
                 </h2>
                 <div class="form-grid">
-                    <div class="form-group">
-                        <label for="edit-eq-price-hour" class="form-label">Price per Hour (₹)</label>
-                        <input type="number" name="price_per_hour" id="edit-eq-price-hour" class="form-input" value="<?= (float)$eq['price_per_hour'] ?>" min="0" step="50" required>
-                    </div>
                     <div class="form-group">
                         <label for="edit-eq-price-day" class="form-label">Price per Day (₹)</label>
                         <input type="number" name="price_per_day" id="edit-eq-price-day" class="form-input" value="<?= (float)$eq['price_per_day'] ?>" min="0" step="100" required>

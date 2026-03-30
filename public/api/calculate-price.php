@@ -48,36 +48,11 @@ if (!$startTime || !$endTime || $endTime <= $startTime) {
 $durationSeconds = $endTime - $startTime;
 $durationHours   = $durationSeconds / 3600;
 
-$hourlyRate = (float)$eq['price_per_hour'];
 $dailyRate  = (float)$eq['price_per_day'];
+$dayCount   = max(1, (int)ceil($durationHours / 24));
 
-$totalPrice = 0;
-$breakdown  = "";
-
-if ($durationHours < 8) {
-    // Strictly hourly
-    $totalPrice = ceil($durationHours) * $hourlyRate;
-    $breakdown  = sprintf("%d hours × ₹%s/hr", ceil($durationHours), number_format($hourlyRate, 0));
-} else {
-    // Compare hourly vs daily
-    $hourlyTotal = ceil($durationHours) * $hourlyRate;
-    
-    $days       = floor($durationHours / 24);
-    $extraHours = ceil($durationHours % 24);
-    
-    // If extra hours are significant, daily might be better
-    // Simplified: how many full days + (remaining hours vs daily rate)
-    $dayCount = ceil($durationHours / 24);
-    $dailyTotal = $dayCount * $dailyRate;
-    
-    if ($hourlyTotal <= $dailyTotal) {
-        $totalPrice = $hourlyTotal;
-        $breakdown  = sprintf("%d hours × ₹%s/hr (Hourly rate applied)", ceil($durationHours), number_format($hourlyRate, 0));
-    } else {
-        $totalPrice = $dailyTotal;
-        $breakdown  = sprintf("%d days × ₹%s/day (Daily discount applied)", $dayCount, number_format($dailyRate, 0));
-    }
-}
+$totalPrice = $dayCount * $dailyRate;
+$breakdown  = sprintf("%d day%s × ₹%s/day", $dayCount, $dayCount > 1 ? 's' : '', number_format($dailyRate, 0));
 
 echo json_encode([
     'success'     => true,

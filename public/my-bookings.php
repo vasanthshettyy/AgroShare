@@ -338,8 +338,8 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
     <main class="main-content">
         <div class="bookings-container">
             <div class="bookings-tabs">
-                <button class="tab-btn active" data-tab="rentals">My Rentals</button>
-                <button class="tab-btn" data-tab="requests">Incoming Requests</button>
+                <button class="tab-btn active" data-tab="rentals">Equipment I Rented</button>
+                <button class="tab-btn" data-tab="requests">Requests for My Equipment</button>
             </div>
 
             <!-- Rentals Grid -->
@@ -421,12 +421,19 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                 <?php endif; ?>
                             </div>
                             <div class="actions-wrap" style="margin-left: auto;">
+                                <?php
+                                    $btnData = 'data-id="' . $b['id'] . '"'
+                                             . ' data-renter="' . e($b['renter_name']) . '"'
+                                             . ' data-dates="' . date('d M Y', strtotime($b['start_datetime'])) . ' — ' . date('d M Y', strtotime($b['end_datetime'])) . '"'
+                                             . ' data-price="₹' . number_format($b['total_price'], 0) . '"'
+                                             . ' data-equipment="' . e($b['equipment_title']) . '"';
+                                ?>
                                 <?php if ($b['status'] === 'pending'): ?>
-                                    <button class="btn-primary btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="confirmed">Accept</button>
-                                    <button class="btn-secondary btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="cancelled">Decline</button>
+                                    <button class="btn-primary btn-sm status-action" <?= $btnData ?> data-status="confirmed">Accept</button>
+                                    <button class="btn-secondary btn-sm status-action" <?= $btnData ?> data-status="cancelled">Decline</button>
                                 <?php elseif ($b['status'] === 'confirmed'): ?>
-                                    <button class="btn-primary btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="completed">Mark Completed</button>
-                                    <button class="btn-secondary btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="cancelled">Cancel</button>
+                                    <button class="btn-primary btn-sm status-action" <?= $btnData ?> data-status="completed">Mark Completed</button>
+                                    <button class="btn-secondary btn-sm status-action" <?= $btnData ?> data-status="cancelled">Cancel</button>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -480,7 +487,15 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             const bookingId = btn.dataset.id;
             const newStatus = btn.dataset.status;
             
-            if (!confirm(`Are you sure you want to set this booking as ${newStatus}?`)) return;
+            const info = {
+                renter: btn.dataset.renter || '—',
+                dates: btn.dataset.dates || '—',
+                price: btn.dataset.price || '—',
+                equipment: btn.dataset.equipment || '—'
+            };
+
+            const confirmed = await showActionConfirm(newStatus, bookingId, info);
+            if (!confirmed) return;
 
             btn.disabled = true;
             btn.style.opacity = '0.5';
@@ -537,6 +552,87 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             }
         });
     });
+
+    function showActionConfirm(status, bookingId, info) {
+        return new Promise((resolve) => {
+            document.getElementById('actionConfirmOverlay')?.remove();
+
+            const isAccept = (status === 'confirmed');
+            const isComplete = (status === 'completed');
+            let title, desc, icon, btnColor, btnText;
+
+            if (isAccept) {
+                title = 'Accept Booking?';
+                desc = 'The renter will be notified and your equipment will be marked as booked.';
+                icon = `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+                btnColor = 'background:#2e7d32;'; btnText = 'Yes, Accept';
+            } else if (isComplete) {
+                title = 'Mark as Completed?';
+                desc = 'This will mark the booking as completed and free up your equipment.';
+                icon = `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#1565c0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+                btnColor = 'background:#1565c0;'; btnText = 'Yes, Complete';
+            } else {
+                title = 'Decline Booking?';
+                desc = 'The renter will be notified that their request was declined.';
+                icon = `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#c62828" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+                btnColor = 'background:#c62828;'; btnText = 'Yes, Decline';
+            }
+
+            const detailsCard = `
+                <div style="background:var(--bg-color,#111);border:1px solid var(--border-color,rgba(255,255,255,.08));border-radius:12px;padding:1rem 1.25rem;margin:1rem 0 1.25rem;text-align:left;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;">
+                        <span style="font-size:.82rem;color:var(--text-muted,#aaa);display:flex;align-items:center;gap:.5rem;">🔧 Equipment</span>
+                        <span style="font-size:.88rem;font-weight:600;color:var(--text-main,#fff);">${info.equipment}</span>
+                    </div>
+                    <div style="border-top:1px solid var(--border-color,rgba(255,255,255,.06));display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;">
+                        <span style="font-size:.82rem;color:var(--text-muted,#aaa);display:flex;align-items:center;gap:.5rem;">👤 Renter</span>
+                        <span style="font-size:.88rem;font-weight:600;color:var(--text-main,#fff);">${info.renter}</span>
+                    </div>
+                    <div style="border-top:1px solid var(--border-color,rgba(255,255,255,.06));display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;">
+                        <span style="font-size:.82rem;color:var(--text-muted,#aaa);display:flex;align-items:center;gap:.5rem;">📅 Dates</span>
+                        <span style="font-size:.88rem;font-weight:600;color:var(--text-main,#fff);">${info.dates}</span>
+                    </div>
+                    <div style="border-top:1px solid var(--border-color,rgba(255,255,255,.06));display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;">
+                        <span style="font-size:.82rem;color:var(--text-muted,#aaa);display:flex;align-items:center;gap:.5rem;">💰 Total</span>
+                        <span style="font-size:1rem;font-weight:800;color:var(--primary-action,#2e7d32);">${info.price}</span>
+                    </div>
+                </div>`;
+
+            const overlay = document.createElement('div');
+            overlay.id = 'actionConfirmOverlay';
+            overlay.style.cssText = 'position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);opacity:0;transition:opacity .3s ease;padding:1.5rem;';
+            overlay.innerHTML = `
+                <div style="background:var(--surface-color,#1a2e1a);border:1px solid var(--border-color,rgba(255,255,255,.1));border-radius:20px;padding:2.5rem 2rem;max-width:440px;width:100%;text-align:center;transform:scale(.9) translateY(20px);transition:transform .4s cubic-bezier(.22,.61,.36,1);box-shadow:0 24px 64px rgba(0,0,0,.4);">
+                    <div style="margin-bottom:1rem;">${icon}</div>
+                    <h2 style="font-size:1.3rem;font-weight:700;color:var(--text-main,#fff);margin:0 0 .25rem;">${title}</h2>
+                    <p style="font-size:.82rem;color:var(--text-muted,#aaa);margin:0;line-height:1.5;">${desc}</p>
+                    ${detailsCard}
+                    <div style="display:flex;flex-direction:column;gap:.6rem;">
+                        <button id="actionConfirmYes" style="${btnColor}color:#fff;padding:.85rem 1.5rem;border-radius:10px;font-size:.92rem;font-weight:600;border:none;cursor:pointer;transition:filter .2s ease;">${btnText}</button>
+                        <button id="actionConfirmNo" style="background:var(--surface-color,#1a2e1a);color:var(--text-main,#fff);border:1px solid var(--border-color,rgba(255,255,255,.1));padding:.85rem 1.5rem;border-radius:10px;font-size:.92rem;font-weight:600;cursor:pointer;transition:all .2s ease;">Cancel</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => {
+                overlay.style.opacity = '1';
+                overlay.firstElementChild.style.transform = 'scale(1) translateY(0)';
+            });
+
+            overlay.querySelector('#actionConfirmYes').addEventListener('click', () => {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.remove(), 300);
+                resolve(true);
+            });
+
+            overlay.querySelector('#actionConfirmNo').addEventListener('click', () => {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.remove(), 300);
+                resolve(false);
+            });
+        });
+    }
 </script>
 </body>
 </html>

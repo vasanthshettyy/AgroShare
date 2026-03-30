@@ -8,7 +8,7 @@
  */
 function calculateServerSidePrice(mysqli $conn, int $equipmentId, string $start, string $end): float 
 {
-    $stmt = $conn->prepare("SELECT price_per_hour, price_per_day FROM equipment WHERE id = ?");
+    $stmt = $conn->prepare("SELECT price_per_day FROM equipment WHERE id = ?");
     $stmt->bind_param('i', $equipmentId);
     $stmt->execute();
     $eq = $stmt->get_result()->fetch_assoc();
@@ -18,18 +18,10 @@ function calculateServerSidePrice(mysqli $conn, int $equipmentId, string $start,
     $startTime = strtotime($start);
     $endTime   = strtotime($end);
     $durationHours = ($endTime - $startTime) / 3600;
+    $dayCount = max(1, (int)ceil($durationHours / 24));
+    $dailyRate = (float)$eq['price_per_day'];
 
-    $hourlyRate = (float)$eq['price_per_hour'];
-    $dailyRate  = (float)$eq['price_per_day'];
-
-    if ($durationHours < 8) {
-        return ceil($durationHours) * $hourlyRate;
-    } else {
-        $hourlyTotal = ceil($durationHours) * $hourlyRate;
-        $dayCount    = ceil($durationHours / 24);
-        $dailyTotal  = $dayCount * $dailyRate;
-        return min($hourlyTotal, $dailyTotal);
-    }
+    return $dayCount * $dailyRate;
 }
 
 /**
@@ -60,11 +52,11 @@ function autoPromoteBookings(mysqli $conn, int $userId): void
 {
     $now = date('Y-m-d H:i:s');
     
-    // pending/confirmed -> active
+    // confirmed -> active (only confirmed bookings should auto-promote, never pending)
     $sql1 = "UPDATE bookings 
              SET status = 'active' 
              WHERE (renter_id = ? OR owner_id = ?) 
-             AND status IN ('pending', 'confirmed') 
+             AND status = 'confirmed' 
              AND start_datetime <= ? 
              AND end_datetime > ?";
     $stmt1 = $conn->prepare($sql1);
@@ -177,6 +169,13 @@ function updateBookingStatus(mysqli $conn, int $bookingId, int $userId, string $
         $stmt = $conn->prepare("UPDATE bookings SET status = ? WHERE id = ?");
         $stmt->bind_param('si', $newStatus, $bookingId);
         $stmt->execute();
+
+        // If confirmed, mark equipment as unavailable during the booking period
+        if ($newStatus === 'confirmed') {
+            $stmt = $conn->prepare("UPDATE equipment SET is_available = 0 WHERE id = ?");
+            $stmt->bind_param('i', $booking['equipment_id']);
+            $stmt->execute();
+        }
 
         // If completed or cancelled (after being confirmed), free up the equipment
         if ($newStatus === 'completed' || ($newStatus === 'cancelled' && $current === 'confirmed')) {
