@@ -400,6 +400,65 @@ class BookingCalendar {
     }
 }
 
+/* ══════════════════════════════════════════════════════════
+   STICKY BOOKING BAR LOGIC (Intersection Observer + Proxy)
+   ══════════════════════════════════════════════════════════ */
+(function initStickyBookingBar() {
+    console.log("AgroShare: Sticky Booking Bar Initialized");
+    const stickyBar = document.getElementById('stickyBookingBar');
+    const stickyBtn = document.getElementById('stickyBookBtn');
+    const mainBtn = document.getElementById('btnBookNow');
+    const stickyPriceText = document.getElementById('sticky-est-total');
+    const mainPriceText = document.getElementById('est-total');
+
+    // If the main Book Now button doesn't exist (e.g. user is owner or item is unavailable),
+    // remove the sticky bar entirely.
+    if (!mainBtn || !stickyBar) {
+        stickyBar?.remove();
+        return;
+    }
+
+    // 1. Intersection Observer: Docking Logic
+    // Watches the INLINE button. If it's not visible, show the sticky bar.
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            // Show sticky bar only if the main button is NOT in the viewport
+            stickyBar.classList.toggle('is-visible', !entry.isIntersecting);
+        });
+    }, { 
+        threshold: 0,
+        rootMargin: '0px 0px -10px 0px' // Offset slightly to ensure smooth transition
+    });
+
+    observer.observe(mainBtn);
+
+    // 2. Click Proxy
+    stickyBtn?.addEventListener('click', () => {
+        mainBtn.click();
+    });
+
+    // 3. State Syncing
+    const syncStates = () => {
+        if (mainBtn && stickyBtn) {
+            stickyBtn.disabled = mainBtn.disabled;
+            if (mainBtn.innerHTML.includes('loading-spinner')) {
+                stickyBtn.innerHTML = mainBtn.innerHTML;
+            } else {
+                stickyBtn.textContent = 'Book Now';
+            }
+        }
+        if (mainPriceText && stickyPriceText) {
+            stickyPriceText.textContent = mainPriceText.textContent;
+        }
+    };
+
+    const syncObserver = new MutationObserver(syncStates);
+    syncObserver.observe(mainBtn, { attributes: true, attributeFilter: ['disabled', 'class'], childList: true });
+    if (mainPriceText) syncObserver.observe(mainPriceText, { childList: true, characterData: true, subtree: true });
+
+    syncStates();
+})();
+
 // Global initialization
 document.addEventListener('DOMContentLoaded', () => {
     const eqId = new URLSearchParams(window.location.search).get('id');

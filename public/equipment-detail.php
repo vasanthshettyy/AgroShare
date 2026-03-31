@@ -253,14 +253,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             <div class="detail-side-col">
                 
                 <!-- Pricing Card -->
-                <div class="detail-section glass-card">
-                    <h2 class="detail-section-title">Pricing</h2>
-                    <div class="pricing-grid">
-                        <div class="pricing-card pricing-card-highlight">
-                            <span class="pricing-label">Per Day</span>
-                            <span class="pricing-value">₹<?= number_format($eq['price_per_day'], 0) ?></span>
-                        </div>
+                <div class="pricing-card-hero glass-card">
+                    <div class="price-main">
+                        <span class="currency">₹</span>
+                        <span class="amount"><?= number_format($eq['price_per_day'], 0) ?></span>
+                        <span class="period">/ day</span>
                     </div>
+                    <?php if ($eq['includes_operator']): ?>
+                    <div class="price-feature">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary-action)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <span>Professional Operator Included</span>
+                    </div>
+                    <?php else: ?>
+                    <div class="price-feature secondary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <span>Operator not included</span>
+                    </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Interactive Booking Calendar -->
@@ -313,6 +322,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 </div>
 
             </div>
+        </div>
+
+        <!-- Sticky Booking Bar (Mobile/Floating) -->
+        <div class="sticky-booking-bar" id="stickyBookingBar">
+            <div class="sticky-price">
+                <span class="sticky-label">Est. Total</span>
+                <strong id="sticky-est-total">₹0</strong>
+            </div>
+            <button class="btn-primary" id="stickyBookBtn" disabled>Book Now</button>
         </div>
 
     </main>
