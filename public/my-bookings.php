@@ -172,6 +172,68 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             color: var(--text-muted);
             grid-column: 1 / -1;
         }
+
+        /* -- Renter Profile Info -- */
+        .renter-profile-card {
+            background: var(--primary-10);
+            border: 1px solid var(--primary-20);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .renter-info-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .renter-avatar-sm {
+            width: 32px;
+            height: 32px;
+            background: var(--primary-action);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+        .renter-meta {
+            display: flex;
+            flex-direction: column;
+        }
+        .renter-name-link {
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 0.9rem;
+        }
+        .renter-sub-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+        .renter-contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--primary-20);
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+        .contact-item svg { color: var(--primary-action); }
+        .contact-item:hover { color: var(--primary-action); }
     </style>
 </head>
 <body>
@@ -407,18 +469,43 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                                 <span class="info-label">Dates:</span> <span><?= date('d M', strtotime($b['start_datetime'])) ?> - <?= date('d M', strtotime($b['end_datetime'])) ?></span>
                             </div>
+
+                            <?php if (in_array($b['status'], ['confirmed', 'active', 'completed'])): ?>
+                                <div class="renter-profile-card">
+                                    <div class="renter-info-header">
+                                        <div class="renter-avatar-sm">
+                                            <?= strtoupper(substr(trim($b['renter_name'] ?? ''), 0, 1)) ?: '?' ?>
+                                        </div>
+                                        <div class="renter-meta">
+                                            <span class="renter-name-link"><?= e($b['renter_name']) ?></span>
+                                            <div class="renter-sub-meta">
+                                                <span>📍 <?= e($b['renter_village']) ?>, <?= e($b['renter_district']) ?></span>
+                                                <span>•</span>
+                                                <span style="color:var(--amber);">⭐ <?= number_format($b['renter_trust'], 1) ?></span>
+                                                <?php if ($b['renter_verified']): ?>
+                                                    <span style="color:var(--secondary-action);">✔ Verified</span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="renter-contact-grid">
+                                        <a href="tel:<?= e($b['renter_phone']) ?>" class="contact-item">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                            <?= e($b['renter_phone']) ?>
+                                        </a>
+                                        <?php if ($b['renter_email']): ?>
+                                            <a href="mailto:<?= e($b['renter_email']) ?>" class="contact-item">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                                Email Renter
+                                            </a>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                         </div>
                         <div class="card-footer" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
-                                <?php if ($b['status'] === 'confirmed'): ?>
-                                    <div class="contact-reveal-container">
-                                        <button type="button" class="btn-contact btn-reveal-contact" data-phone="<?= e($b['renter_phone'] ?? '') ?>">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                                            Contact Info
-                                        </button>
-                                    </div>
-                                <?php endif; ?>
                             </div>
                             <div class="actions-wrap" style="margin-left: auto;">
                                 <?php
