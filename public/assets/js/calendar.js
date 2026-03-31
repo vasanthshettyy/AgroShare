@@ -360,7 +360,10 @@ class BookingCalendar {
             // Range selected
             startInput.value = this.selectedStart.toISOString().split('T')[0] + 'T09:00';
             endInput.value = this.selectedEnd.toISOString().split('T')[0] + 'T18:00';
-            btnBook?.removeAttribute('disabled');
+            if (btnBook) {
+                btnBook.disabled = false;
+                btnBook.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Book Now`;
+            }
 
             // Availability hint
             const diffDays = Math.ceil((this.selectedEnd - this.selectedStart) / (1000 * 60 * 60 * 24)) + 1;
@@ -370,7 +373,10 @@ class BookingCalendar {
             // Only start selected
             startInput.value = this.selectedStart.toISOString().split('T')[0] + 'T09:00';
             endInput.value = '';
-            btnBook?.setAttribute('disabled', 'true');
+            if (btnBook) {
+                btnBook.disabled = true;
+                btnBook.textContent = 'Select end date';
+            }
 
             const nextBooked = this.getNextBookedDate(this.selectedStart);
             const avail = nextBooked ? Math.floor((nextBooked - this.selectedStart) / (86400000)) : 30;
@@ -380,7 +386,10 @@ class BookingCalendar {
         } else {
             startInput.value = '';
             endInput.value = '';
-            btnBook?.setAttribute('disabled', 'true');
+            if (btnBook) {
+                btnBook.disabled = true;
+                btnBook.textContent = 'Select dates to book';
+            }
             document.getElementById('calHint').style.display = 'none';
         }
 
@@ -444,7 +453,9 @@ class BookingCalendar {
             if (mainBtn.innerHTML.includes('loading-spinner')) {
                 stickyBtn.innerHTML = mainBtn.innerHTML;
             } else {
-                stickyBtn.textContent = 'Book Now';
+                // If main button has an SVG (Book Now state), we just want the text "Book Now" for sticky
+                // or we can just sync the textContent
+                stickyBtn.textContent = mainBtn.textContent;
             }
         }
         if (mainPriceText && stickyPriceText) {

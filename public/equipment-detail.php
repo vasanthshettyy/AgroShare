@@ -315,8 +315,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
                     <?php if (!$isOwner && $eq['is_available']): ?>
                     <button class="btn-primary btn-book-cta" id="btnBookNow" disabled title="Select dates to book">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                        Book Now
+                        Select dates to book
                     </button>
                     <?php endif; ?>
                 </div>
@@ -330,7 +329,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 <span class="sticky-label">Est. Total</span>
                 <strong id="sticky-est-total">₹0</strong>
             </div>
-            <button class="btn-primary" id="stickyBookBtn" disabled>Book Now</button>
+            <button class="btn-primary" id="stickyBookBtn" disabled>Select dates to book</button>
         </div>
 
     </main>
