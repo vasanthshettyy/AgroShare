@@ -951,6 +951,8 @@ img {
 .kpi-header-link svg {
     width: 13px;
     height: 13px;
+    flex-shrink: 0;
+    display: block;
 }
 
 .kpi-value {
@@ -1101,6 +1103,8 @@ img {
 .card-action-link svg {
     width: 14px;
     height: 14px;
+    flex-shrink: 0;
+    display: block;
 }
 
 /* ── Recent Activity Table ────────────────────────────────── */
@@ -1633,6 +1637,8 @@ input[type="number"].form-input::-webkit-inner-spin-button {
 .action-arrow svg {
     width: 14px;
     height: 14px;
+    flex-shrink: 0;
+    display: block;
 }
 
 /* ══════════════════════════════════════════════════════════

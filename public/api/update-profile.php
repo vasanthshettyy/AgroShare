@@ -98,5 +98,6 @@ try {
     $stmt->close();
 
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
+    error_log('Profile update error: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'An unexpected server error occurred. Please try again later.']);
 }

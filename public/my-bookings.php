@@ -19,7 +19,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Bookings — <?= e(APP_NAME) ?></title>
-    <script>document.documentElement.setAttribute('data-theme', 'dark');</script>
+    <script>(function(){ var t = localStorage.getItem('theme') || 'dark'; document.documentElement.setAttribute('data-theme', t); })();</script>
     <link rel="stylesheet" href="assets/css/dashboard.css?v=<?= time() ?>">
     <style>
         .bookings-container {
@@ -336,7 +336,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 
             <span class="nav-section-label">Community</span>
 
-            <a href="#" class="nav-link">
+            <span class="nav-link is-disabled" title="Coming soon" aria-disabled="true">
                 <!-- users icon -->
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -345,7 +345,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
                 </svg>
                 <span>Pooling</span>
-            </a>
+            </span>
 
             <a href="equipment-browse.php" class="nav-link">
                 <!-- search icon -->
@@ -356,18 +356,18 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                 <span>Browse</span>
             </a>
 
-            <a href="#" class="nav-link">
+            <span class="nav-link is-disabled" title="Coming soon" aria-disabled="true">
                 <!-- star icon -->
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                 </svg>
                 <span>Reviews</span>
-            </a>
+            </span>
 
             <span class="nav-section-label">Account</span>
 
-            <a href="#" class="nav-link" id="profile-btn">
+            <a href="javascript:void(0)" class="nav-link" id="profile-btn">
                 <!-- user-circle icon -->
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

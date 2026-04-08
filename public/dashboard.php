@@ -16,7 +16,7 @@ $nameParts = explode(' ', $_SESSION['full_name']);
 $initials   = strtoupper(substr($nameParts[0], 0, 1));
 if (isset($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 
-// ── Greeting based on time of day ──────────────────────────
+// —— Greeting based on time of day ──────────────────────────
 $hour     = (int) date('G');
 $greeting = match(true) {
     $hour < 12  => 'Good Morning',
@@ -24,7 +24,7 @@ $greeting = match(true) {
     default     => 'Good Evening',
 };
 
-// ── Persist-tab check injection flag ───────────────────────
+// —— Persist-tab check injection flag ───────────────────────
 $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
 ?>
 <!DOCTYPE html>
@@ -36,7 +36,10 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
     <meta name="description" content="<?= e(APP_NAME) ?> farmer dashboard — manage your equipment, bookings and pooling campaigns.">
 
     <script>
-        document.documentElement.setAttribute('data-theme', 'dark');
+        (function(){
+            var t = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
     </script>
 
     <?php if ($needsTabCheck): ?>
@@ -156,7 +159,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
 
             <span class="nav-section-label">Community</span>
 
-            <a href="#" class="nav-link">
+            <span class="nav-link is-disabled" title="Coming soon" aria-disabled="true">
                 <!-- users icon -->
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -165,7 +168,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
                 </svg>
                 <span>Pooling</span>
-            </a>
+            </span>
 
             <a href="equipment-browse.php" class="nav-link">
                 <!-- search icon -->
@@ -176,18 +179,18 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 <span>Browse</span>
             </a>
 
-            <a href="#" class="nav-link">
+            <span class="nav-link is-disabled" title="Coming soon" aria-disabled="true">
                 <!-- star icon -->
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                 </svg>
                 <span>Reviews</span>
-            </a>
+            </span>
 
             <span class="nav-section-label">Account</span>
 
-            <a href="#" class="nav-link" id="profile-btn">
+            <a href="javascript:void(0)" class="nav-link" id="profile-btn">
                 <!-- user-circle icon -->
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -222,13 +225,13 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
 
         <?= renderFlash() ?>
 
-        <!-- ── Page Header ──────────────────────────────────── -->
+        <!-- —— Page Header ────────────────────────────────────────── -->
         <div class="page-header">
             <div class="page-header-text">
                 <h1>Dashboard</h1>
                 <p>Your farm activity at a glance, <?= e($nameParts[0]) ?>.</p>
             </div>
-            <a href="equipment-browse.php?mine=1&action=list" class="btn-primary" role="button">
+            <a href="equipment-browse.php?mine=1&action=list" class="btn-primary listEquipmentBtn" role="button">
                 <!-- plus icon -->
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
@@ -238,7 +241,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
             </a>
         </div>
 
-        <!-- ── ROW 1: KPI Cards (4 columns) ────────────────── -->
+        <!-- —— ROW 1: KPI Cards (4 columns) ──────────────────────── -->
         <section class="kpi-grid" aria-label="Key performance indicators">
 
             <!-- KPI 1 — Hero card (dark green) -->
@@ -274,7 +277,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
             <div class="kpi-card">
                 <div class="kpi-header">
                     <span class="kpi-label">Active Rentals</span>
-                    <a href="#" class="kpi-header-link" aria-label="View rentals">
+                    <a href="my-bookings.php" class="kpi-header-link" aria-label="View rentals">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="7" y1="17" x2="17" y2="7"/>
@@ -302,13 +305,13 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
             <div class="kpi-card">
                 <div class="kpi-header">
                     <span class="kpi-label">Pool Campaigns</span>
-                    <a href="#" class="kpi-header-link" aria-label="View campaigns">
+                    <span class="kpi-header-link is-disabled" title="Coming soon" aria-disabled="true" aria-label="View campaigns">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="7" y1="17" x2="17" y2="7"/>
                             <polyline points="7 7 17 7 17 17"/>
                         </svg>
-                    </a>
+                    </span>
                 </div>
                 <div class="kpi-value" data-target="<?= e($poolCount) ?>"><?= e($poolCount) ?></div>
                 <div class="kpi-trend neutral">
@@ -331,13 +334,13 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
             <div class="kpi-card">
                 <div class="kpi-header">
                     <span class="kpi-label">Trust Score</span>
-                    <a href="#" class="kpi-header-link" aria-label="View reviews">
+                    <span class="kpi-header-link is-disabled" title="Coming soon" aria-disabled="true" aria-label="View reviews">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="7" y1="17" x2="17" y2="7"/>
                             <polyline points="7 7 17 7 17 17"/>
                         </svg>
-                    </a>
+                    </span>
                 </div>
                 <div class="kpi-value" data-target="<?= e(number_format($trustScore, 1)) ?>"><?= e(number_format($trustScore, 1)) ?></div>
                 <div class="kpi-trend neutral">
@@ -355,7 +358,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
             </div>
         </section>
 
-        <!-- ── ROW 2: Recent Activity + Chart ──────────────── -->
+        <!-- —— ROW 2: Recent Activity + Chart ─────────────────── -->
         <div class="bento-row bento-row-2">
 
             <!-- Recent Activity Table -->
@@ -372,7 +375,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         </svg>
                         Recent Activity
                     </h2>
-                    <a href="#" class="card-action-link" aria-label="View all bookings">
+                    <a href="my-bookings.php" class="card-action-link" aria-label="View all bookings">
                         View All
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
@@ -452,10 +455,8 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
             </article>
         </div>
 
-        <!-- ── ROW 3: Quick Actions (4 equal columns) ───────── -->
+        <!-- —— ROW 3: Quick Actions (4 equal columns) ──────────── -->
         <section class="actions-grid" aria-label="Quick actions">
-
-
 
             <a href="equipment-browse.php" class="action-card">
                 <div class="action-icon-wrap teal" aria-hidden="true">
@@ -478,7 +479,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 </div>
             </a>
 
-            <a href="#" class="action-card">
+            <span class="action-card is-disabled" title="Coming soon" aria-disabled="true" style="cursor: not-allowed; opacity: 0.7;">
                 <div class="action-icon-wrap amber" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -499,9 +500,9 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         </svg>
                     </div>
                 </div>
-            </a>
+            </span>
 
-            <a href="#" class="action-card" id="edit-profile-quick-action">
+            <a href="javascript:void(0)" class="action-card" id="edit-profile-quick-action">
                 <div class="action-icon-wrap purple" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

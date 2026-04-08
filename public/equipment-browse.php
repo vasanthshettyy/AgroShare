@@ -1,16 +1,23 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../src/Controllers/EquipmentController.php';
-requireAuth();
 
-// ── Common layout data ─────────────────────────────────────
-$nameParts = explode(' ', $_SESSION['full_name']);
-$initials  = strtoupper(substr($nameParts[0], 0, 1));
-if (isset($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
+$isLoggedIn = isset($_SESSION['user_id']);
 
-$needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
+if (isset($_GET['mine']) && $_GET['mine'] === '1' && !$isLoggedIn) {
+    header('Location: login.php');
+    exit();
+}
 
-// ── Filters from query string ──────────────────────────────
+// —— Common layout data ─────────────────────────────────────
+$fullName  = trim($_SESSION['full_name'] ?? '');
+$nameParts = explode(' ', $fullName);
+$initials  = !empty($nameParts[0]) ? strtoupper(substr($nameParts[0], 0, 1)) : '?';
+if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
+
+$needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false && $isLoggedIn;
+
+// —— Filters from query string ──────────────────────────────
 $filters = [];
 if (!empty($_GET['category']))     $filters['category']     = $_GET['category'];
 if (!empty($_GET['district']))     $filters['district']     = $_GET['district'];
@@ -35,7 +42,10 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
     <meta name="description" content="<?= e(APP_NAME) ?> — find and rent agricultural equipment near you.">
 
     <script>
-        document.documentElement.setAttribute('data-theme', 'dark');
+        (function(){
+            var t = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
     </script>
 
     <?php if ($needsTabCheck): ?>
@@ -78,6 +88,7 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
         </label>
 
         <div class="topbar-right" style="position: relative;">
+            <?php if ($isLoggedIn): ?>
             <button class="btn-icon" id="notifBtn" aria-label="Notifications" title="Notifications">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -95,9 +106,12 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
             </div>
 
             <div class="avatar" id="avatar-btn" role="button" tabindex="0"
-                 title="Profile — <?= e($_SESSION['full_name']) ?>" aria-label="Open profile">
+                 title="Profile — <?= e($fullName) ?>" aria-label="Open profile">
                 <?= e($initials) ?>
             </div>
+            <?php else: ?>
+            <a href="login.php" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: 8px; text-decoration: none;">Log In</a>
+            <?php endif; ?>
         </div>
     </header>
 
@@ -117,6 +131,7 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
         <nav class="sidebar-nav" aria-label="Site navigation">
             <span class="nav-section-label">Main</span>
 
+            <?php if ($isLoggedIn): ?>
             <a href="dashboard.php" class="nav-link">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -141,10 +156,11 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
                 </svg>
                 <span>My Bookings</span>
             </a>
+            <?php endif; ?>
 
             <span class="nav-section-label">Community</span>
 
-            <a href="#" class="nav-link">
+            <span class="nav-link is-disabled" title="Coming soon" aria-disabled="true">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -152,7 +168,7 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
                 </svg>
                 <span>Pooling</span>
-            </a>
+            </span>
 
             <a href="equipment-browse.php" class="nav-link <?= !$isMyEquipment ? 'active' : '' ?>" <?= !$isMyEquipment ? 'aria-current="page"' : '' ?>>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -162,17 +178,18 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
                 <span>Browse</span>
             </a>
 
-            <a href="#" class="nav-link">
+            <span class="nav-link is-disabled" title="Coming soon" aria-disabled="true">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                 </svg>
                 <span>Reviews</span>
-            </a>
+            </span>
 
+            <?php if ($isLoggedIn): ?>
             <span class="nav-section-label">Account</span>
 
-            <a href="#" class="nav-link" id="profile-btn">
+            <a href="javascript:void(0)" class="nav-link" id="profile-btn">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="10"/>
@@ -181,8 +198,10 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
                 </svg>
                 <span>Profile</span>
             </a>
+            <?php endif; ?>
         </nav>
 
+        <?php if ($isLoggedIn): ?>
         <div class="sidebar-footer">
             <a href="logout.php" class="nav-link danger">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -194,6 +213,7 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
                 <span>Log Out</span>
             </a>
         </div>
+        <?php endif; ?>
     </aside>
 
     <!-- -- SIDEBAR OVERLAY (mobile backdrop) ---------------- -->
@@ -209,7 +229,7 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
             Back to Dashboard
         </a>
 
-        <!-- ── Page Header ──────────────────────────────────── -->
+        <!-- —— Page Header ────────────────────────────────────────── -->
         <div class="page-header">
             <div class="page-header-text">
                 <h1><?= $isMyEquipment ? 'My Equipment' : 'Browse Equipment' ?></h1>
@@ -226,7 +246,7 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
             <?php endif; ?>
         </div>
 
-        <!-- ── Filter Bar ──────────────────────────────────── -->
+        <!-- —— Filter Bar ────────────────────────────────────────── -->
         <?php if (!$isMyEquipment): ?>
         <form class="filter-bar" method="GET" action="equipment-browse.php" aria-label="Filter equipment">
             <div class="filter-group">
@@ -294,7 +314,7 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
         </form>
         <?php endif; ?>
 
-        <!-- ── Equipment Grid ──────────────────────────────── -->
+        <!-- —— Equipment Grid ────────────────────────────────────── -->
         <?php if (empty($items)): ?>
         <div class="empty-state">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent-soft)"
@@ -315,7 +335,7 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
             <?php foreach ($items as $index => $eq):
                 $images    = $eq['images'] ? json_decode($eq['images'], true) : [];
                 $thumbnail = !empty($images) ? e($images[0]) : '';
-                $isOwner   = (int)$eq['owner_id'] === (int)$_SESSION['user_id'];
+                $isOwner   = $isLoggedIn && (int)$eq['owner_id'] === (int)$_SESSION['user_id'];
             ?>
             <a href="equipment-detail.php?id=<?= (int)$eq['id'] ?>" class="eq-card" style="animation-delay: <?= 0.06 * $index ?>s;">
                 <div class="eq-card-image">
@@ -375,7 +395,7 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
             <?php endforeach; ?>
         </div>
 
-        <!-- ── Pagination ──────────────────────────────────── -->
+        <!-- —— Pagination ────────────────────────────────────────── -->
         <?php if ($results['totalPages'] > 1): ?>
         <nav class="pagination" aria-label="Page navigation">
             <?php
@@ -534,7 +554,7 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
     </div>
 </div>
 
-<?php require_once __DIR__ . '/includes/profile-modal.php'; ?>
+<?php if ($isLoggedIn) require_once __DIR__ . '/includes/profile-modal.php'; ?>
 <script src="assets/js/dashboard.js" defer></script>
 <script src="assets/js/equipment.js?v=<?= time() ?>" defer></script>
 </body>

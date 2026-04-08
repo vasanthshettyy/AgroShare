@@ -1,17 +1,18 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../src/Controllers/EquipmentController.php';
-requireAuth();
 
-// ── Common layout data ─────────────────────────────────────
+$isLoggedIn = isset($_SESSION['user_id']);
+
+// —— Common layout data ─────────────────────────────────────
 $fullName  = trim($_SESSION['full_name'] ?? '');
 $nameParts = explode(' ', $fullName);
 $initials  = !empty($nameParts[0]) ? strtoupper(substr($nameParts[0], 0, 1)) : '?';
 if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 
-$needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
+$needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false && $isLoggedIn;
 
-// ── Load equipment ─────────────────────────────────────────
+// —— Load equipment ─────────────────────────────────────────
 $equipmentId = (int)($_GET['id'] ?? 0);
 if ($equipmentId <= 0) {
     setFlash('error', 'Equipment not found.');
@@ -26,10 +27,10 @@ if (!$eq) {
     exit();
 }
 
-$isOwner = (int)$eq['owner_id'] === (int)$_SESSION['user_id'];
+$isOwner = $isLoggedIn && (int)$eq['owner_id'] === (int)$_SESSION['user_id'];
 $images  = $eq['images'] ? json_decode($eq['images'], true) : [];
 
-// ── Handle delete ──────────────────────────────────────────
+// —— Handle delete ──────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
         setFlash('error', 'Invalid form submission.');
@@ -61,7 +62,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     <meta name="description" content="<?= e($eq['title']) ?> — <?= e(ucfirst($eq['category'])) ?> available for rent on <?= e(APP_NAME) ?>.">
 
     <script>
-        document.documentElement.setAttribute('data-theme', 'dark');
+        (function(){
+            var t = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
     </script>
     <?php if ($needsTabCheck): ?>
     <script>if (!sessionStorage.getItem('agroshare_tab')) window.location.href = 'logout.php';</script>
@@ -81,6 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             <p class="topbar-greeting">Equipment Details</p>
         </div>
         <div class="topbar-right" style="position: relative;">
+            <?php if ($isLoggedIn): ?>
             <button class="btn-icon" id="notifBtn" aria-label="Notifications" title="Notifications">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -98,6 +103,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             </div>
             
             <div class="avatar" id="avatar-btn" role="button" tabindex="0" title="Profile — <?= e($_SESSION['full_name']) ?>" aria-label="Open profile"><?= e($initials) ?></div>
+            <?php else: ?>
+            <a href="login.php" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: 8px; text-decoration: none;">Log In</a>
+            <?php endif; ?>
         </div>
     </header>
 
@@ -109,17 +117,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         </div>
         <nav class="sidebar-nav" aria-label="Site navigation">
             <span class="nav-section-label">Main</span>
+            <?php if ($isLoggedIn): ?>
             <a href="dashboard.php" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Dashboard</span></a>
             <a href="equipment-browse.php?mine=1" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11V5h9l3 6m0 0H3m12 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m14 0h2a2 2 0 0 1 2 2v4h-3.5"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/></svg><span>My Equipment</span></a>
             <a href="my-bookings.php" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg><span>My Bookings</span></a>
+            <?php endif; ?>
             <span class="nav-section-label">Community</span>
-            <a href="#" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Pooling</span></a>
+            <span class="nav-link is-disabled" title="Coming soon" aria-disabled="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Pooling</span></span>
             <a href="equipment-browse.php" class="nav-link active" aria-current="page"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>Browse</span></a>
-            <a href="#" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span>Reviews</span></a>
+            <span class="nav-link is-disabled" title="Coming soon" aria-disabled="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span>Reviews</span></span>
+            <?php if ($isLoggedIn): ?>
             <span class="nav-section-label">Account</span>
-            <a href="#" class="nav-link" id="profile-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/></svg><span>Profile</span></a>
+            <a href="javascript:void(0)" class="nav-link" id="profile-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/></svg><span>Profile</span></a>
+            <?php endif; ?>
         </nav>
+        <?php if ($isLoggedIn): ?>
         <div class="sidebar-footer"><a href="logout.php" class="nav-link danger"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Log Out</span></a></div>
+        <?php endif; ?>
     </aside>
 
     <!-- -- SIDEBAR OVERLAY (mobile backdrop) ---------------- -->
@@ -132,210 +146,230 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
         <?= renderFlash() ?>
 
-        <div class="page-header">
-            <div class="page-header-text">
-                <a href="equipment-browse.php" class="btn-back">
+        <div class="product-header">
+            <a href="equipment-browse.php" class="btn-back">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
                 Back to Browse
             </a>
-                <h1><?= e($eq['title']) ?></h1>
-            </div>
-            <?php if ($isOwner): ?>
-            <div class="owner-actions">
-                <button class="btn-toggle-avail <?= $eq['is_available'] ? 'is-available' : 'is-unavailable' ?>"
-                        id="toggleAvailBtn" data-id="<?= $equipmentId ?>"
-                        aria-label="Toggle availability">
-                    <span class="toggle-icon">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-check"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </span>
-                    <span class="toggle-label"><?= $eq['is_available'] ? 'Available for Booking' : 'Unavailable' ?></span>
-                </button>
-                <button type="button" class="btn-secondary" id="editEquipmentBtn">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    Edit
-                </button>
-                <form method="POST" action="equipment-detail.php?id=<?= $equipmentId ?>" class="inline-form"
-                      onsubmit="return confirm('Are you sure you want to delete this equipment? This action cannot be undone.');">
-                    <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-                    <input type="hidden" name="action" value="delete">
-                    <button type="submit" class="btn-danger">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                        Delete
-                    </button>
-                </form>
-            </div>
-            <?php endif; ?>
-        </div>
-
-        <div class="detail-layout-grid">
-
-            <!-- ── LEFT COLUMN: Main Info ────────────────────────── -->
-            <div class="detail-main-col">
-                <!-- Image Gallery -->
-                <div class="detail-gallery glass-card">
-                    <?php if (!empty($images)): ?>
-                    <div class="gallery-main">
-                        <img src="<?= e($images[0]) ?>" alt="<?= e($eq['title']) ?>" id="galleryMainImg" class="gallery-main-img">
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem;">
+                <div class="product-header-main">
+                    <div class="product-meta">
+                        <span class="category-tag"><?= e(ucfirst(str_replace('_', ' ', $eq['category']))) ?></span>
+                        <span class="condition-tag <?= e($eq['condition']) ?>"><?= e(ucfirst($eq['condition'])) ?></span>
+                        <?php if (!$eq['is_available']): ?>
+                            <span class="condition-tag" style="background: rgba(183, 28, 28, 0.1); color: var(--danger);">Unavailable</span>
+                        <?php endif; ?>
                     </div>
-                    <?php if (count($images) > 1): ?>
-                    <div class="gallery-thumbs">
-                        <?php foreach ($images as $i => $img): ?>
-                        <button class="gallery-thumb <?= $i === 0 ? 'active' : '' ?>"
-                                data-src="<?= e($img) ?>" aria-label="View photo <?= $i+1 ?>">
-                            <img src="<?= e($img) ?>" alt="Photo <?= $i+1 ?>" loading="lazy">
-                        </button>
-                        <?php endforeach; ?>
+                    <div class="product-location-brief" style="margin-top: 0.5rem;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <?= e($eq['location_village']) ?>, <?= e($eq['location_district']) ?>
                     </div>
-                    <?php endif; ?>
-                    <?php else: ?>
-                    <div class="gallery-empty">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent-soft)" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                        <p>No photos uploaded</p>
-                    </div>
-                    <?php endif; ?>
                 </div>
 
+                <?php if ($isOwner): ?>
+                <div class="owner-actions">
+                    <button class="btn-toggle-avail <?= $eq['is_available'] ? 'is-available' : 'is-unavailable' ?>"
+                            id="toggleAvailBtn" data-id="<?= $equipmentId ?>"
+                            aria-label="Toggle availability">
+                        <span class="toggle-dot"></span>
+                        <span class="toggle-label"><?= $eq['is_available'] ? 'Available for Booking' : 'Unavailable' ?></span>
+                    </button>
+                    <button type="button" class="btn-secondary" id="editEquipmentBtn">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        Edit
+                    </button>
+                    <form method="POST" action="equipment-detail.php?id=<?= $equipmentId ?>" class="inline-form"
+                          onsubmit="return confirm('Are you sure you want to delete this equipment?');">
+                        <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+                        <input type="hidden" name="action" value="delete">
+                        <button type="submit" class="btn-danger">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            Delete
+                        </button>
+                    </form>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="product-layout-grid">
+
+            <!-- —— LEFT COLUMN: Main Info ────────────────────────── -->
+            <div class="product-main-content">
+                <!-- Image Gallery -->
+                <div class="product-image-frame">
+                    <div class="detail-gallery">
+                        <?php if (!empty($images)): ?>
+                        <div class="gallery-main">
+                            <img src="<?= e($images[0]) ?>" alt="<?= e($eq['title']) ?>" id="galleryMainImg" class="gallery-main-img">
+                        </div>
+                        <?php if (count($images) > 1): ?>
+                        <div class="gallery-thumbs">
+                            <?php foreach ($images as $i => $img): ?>
+                            <button class="gallery-thumb <?= $i === 0 ? 'active' : '' ?>"
+                                    data-src="<?= e($img) ?>" aria-label="View photo <?= $i+1 ?>">
+                                <img src="<?= e($img) ?>" alt="Photo <?= $i+1 ?>" loading="lazy">
+                            </button>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
+                        <?php else: ?>
+                        <div class="gallery-empty">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent-soft)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            <p>No photos uploaded</p>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <h1 class="product-title"><?= e($eq['title']) ?></h1>
+
                 <!-- Specs -->
-                <div class="detail-section glass-card">
-                    <h2 class="detail-section-title">Specifications</h2>
+                <div class="premium-section">
+                    <span class="section-label">Technical Specifications</span>
                     <table class="specs-table">
-                        <tr><th>Category</th><td><?= e(ucfirst(str_replace('_', ' ', $eq['category']))) ?></td></tr>
-                        <tr><th>Condition</th><td><span class="condition-badge condition-<?= e($eq['condition']) ?>"><?= e(ucfirst($eq['condition'])) ?></span></td></tr>
-                        <tr><th>Operator</th><td><?= $eq['includes_operator'] ? '✅ Included' : '—' ?></td></tr>
-                        <tr>
-                            <th>Status</th>
-                            <td>
-                                <span class="badge <?= $eq['is_available'] ? 'badge-active' : 'badge-cancelled' ?>" id="statusBadge">
-                                    <?= $eq['is_available'] ? 'Available' : 'Unavailable' ?>
-                                </span>
-                            </td>
-                        </tr>
-                        <tr><th>Location</th><td><?= e($eq['location_village']) ?>, <?= e($eq['location_district']) ?></td></tr>
-                        <tr><th>Listed</th><td><?= date('d M Y', strtotime($eq['created_at'])) ?></td></tr>
+                        <tr><th>Equipment Class</th><td><?= e(ucfirst(str_replace('_', ' ', $eq['category']))) ?></td></tr>
+                        <tr><th>Structural Condition</th><td><?= e(ucfirst($eq['condition'])) ?></td></tr>
+                        <tr><th>Operational Support</th><td><?= $eq['includes_operator'] ? 'Professional Operator Included' : 'Equipment Only' ?></td></tr>
+                        <tr><th>Service Location</th><td><?= e($eq['location_village']) ?>, <?= e($eq['location_district']) ?></td></tr>
+                        <tr><th>Platform Listing Date</th><td><?= date('d M Y', strtotime($eq['created_at'])) ?></td></tr>
                     </table>
                 </div>
 
                 <!-- Description -->
-                <div class="detail-section glass-card">
-                    <h2 class="detail-section-title">Description</h2>
-                    <p class="detail-description"><?= nl2br(e($eq['description'])) ?></p>
+                <div class="premium-section">
+                    <span class="section-label">Overview</span>
+                    <p class="description-text"><?= nl2br(e($eq['description'])) ?></p>
                 </div>
 
                 <!-- Owner Info -->
-                <div class="detail-section glass-card">
-                    <h2 class="detail-section-title">Owner</h2>
-                    <div class="owner-info-card">
-                        <div class="owner-avatar">
+                <div class="premium-section">
+                    <span class="section-label">Listed By</span>
+                    <div class="owner-premium-card">
+                        <div class="owner-initials">
                             <?= strtoupper(substr(trim($eq['owner_name'] ?? ''), 0, 1)) ?: '?' ?>
                         </div>
-                        <div class="owner-details">
-                            <strong><?= e($eq['owner_name']) ?></strong>
-                            <?php if ($eq['owner_verified']): ?>
-                            <span class="verified-badge" title="Verified farmer">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--secondary-action)" stroke="none" aria-hidden="true"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                Verified
-                            </span>
-                            <?php endif; ?>
-                            <span class="owner-location"><?= e($eq['owner_village']) ?>, <?= e($eq['owner_district']) ?></span>
+                        <div class="owner-info">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span class="owner-name"><?= e($eq['owner_name']) ?></span>
+                                <?php if ($eq['owner_verified']): ?>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--secondary-action)" stroke="none" title="Verified Farmer"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <?php endif; ?>
+                            </div>
+                            <span class="owner-loc"><?= e($eq['owner_village']) ?>, <?= e($eq['owner_district']) ?></span>
                             <?php if ($eq['owner_trust'] > 0): ?>
-                            <span class="owner-trust">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--amber)" stroke="none" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                                <?= number_format($eq['owner_trust'], 1) ?> Trust Score
-                            </span>
+                            <div class="owner-trust">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--amber)" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                <?= number_format($eq['owner_trust'], 1) ?> Trust Rating
+                            </div>
                             <?php endif; ?>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ── RIGHT COLUMN: Booking Sidebar ────────────────── -->
-            <div class="detail-side-col">
-                
-                <!-- Pricing Card -->
-                <div class="pricing-card-hero glass-card">
-                    <div class="price-main">
-                        <span class="currency">₹</span>
-                        <span class="amount"><?= number_format($eq['price_per_day'], 0) ?></span>
-                        <span class="period">/ day</span>
-                    </div>
-                    <?php if ($eq['includes_operator']): ?>
-                    <div class="price-feature">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary-action)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        <span>Professional Operator Included</span>
-                    </div>
-                    <?php else: ?>
-                    <div class="price-feature secondary">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        <span>Operator not included</span>
-                    </div>
-                    <?php endif; ?>
-                </div>
-
-                <!-- Interactive Booking Calendar -->
-                <div class="calendar-widget glass-card">
-                    <div class="calendar-header">
-                        <span class="calendar-month-year" id="calMonthYear">March 2026</span>
-                        <div class="calendar-nav">
-                            <button class="calendar-nav-btn" id="calPrev" title="Previous Month">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-                            </button>
-                            <button class="calendar-nav-btn" id="calNext" title="Next Month">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-                            </button>
+            <!-- —— RIGHT COLUMN: Booking Sidebar ────────────────── -->
+            <aside class="product-booking-sidebar">
+                <div class="booking-sticky-card">
+                    <!-- Pricing Hero -->
+                    <div class="pricing-hero">
+                        <div class="price-display">
+                            <span class="curr">₹</span>
+                            <span class="val"><?= number_format($eq['price_per_day'], 0) ?></span>
+                            <span class="per">/ day</span>
+                        </div>
+                        <div class="price-features">
+                            <?php if ($eq['includes_operator']): ?>
+                            <div class="p-feature">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                <span>Operator Support Included</span>
+                            </div>
+                            <?php endif; ?>
+                            <div class="p-feature">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                <span>Verified Local Listing</span>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="calendar-grid" id="calGrid">
-                        <!-- Labels -->
-                        <div class="calendar-day-label">Mo</div>
-                        <div class="calendar-day-label">Tu</div>
-                        <div class="calendar-day-label">We</div>
-                        <div class="calendar-day-label">Th</div>
-                        <div class="calendar-day-label">Fr</div>
-                        <div class="calendar-day-label">Sa</div>
-                        <div class="calendar-day-label">Su</div>
-                        <!-- Days injected via JS -->
-                    </div>
 
-                    <div id="calHint" class="calendar-availability-hint" style="display: none;">
-                        ✨ <span id="calHintText">Available for up to 5 consecutive days</span>
-                    </div>
-
-                    <div id="est-result" class="est-result" style="display: none; margin-top: 1.25rem; padding: 1.25rem; background: var(--primary-10); border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 0.85rem; color: var(--text-muted);">Estimated Total</span>
-                            <strong id="est-total" style="font-size: 1.35rem; color: var(--primary-action);">₹0</strong>
+                    <!-- Booking Widget -->
+                    <div class="booking-widget">
+                        <span class="section-label">Select Rental Period</span>
+                        
+                        <div class="calendar-header">
+                            <span class="calendar-month-year" id="calMonthYear">Loading...</span>
+                            <div class="calendar-nav">
+                                <button class="calendar-nav-btn" id="calPrev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+                                <button class="calendar-nav-btn" id="calNext"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+                            </div>
                         </div>
-                        <p id="est-breakdown" style="font-size: 0.75rem; color: var(--text-subtle); margin-top: 4px;"></p>
+                        
+                        <div class="calendar-grid" id="calGrid">
+                            <div class="calendar-day-label">Mo</div>
+                            <div class="calendar-day-label">Tu</div>
+                            <div class="calendar-day-label">We</div>
+                            <div class="calendar-day-label">Th</div>
+                            <div class="calendar-day-label">Fr</div>
+                            <div class="calendar-day-label">Sa</div>
+                            <div class="calendar-day-label">Su</div>
+                        </div>
+
+                        <div class="booking-action-dock">
+                            <div id="calHint" class="calendar-availability-hint" style="display: none;">
+                                ✨ <span id="calHintText">Available for booking</span>
+                            </div>
+
+                            <div id="est-result" class="est-result" style="display: none;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 0.85rem; color: var(--text-muted);">Estimated Total</span>
+                                    <strong id="est-total" style="font-size: 1.5rem; color: var(--primary-action);">₹0</strong>
+                                </div>
+                                <p id="est-breakdown" style="font-size: 0.75rem; color: var(--text-subtle); margin-top: 6px;"></p>
+                            </div>
+
+                            <input type="hidden" id="est-start" value="">
+                            <input type="hidden" id="est-end" value="">
+
+                            <?php if (!$isOwner && $eq['is_available']): ?>
+                                <?php if ($isLoggedIn): ?>
+                                <button class="btn-primary btn-book-cta" id="btnBookNow" disabled style="width: 100%; margin-top: 1.5rem; border-radius: 12px; padding: 1rem;">
+                                    Select dates to book
+                                </button>
+                                <?php else: ?>
+                                <a href="login.php" class="btn-primary btn-book-cta" style="width: 100%; margin-top: 1.5rem; border-radius: 12px; padding: 1rem; text-decoration: none; text-align: center; display: inline-block; box-sizing: border-box;">
+                                    Log in to Book
+                                </a>
+                                <?php endif; ?>
+                            <?php elseif (!$eq['is_available']): ?>
+                            <button class="btn-secondary" disabled style="width: 100%; margin-top: 1.5rem; opacity: 0.5;">
+                                Currently Unavailable
+                            </button>
+                            <?php endif; ?>
+                        </div>
                     </div>
-
-                    <input type="hidden" id="est-start" value="">
-                    <input type="hidden" id="est-end" value="">
-
-                    <?php if (!$isOwner && $eq['is_available']): ?>
-                    <button class="btn-primary btn-book-cta" id="btnBookNow" disabled title="Select dates to book">
-                        Select dates to book
-                    </button>
-                    <?php endif; ?>
                 </div>
-
-            </div>
+            </aside>
         </div>
 
-        <!-- Sticky Booking Bar (Mobile/Floating) -->
+        <!-- Sticky Booking Bar -->
         <div class="sticky-booking-bar" id="stickyBookingBar">
             <div class="sticky-price">
-                <span class="sticky-label">Est. Total</span>
+                <span class="sticky-label">Estimated Total</span>
                 <strong id="sticky-est-total">₹0</strong>
             </div>
+            <?php if ($isLoggedIn): ?>
             <button class="btn-primary" id="stickyBookBtn" disabled>Select dates to book</button>
+            <?php else: ?>
+            <a href="login.php" class="btn-primary" style="text-decoration: none; padding: 0.6rem 1.5rem; border-radius: 50px; font-size: 0.85rem; font-weight: 700;">Log in to Book</a>
+            <?php endif; ?>
         </div>
 
     </main>
 </div><!-- /.app-layout -->
 
 <!-- Edit Equipment Modal -->
+<?php if ($isOwner): ?>
 <div id="editEquipmentModal" class="modal-overlay">
     <div class="modal-content">
         <button type="button" class="modal-close" id="editModalCloseBtn" aria-label="Close modal">&times;</button>
@@ -452,8 +486,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         </form>
     </div>
 </div>
+<?php endif; ?>
 
-<?php require_once __DIR__ . '/includes/profile-modal.php'; ?>
+<?php if ($isLoggedIn) require_once __DIR__ . '/includes/profile-modal.php'; ?>
 <script src="assets/js/dashboard.js" defer></script>
 <script src="assets/js/equipment.js?v=<?= time() ?>" defer></script>
 <script src="assets/js/calendar.js?v=<?= time() ?>" defer></script>

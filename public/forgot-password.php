@@ -1,0 +1,143 @@
+<?php
+require_once __DIR__ . '/../config/db.php';
+
+if (isset($_SESSION['user_id'])) {
+    header('Location: dashboard.php');
+    exit();
+}
+
+$errors = [];
+$old_phone = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        $errors['general'] = 'Invalid form submission. Please try again.';
+    }
+
+    $phone = trim($_POST['phone'] ?? '');
+    $old_phone = $phone;
+
+    if (empty($errors)) {
+        if (empty($phone)) {
+            $errors['phone'] = 'Phone number is required.';
+        } elseif (!preg_match('/^[6-9]\d{9}$/', $phone)) {
+            $errors['phone'] = 'Valid 10-digit Indian mobile required.';
+        }
+    }
+
+    if (empty($errors)) {
+        $stmt = $conn->prepare("SELECT COUNT(*) as count FROM password_resets WHERE phone = ? AND created_at > DATE_SUB(NOW(), INTERVAL 15 MINUTE)");
+        $stmt->bind_param('s', $phone);
+        $stmt->execute();
+        $rateLimit = $stmt->get_result()->fetch_assoc()['count'] ?? 0;
+        $stmt->close();
+
+        if ($rateLimit >= 3) {
+            $errors['general'] = 'Too many requests. Please try again after 15 minutes.';
+        } else {
+            $stmt = $conn->prepare("UPDATE password_resets SET used = 1 WHERE phone = ? AND used = 0");
+            $stmt->bind_param('s', $phone);
+            $stmt->execute();
+            $stmt->close();
+
+            $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+            $stmt = $conn->prepare("INSERT INTO password_resets (phone, otp, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))");
+            $stmt->bind_param('ss', $phone, $otp);
+            $stmt->execute();
+            $stmt->close();
+
+            $_SESSION['reset_phone'] = $phone;
+
+            setFlash('success', "If the phone number is registered, an OTP has been sent. (Demo OTP: {$otp})");
+            header('Location: verify-otp.php');
+            exit();
+        }
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forgot Password — <?= e(APP_NAME) ?></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color:            hsl(144, 28%, 6%);
+            --surface-color:       hsl(150, 24%, 10%);
+            --text-main:           hsl(90, 20%, 90%);
+            --text-muted:          hsl(140, 14%, 60%);
+            --border-color:        hsl(150, 20%, 16%);
+            --primary-action:      hsl(150, 50%, 45%); 
+            --secondary-action:    hsl(171, 35%, 55%);
+            --danger:              #E11D48;
+            --primary-10:          rgba(76, 175, 120, 0.12);
+            --shadow-lg:           0 10px 25px rgba(0, 0, 0, 0.5);
+            --radius:              18px;
+            --radius-sm:           12px;
+            --font:                'Inter', system-ui, -apple-system, sans-serif;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        a { color: inherit; text-decoration: none; }
+        body { font-family: var(--font); background: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+        .auth-wrapper { max-width: 460px; width: 100%; background: var(--surface-color); border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 40px; }
+        h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+        p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; line-height: 1.5; }
+        .form-group { margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; }
+        .form-label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+        .input-wrap { position: relative; }
+        .form-input { width: 100%; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px 16px 12px 40px; color: var(--text-main); font-size: 0.95rem; outline: none; transition: border-color 0.2s ease; }
+        .form-input:focus { border-color: var(--primary-action); }
+        .form-input.is-invalid { border-color: var(--danger); }
+        .input-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 18px; height: 18px; }
+        .btn-submit { width: 100%; background: var(--primary-action); color: #fff; border: none; padding: 12px; border-radius: var(--radius-sm); font-size: 1rem; font-weight: 600; cursor: pointer; transition: filter 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 1rem; }
+        .btn-submit:hover { filter: brightness(1.1); }
+        .error-msg { color: var(--danger); font-size: 0.8rem; font-weight: 500; }
+        .alert { padding: 12px 16px; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 500; margin-bottom: 1rem; }
+        .alert-error { background: rgba(225, 29, 72, 0.1); border: 1px solid rgba(225, 29, 72, 0.2); color: #ff4c4c; }
+        .alert-success { background: rgba(76, 175, 80, 0.1); border: 1px solid rgba(76, 175, 80, 0.2); color: #4caf50; }
+        .auth-footer { text-align: center; margin-top: 1.5rem; }
+        .auth-footer a { color: var(--primary-action); font-weight: 600; }
+        .btn-back { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--primary-10); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--primary-action); font-size: 0.8rem; font-weight: 700; transition: all 0.2s ease; margin-bottom: 1.5rem; width: fit-content; }
+        .btn-back:hover { background: var(--primary-action); color: #fff; }
+        .btn-back svg { width: 14px; height: 14px; }
+    </style>
+</head>
+<body>
+<div class="auth-wrapper">
+    <a href="login.php" class="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Login
+    </a>
+    <h1>Forgot Password</h1>
+    <p>Enter your registered mobile number. We will send you an OTP to reset your password.</p>
+
+    <?php if (!empty($errors['general'])): ?>
+        <div class="alert alert-error" role="alert"><?= e($errors['general']) ?></div>
+    <?php endif; ?>
+    <?= renderFlash() ?>
+
+    <form method="POST" action="" novalidate>
+        <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+        
+        <div class="form-group">
+            <label class="form-label" for="phone">Phone Number</label>
+            <div class="input-wrap">
+                <input type="tel" id="phone" name="phone" value="<?= e($old_phone) ?>" placeholder="10-digit mobile" class="form-input has-icon<?= isset($errors['phone']) ? ' is-invalid' : '' ?>" required maxlength="10" autofocus>
+                <span class="input-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.9-.9a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16.92z"/></svg>
+                </span>
+            </div>
+            <?php if (isset($errors['phone'])): ?>
+                <span class="error-msg"><?= e($errors['phone']) ?></span>
+            <?php endif; ?>
+        </div>
+
+        <button type="submit" class="btn-submit">Send OTP</button>
+    </form>
+</div>
+</body>
+</html>

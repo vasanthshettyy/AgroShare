@@ -1,16 +1,16 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../src/Controllers/EquipmentController.php';
 requireAuth();
 
-// ── Common layout data ─────────────────────────────────────
+// â”€â”€ Common layout data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 $nameParts = explode(' ', $_SESSION['full_name']);
 $initials  = strtoupper(substr($nameParts[0], 0, 1));
 if (isset($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 
 $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
 
-// ── Load equipment ─────────────────────────────────────────
+// â”€â”€ Load equipment â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 $equipmentId = (int)($_GET['id'] ?? 0);
 if ($equipmentId <= 0) {
     setFlash('error', 'Equipment not found.');
@@ -27,7 +27,7 @@ if (!$eq || (int)$eq['owner_id'] !== (int)$_SESSION['user_id']) {
 
 $existingImages = $eq['images'] ? json_decode($eq['images'], true) : [];
 
-// ── Handle form submission ─────────────────────────────────
+// â”€â”€ Handle form submission â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 $errors   = [];
 $formData = [
     'title'            => $eq['title'],
@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Equipment — <?= e(APP_NAME) ?></title>
+    <title>Edit Equipment â€” <?= e(APP_NAME) ?></title>
 
     <script>
         document.documentElement.setAttribute('data-theme', 'dark');
@@ -136,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
             
-            <div class="avatar" id="avatar-btn" role="button" tabindex="0" title="Profile — <?= e($_SESSION['full_name']) ?>" aria-label="Open profile"><?= e($initials) ?></div>
+            <div class="avatar" id="avatar-btn" role="button" tabindex="0" title="Profile â€” <?= e($_SESSION['full_name']) ?>" aria-label="Open profile"><?= e($initials) ?></div>
         </div>
     </header>
 
@@ -152,11 +152,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="equipment-browse.php?mine=1" class="nav-link active" aria-current="page"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11V5h9l3 6m0 0H3m12 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m14 0h2a2 2 0 0 1 2 2v4h-3.5"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/></svg><span>My Equipment</span></a>
             <a href="my-bookings.php" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg><span>My Bookings</span></a>
             <span class="nav-section-label">Community</span>
-            <a href="#" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Pooling</span></a>
+            <span class=\"nav-link is-disabled\" title=\"Coming soon\" aria-disabled=\"true\"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Pooling</span></span>
             <a href="equipment-browse.php" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>Browse</span></a>
-            <a href="#" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span>Reviews</span></a>
+            <span class=\"nav-link is-disabled\" title=\"Coming soon\" aria-disabled=\"true\"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span>Reviews</span></span>
             <span class="nav-section-label">Account</span>
-            <a href="#" class="nav-link" id="profile-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/></svg><span>Profile</span></a>
+            <a href=\"javascript:void(0)\" class=\"nav-link\" id=\"profile-btn\"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/></svg><span>Profile</span></a>
         </nav>
         <div class="sidebar-footer"><a href="logout.php" class="nav-link danger"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Log Out</span></a></div>
     </aside>
@@ -200,7 +200,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="form-group">
                         <label for="eq-category" class="form-label">Category</label>
                         <select name="category" id="eq-category" class="form-input form-select <?= isset($errors['category']) ? 'has-error' : '' ?>" required>
-                            <option value="">Select category…</option>
+                            <option value="">Select categoryâ€¦</option>
                             <?php foreach (['tractor','harvester','seeder','sprayer','other'] as $cat): ?>
                             <option value="<?= $cat ?>" <?= ($formData['category'] ?? '') === $cat ? 'selected' : '' ?>><?= ucfirst($cat) ?></option>
                             <?php endforeach; ?>
@@ -210,7 +210,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="form-group">
                         <label for="eq-condition" class="form-label">Condition</label>
                         <select name="condition" id="eq-condition" class="form-input form-select <?= isset($errors['condition']) ? 'has-error' : '' ?>" required>
-                            <option value="">Select condition…</option>
+                            <option value="">Select conditionâ€¦</option>
                             <?php foreach (['excellent'=>'Excellent','good'=>'Good','fair'=>'Fair'] as $val=>$label): ?>
                             <option value="<?= $val ?>" <?= ($formData['condition'] ?? '') === $val ? 'selected' : '' ?>><?= $label ?></option>
                             <?php endforeach; ?>
@@ -234,13 +234,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </h2>
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="eq-price-hour" class="form-label">Price per Hour (₹)</label>
+                        <label for="eq-price-hour" class="form-label">Price per Hour (â‚¹)</label>
                         <input type="number" name="price_per_hour" id="eq-price-hour" class="form-input <?= isset($errors['price_per_hour']) ? 'has-error' : '' ?>"
                                min="0" step="50" value="<?= e($formData['price_per_hour'] ?? '') ?>" required>
                         <?php if (isset($errors['price_per_hour'])): ?><span class="form-error"><?= e($errors['price_per_hour']) ?></span><?php endif; ?>
                     </div>
                     <div class="form-group">
-                        <label for="eq-price-day" class="form-label">Price per Day (₹)</label>
+                        <label for="eq-price-day" class="form-label">Price per Day (â‚¹)</label>
                         <input type="number" name="price_per_day" id="eq-price-day" class="form-input <?= isset($errors['price_per_day']) ? 'has-error' : '' ?>"
                                min="0" step="100" value="<?= e($formData['price_per_day'] ?? '') ?>" required>
                         <?php if (isset($errors['price_per_day'])): ?><span class="form-error"><?= e($errors['price_per_day']) ?></span><?php endif; ?>
@@ -293,7 +293,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <img src="<?= e($img) ?>" alt="Equipment photo">
                         <label class="remove-image-label">
                             <input type="checkbox" name="remove_images[]" value="<?= e($img) ?>">
-                            <span class="remove-badge">✕ Remove</span>
+                            <span class="remove-badge">âœ• Remove</span>
                         </label>
                     </div>
                     <?php endforeach; ?>
@@ -306,7 +306,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="upload-placeholder">
                         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/><path d="m21 11-3-3a2 2 0 0 0-2.828 0l-8.086 8.086"/><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>
                         <p>Add more photos (drag & drop or click)</p>
-                        <span>JPEG, PNG, WebP — max 2MB each</span>
+                        <span>JPEG, PNG, WebP â€” max 2MB each</span>
                     </div>
                     <div class="image-preview-grid" id="imagePreviewGrid"></div>
                 </div>
@@ -331,3 +331,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <script src="assets/js/equipment.js" defer></script>
 </body>
 </html>
+
+

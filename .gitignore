@@ -1,4 +1,4 @@
-﻿# Agent and Context folders
+# Agent and Context folders
 .agents/
 .context/
 
@@ -24,3 +24,9 @@ node_modules/
 
 # Logs
 *.log
+
+# Uploaded Files
+public/uploads/equipment/*
+!public/uploads/equipment/.gitkeep
+public/uploads/profiles/*
+!public/uploads/profiles/.gitkeep

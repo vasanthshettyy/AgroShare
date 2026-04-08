@@ -55,10 +55,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         const d = new Date(n.created_at);
                         const timeStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-                        item.innerHTML = `
-                            <div>${n.message}</div>
-                            <span class="notif-time">${timeStr}</span>
-                        `;
+                        const msgDiv = document.createElement('div');
+                        msgDiv.textContent = n.message;
+                        const timeSpan = document.createElement('span');
+                        timeSpan.className = 'notif-time';
+                        timeSpan.textContent = timeStr;
+                        item.appendChild(msgDiv);
+                        item.appendChild(timeSpan);
 
                         // Mark as read on click
                         if (n.is_read == 0) {
@@ -66,6 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 try {
                                     const formData = new FormData();
                                     formData.append('id', n.id);
+                                    const csrfToken = document.getElementById('global-csrf-token') || document.querySelector('input[name="csrf_token"]');
+                                    if (csrfToken) formData.append('csrf_token', csrfToken.value);
                                     
                                     const mRes = await fetch('api/mark-notification-read.php', { method: 'POST', body: formData });
                                     const mData = await mRes.json();
@@ -102,8 +107,10 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ── 1. Theme Persistence ──────────────────────────────────────
    Force dark mode as the default theme.
    ─────────────────────────────────────────────────────────── */
-document.documentElement.setAttribute('data-theme', 'dark');
-localStorage.setItem('theme', 'dark');
+(function(){
+    var t = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+})();
 
 /* ── 2. Sidebar Toggle (mobile) ───────────────────────────────
    Hamburger opens the drawer.

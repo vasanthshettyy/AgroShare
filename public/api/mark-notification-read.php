@@ -5,6 +5,18 @@
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../config/db.php';
 
+require_once __DIR__ . '/../../src/Helpers/auth.php';
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
+    exit();
+}
+
+if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
+    echo json_encode(['success' => false, 'message' => 'Invalid CSRF token.']);
+    exit();
+}
+
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'Not authenticated.']);
     exit();
