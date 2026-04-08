@@ -334,8 +334,6 @@ class BookingCalendar {
             // Selecting an end date
             if (date < this.selectedStart) {
                 this.selectedStart = date; // Reset start if clicked before current start
-            } else if (date.getTime() === this.selectedStart.getTime()) {
-                this.selectedStart = null; // Toggle off if clicked same date
             } else {
                 // Check for booked overlaps in between
                 if (this.hasOverlap(this.selectedStart, date)) {
@@ -356,10 +354,18 @@ class BookingCalendar {
         const endInput = document.getElementById('est-end');
         const btnBook = document.getElementById('btnBookNow');
 
+        // Helper to get local ISO date string (YYYY-MM-DD)
+        const toLocalDateString = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
         if (this.selectedStart && this.selectedEnd) {
-            // Range selected
-            startInput.value = this.selectedStart.toISOString().split('T')[0] + 'T09:00';
-            endInput.value = this.selectedEnd.toISOString().split('T')[0] + 'T18:00';
+            // Range selected (can be same day)
+            startInput.value = toLocalDateString(this.selectedStart) + 'T09:00';
+            endInput.value = toLocalDateString(this.selectedEnd) + 'T18:00';
             if (btnBook) {
                 btnBook.disabled = false;
                 btnBook.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Book Now`;
@@ -367,11 +373,10 @@ class BookingCalendar {
 
             // Availability hint
             const diffDays = Math.ceil((this.selectedEnd - this.selectedStart) / (1000 * 60 * 60 * 24)) + 1;
-            document.getElementById('calHint').style.display = 'block';
-            document.getElementById('calHintText').innerHTML = `Selected <span class="avail-highlight">${diffDays} days</span>.`;
+            document.getElementById('calHintText').innerHTML = `Selected <span class="avail-highlight">${diffDays} day${diffDays > 1 ? 's' : ''}</span>.`;
         } else if (this.selectedStart) {
             // Only start selected
-            startInput.value = this.selectedStart.toISOString().split('T')[0] + 'T09:00';
+            startInput.value = toLocalDateString(this.selectedStart) + 'T09:00';
             endInput.value = '';
             if (btnBook) {
                 btnBook.disabled = true;
@@ -381,8 +386,7 @@ class BookingCalendar {
             const nextBooked = this.getNextBookedDate(this.selectedStart);
             const avail = nextBooked ? Math.floor((nextBooked - this.selectedStart) / (86400000)) : 30;
 
-            document.getElementById('calHint').style.display = 'block';
-            document.getElementById('calHintText').innerHTML = `Available for up to <span class="avail-highlight">${avail} consecutive days</span>.`;
+            document.getElementById('calHintText').innerHTML = `Selected start. <span class="avail-highlight">Click again</span> for a 1-day rental, or pick an end date.`;
         } else {
             startInput.value = '';
             endInput.value = '';
@@ -390,7 +394,7 @@ class BookingCalendar {
                 btnBook.disabled = true;
                 btnBook.textContent = 'Select dates to book';
             }
-            document.getElementById('calHint').style.display = 'none';
+            document.getElementById('calHintText').innerHTML = `Tip: Click twice on the same date for a single-day rental.`;
         }
 
         if (window.calculatePricing) window.calculatePricing();

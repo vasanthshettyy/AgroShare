@@ -316,8 +316,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         </div>
 
                         <div class="booking-action-dock">
-                            <div id="calHint" class="calendar-availability-hint" style="display: none;">
-                                ✨ <span id="calHintText">Available for booking</span>
+                            <div id="calHint" class="calendar-availability-hint">
+                                ✨ <span id="calHintText">Tip: Click twice on the same date for a single-day rental.</span>
                             </div>
 
                             <div id="est-result" class="est-result" style="display: none;">
