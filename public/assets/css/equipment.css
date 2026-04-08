@@ -80,6 +80,83 @@
     flex-shrink: 0;
 }
 
+/* ── Owner Availability Toggle ── */
+.owner-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.btn-toggle-avail {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 1.1rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    border: 1.5px solid transparent;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.btn-toggle-avail .toggle-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+/* Available State */
+.btn-toggle-avail.is-available {
+    background: rgba(76, 175, 120, 0.1);
+    border-color: rgba(76, 175, 120, 0.3);
+    color: var(--primary-action);
+}
+
+.btn-toggle-avail.is-available .toggle-dot {
+    background: var(--primary-action);
+    box-shadow: 0 0 8px rgba(76, 175, 120, 0.6);
+}
+
+.btn-toggle-avail.is-available:hover {
+    background: rgba(76, 175, 120, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Unavailable State */
+.btn-toggle-avail.is-unavailable {
+    background: rgba(225, 29, 72, 0.08);
+    border-color: rgba(225, 29, 72, 0.25);
+    color: #ff4c4c;
+}
+
+.btn-toggle-avail.is-unavailable .toggle-dot {
+    background: var(--danger);
+    box-shadow: none;
+}
+
+.btn-toggle-avail.is-unavailable:hover {
+    background: rgba(225, 29, 72, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-toggle-avail:active {
+    transform: scale(0.96);
+}
+
+.btn-toggle-avail:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
 .btn-danger {
     display: inline-flex;
     align-items: center;
@@ -954,18 +1031,28 @@
 
 .product-booking-sidebar {
     position: relative;
+    align-self: start;
 }
 
 .booking-sticky-card {
     position: sticky;
-    top: 2rem;
+    top: 1.5rem;
     background: linear-gradient(145deg, rgba(13, 66, 35, 0.4) 0%, rgba(20, 36, 26, 0.6) 100%);
     border: 1px solid rgba(43, 238, 75, 0.2);
     border-radius: 16px;
     padding: 1.5rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     z-index: 10;
+    max-height: calc(100vh - 3rem);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
+
+/* Custom scrollbar for sticky card */
+.booking-sticky-card::-webkit-scrollbar { width: 4px; }
+.booking-sticky-card::-webkit-scrollbar-thumb { background: var(--primary-action); border-radius: 10px; }
 
 /* ── Product Header ── */
 .product-header {
@@ -1282,11 +1369,10 @@
 }
 
 .booking-action-dock {
-    position: sticky;
-    bottom: 0;
-    margin: 1.5rem -1.5rem -1.5rem;
+    margin-top: 1.5rem;
     padding: 1.5rem;
-    background: linear-gradient(180deg, rgba(26, 46, 26, 0) 0%, var(--surface-color) 30%, var(--surface-color) 100%);
+    background: var(--surface-color);
+    background: linear-gradient(180deg, rgba(26, 46, 26, 0) 0%, var(--surface-color) 20%, var(--surface-color) 100%);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-top: 1px solid var(--glass-border);
