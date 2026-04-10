@@ -430,14 +430,25 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                             </div>
                         </div>
                         <div class="card-footer" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
                                 <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
+                                <?php if ($b['booking_type'] === 'ESCROW' && $b['escrow_status']): ?>
+                                    <span class="escrow-chip escrow-<?= $b['escrow_status'] ?>"><?= str_replace('_', ' ', $b['escrow_status']) ?></span>
+                                <?php endif; ?>
                             </div>
                             <div class="actions-wrap" style="margin-left: auto;">
+                                <?php if ($b['booking_type'] === 'ESCROW'): ?>
+                                    <?php if ($b['escrow_status'] === 'FUNDS_LOCKED'): ?>
+                                        <button class="btn-primary btn-sm btn-otp-action" data-txn="<?= $b['transaction_id'] ?>" data-type="handover">Verify Handover PIN</button>
+                                    <?php elseif ($b['escrow_status'] === 'ACTIVE_RENTAL'): ?>
+                                        <button class="btn-primary btn-sm btn-otp-action" data-txn="<?= $b['transaction_id'] ?>" data-type="return">Verify Return PIN</button>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+
                                 <?php if (in_array($b['status'], ['pending', 'confirmed'])): ?>
                                     <button class="btn-secondary btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="cancelled">Cancel</button>
                                 <?php endif; ?>
-                                <?php if ($b['status'] === 'active'): ?>
+                                <?php if ($b['status'] === 'active' && $b['booking_type'] !== 'ESCROW'): ?>
                                     <button class="btn-primary btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="completed">Mark Completed</button>
                                 <?php endif; ?>
                             </div>
@@ -504,10 +515,21 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                             <?php endif; ?>
                         </div>
                         <div class="card-footer" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
                                 <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
+                                <?php if ($b['booking_type'] === 'ESCROW' && $b['escrow_status']): ?>
+                                    <span class="escrow-chip escrow-<?= $b['escrow_status'] ?>"><?= str_replace('_', ' ', $b['escrow_status']) ?></span>
+                                <?php endif; ?>
                             </div>
                             <div class="actions-wrap" style="margin-left: auto;">
+                                <?php if ($b['booking_type'] === 'ESCROW'): ?>
+                                    <?php if ($b['escrow_status'] === 'FUNDS_LOCKED'): ?>
+                                        <button class="btn-primary btn-sm btn-otp-action" data-txn="<?= $b['transaction_id'] ?>" data-type="handover">Verify Handover PIN</button>
+                                    <?php elseif ($b['escrow_status'] === 'ACTIVE_RENTAL'): ?>
+                                        <button class="btn-primary btn-sm btn-otp-action" data-txn="<?= $b['transaction_id'] ?>" data-type="return">Verify Return PIN</button>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+
                                 <?php
                                     $btnData = 'data-id="' . $b['id'] . '"'
                                              . ' data-renter="' . e($b['renter_name']) . '"'
@@ -519,7 +541,9 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                     <button class="btn-primary btn-sm status-action" <?= $btnData ?> data-status="confirmed">Accept</button>
                                     <button class="btn-secondary btn-sm status-action" <?= $btnData ?> data-status="cancelled">Decline</button>
                                 <?php elseif ($b['status'] === 'confirmed'): ?>
-                                    <button class="btn-primary btn-sm status-action" <?= $btnData ?> data-status="completed">Mark Completed</button>
+                                    <?php if ($b['booking_type'] !== 'ESCROW'): ?>
+                                        <button class="btn-primary btn-sm status-action" <?= $btnData ?> data-status="completed">Mark Completed</button>
+                                    <?php endif; ?>
                                     <button class="btn-secondary btn-sm status-action" <?= $btnData ?> data-status="cancelled">Cancel</button>
                                 <?php endif; ?>
                             </div>
@@ -529,6 +553,26 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             </div>
         </div>
     </main>
+</div>
+
+<!-- OTP Verification Modal -->
+<div class="otp-modal-overlay" id="otpModalOverlay">
+    <div class="otp-modal-card">
+        <h2 class="otp-title" id="otpTitle">Verify PIN</h2>
+        <span class="otp-subtitle" id="otpSubtitle">Enter the 4-digit PIN provided by the other party.</span>
+
+        <div class="otp-input-group">
+            <input type="text" class="otp-field" maxlength="1" pattern="\d*" inputmode="numeric">
+            <input type="text" class="otp-field" maxlength="1" pattern="\d*" inputmode="numeric">
+            <input type="text" class="otp-field" maxlength="1" pattern="\d*" inputmode="numeric">
+            <input type="text" class="otp-field" maxlength="1" pattern="\d*" inputmode="numeric">
+        </div>
+
+        <div class="otp-actions">
+            <button class="btn-secondary" id="otpCancelBtn">Cancel</button>
+            <button class="btn-primary" id="otpVerifyBtn">Verify PIN</button>
+        </div>
+    </div>
 </div>
 
 <input type="hidden" id="csrf_token" value="<?= generateCsrfToken() ?>">
@@ -543,6 +587,90 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             btn.classList.add('active');
             document.getElementById(btn.dataset.tab).classList.add('active');
         });
+    });
+
+    // OTP Modal Logic
+    const otpModal = {
+        overlay: document.getElementById('otpModalOverlay'),
+        fields: document.querySelectorAll('.otp-field'),
+        verifyBtn: document.getElementById('otpVerifyBtn'),
+        cancelBtn: document.getElementById('otpCancelBtn'),
+        currentTxn: null,
+        currentType: null,
+
+        open(txnId, type) {
+            this.currentTxn = txnId;
+            this.currentType = type;
+            document.getElementById('otpTitle').textContent = type === 'handover' ? 'Handover Verification' : 'Return Verification';
+            document.getElementById('otpSubtitle').textContent = type === 'handover' 
+                ? 'Ask the renter for the handover PIN to start the rental.' 
+                : 'Ask the renter for the return PIN to complete the deal.';
+            
+            this.fields.forEach(f => f.value = '');
+            this.overlay.classList.add('visible');
+            document.body.style.overflow = 'hidden';
+            this.fields[0].focus();
+        },
+
+        close() {
+            this.overlay.classList.remove('visible');
+            document.body.style.overflow = '';
+        },
+
+        getOTP() {
+            return Array.from(this.fields).map(f => f.value).join('');
+        }
+    };
+
+    otpModal.fields.forEach((field, idx) => {
+        field.addEventListener('input', (e) => {
+            if (e.target.value && idx < 3) otpModal.fields[idx + 1].focus();
+        });
+        field.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !e.target.value && idx > 0) otpModal.fields[idx - 1].focus();
+        });
+    });
+
+    otpModal.cancelBtn.addEventListener('click', () => otpModal.close());
+    otpModal.overlay.addEventListener('click', (e) => { if (e.target === otpModal.overlay) otpModal.close(); });
+
+    document.querySelectorAll('.btn-otp-action').forEach(btn => {
+        btn.addEventListener('click', () => {
+            otpModal.open(btn.dataset.txn, btn.dataset.type);
+        });
+    });
+
+    otpModal.verifyBtn.addEventListener('click', async () => {
+        const otp = otpModal.getOTP();
+        if (otp.length !== 4) return alert('Please enter all 4 digits.');
+
+        otpModal.verifyBtn.disabled = true;
+        otpModal.verifyBtn.textContent = 'Verifying...';
+
+        try {
+            const endpoint = otpModal.currentType === 'handover' ? 'api/verify_handover.php' : 'api/verify_return.php';
+            const formData = new FormData();
+            formData.append('transaction_id', otpModal.currentTxn);
+            formData.append('submitted_otp', otp);
+            formData.append('csrf_token', document.getElementById('csrf_token').value);
+
+            const res = await fetch(endpoint, { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (data.success) {
+                if (window.showToast) window.showToast('success', data.message);
+                else alert(data.message);
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                alert(data.message);
+                otpModal.verifyBtn.disabled = false;
+                otpModal.verifyBtn.textContent = 'Verify PIN';
+            }
+        } catch (err) {
+            alert('Network error. Please try again.');
+            otpModal.verifyBtn.disabled = false;
+            otpModal.verifyBtn.textContent = 'Verify PIN';
+        }
     });
 
     // Reveal Contact Info Logic
@@ -610,23 +738,27 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                     setTimeout(() => actions.remove(), 300);
 
                     // Show visual success feedback
-                    const existingToast = document.querySelector('.toast');
-                    if (existingToast) existingToast.remove();
-                    
-                    const toast = document.createElement('div');
-                    toast.className = 'toast toast-success';
-                    toast.style.position = 'fixed';
-                    toast.style.bottom = '20px';
-                    toast.style.right = '20px';
-                    toast.style.background = 'var(--primary-action)';
-                    toast.style.color = '#fff';
-                    toast.style.padding = '12px 24px';
-                    toast.style.borderRadius = '8px';
-                    toast.style.zIndex = '9999';
-                    toast.textContent = data.message;
-                    document.body.appendChild(toast);
-                    
-                    setTimeout(() => toast.remove(), 3000);
+                    if (window.showToast) {
+                        window.showToast('success', data.message);
+                    } else {
+                        const existingToast = document.querySelector('.toast');
+                        if (existingToast) existingToast.remove();
+                        
+                        const toast = document.createElement('div');
+                        toast.className = 'toast toast-success';
+                        toast.style.position = 'fixed';
+                        toast.style.bottom = '20px';
+                        toast.style.right = '20px';
+                        toast.style.background = 'var(--primary-action)';
+                        toast.style.color = '#fff';
+                        toast.style.padding = '12px 24px';
+                        toast.style.borderRadius = '8px';
+                        toast.style.zIndex = '9999';
+                        toast.textContent = data.message;
+                        document.body.appendChild(toast);
+                        
+                        setTimeout(() => toast.remove(), 3000);
+                    }
                 } else {
                     alert(data.message);
                     btn.disabled = false;

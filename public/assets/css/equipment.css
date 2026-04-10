@@ -1784,8 +1784,239 @@ button:focus-visible,
     outline-offset: 2px;
 }
 
+.booking-gateway-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+    padding: 1.5rem;
+}
+
+.booking-gateway-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.booking-gateway-modal {
+    background: linear-gradient(145deg, rgba(26, 46, 26, 0.9) 0%, rgba(10, 20, 14, 0.95) 100%);
+    border: 1.5px solid rgba(43, 238, 75, 0.15);
+    border-radius: 24px;
+    padding: 2.5rem 2rem;
+    max-width: 520px;
+    width: 100%;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+    position: relative;
+    color: var(--text-main);
+}
+
+.booking-gateway-overlay.visible .booking-gateway-modal {
+    transform: scale(1) translateY(0);
+}
+
+.booking-gateway-modal h2 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    background: linear-gradient(to right, #fff, #81c784);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.booking-gateway-modal .modal-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 2rem;
+    display: block;
+}
+
+.booking-gateway-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.booking-gateway-option {
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.booking-gateway-option:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(76, 175, 120, 0.4);
+    transform: translateY(-2px);
+}
+
+.booking-gateway-option.active {
+    background: rgba(76, 175, 120, 0.1);
+    border-color: var(--primary-action);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), inset 0 0 12px rgba(76, 175, 120, 0.1);
+}
+
+.booking-gateway-option .option-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.booking-gateway-option .option-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.booking-gateway-recommended {
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    background: var(--primary-action);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.booking-gateway-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.booking-gateway-modal .modal-close {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.booking-gateway-modal .modal-close:hover {
+    color: #fff;
+}
+
+.booking-gateway-modal {
+    display: flex;
+    flex-direction: column;
+    min-height: 400px;
+}
+
+.checkout-summary {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.checkout-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.checkout-row:last-child {
+    margin-bottom: 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.checkout-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.checkout-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.checkout-total {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--primary-action);
+}
+
+.checkout-disclaimer {
+    font-size: 0.8rem;
+    color: var(--text-subtle);
+    line-height: 1.5;
+    background: rgba(76, 175, 120, 0.05);
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    border-left: 3px solid var(--primary-action);
+}
+
+.payment-processing-view {
+    text-align: center;
+    padding: 3rem 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.payment-success-view {
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.demo-pin-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px dashed var(--primary-action);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+}
+
+.demo-pin-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--primary-action);
+    margin-bottom: 0.5rem;
+    display: block;
+    font-weight: 800;
+}
+
+.demo-pin-value {
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    color: #fff;
+}
+
 /* ══════════════════════════════════════════════════════════
-   BOOKING SUCCESS OVERLAY
+   SUCCESS OVERLAY (General Purpose)
    ══════════════════════════════════════════════════════════ */
 .booking-success-overlay {
     position: fixed;

@@ -2265,3 +2265,106 @@ input[type="number"].form-input::-webkit-inner-spin-button {
 .btn-contact:active {
     transform: translateY(0);
 }
+
+/* -- Escrow Badges -- */
+.escrow-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+}
+
+.escrow-chip::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.escrow-PENDING_PAYMENT { color: #FFC107; background: rgba(255, 193, 7, 0.1); border-color: rgba(255, 193, 7, 0.2); }
+.escrow-FUNDS_LOCKED { color: #4CAF50; background: rgba(76, 175, 80, 0.1); border-color: rgba(76, 175, 80, 0.2); }
+.escrow-ACTIVE_RENTAL { color: #E040FB; background: rgba(156, 39, 176, 0.1); border-color: rgba(156, 39, 176, 0.2); }
+.escrow-COMPLETED { color: #2196F3; background: rgba(33, 150, 243, 0.1); border-color: rgba(33, 150, 243, 0.2); }
+.escrow-MANUAL_DEAL_INITIATED { color: #9E9E9E; background: rgba(158, 158, 158, 0.1); border-color: rgba(158, 158, 158, 0.2); }
+
+/* -- OTP Modal Styles -- */
+.otp-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.otp-modal-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.otp-modal-card {
+    background: linear-gradient(145deg, rgba(26, 46, 26, 0.95) 0%, rgba(10, 20, 14, 0.98) 100%);
+    border: 1.5px solid rgba(43, 238, 75, 0.2);
+    border-radius: 24px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    transform: translateY(20px);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.otp-modal-overlay.visible .otp-modal-card {
+    transform: translateY(0);
+}
+
+.otp-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; color: #fff; }
+.otp-subtitle { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 2rem; display: block; }
+
+.otp-input-group {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.otp-field {
+    width: 50px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 1.75rem;
+    font-weight: 800;
+    text-align: center;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.otp-field:focus {
+    border-color: var(--primary-action);
+    background: rgba(76, 175, 120, 0.1);
+    box-shadow: 0 0 15px rgba(76, 175, 120, 0.2);
+}
+
+.otp-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+

@@ -53,49 +53,122 @@ class BookingCalendar {
 
         const btnBook = document.getElementById('btnBookNow');
         if (btnBook) {
-            btnBook.addEventListener('click', () => this.submitBooking());
+            btnBook.addEventListener('click', () => this.openGatewayModal());
         }
+
+        // Gateway Modal Events
+        this.initGatewayEvents();
     }
 
-    async submitBooking() {
+    initGatewayEvents() {
+        const overlay = document.getElementById('bookingGatewayOverlay');
+        if (!overlay) return;
+
+        // Handle Escape key
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && overlay.classList.contains('visible')) {
+                this.closeGatewayModal();
+            }
+        });
+
+        // Close on backdrop click
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) this.closeGatewayModal();
+        });
+    }
+
+    openGatewayModal() {
         if (!this.selectedStart || !this.selectedEnd) return;
+        const overlay = document.getElementById('bookingGatewayOverlay');
+        if (!overlay) return;
 
-        // Show custom confirmation modal instead of native confirm()
-        const formatDate = (d) => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-        const estTotal = document.getElementById('est-total')?.textContent || '—';
+        this.renderMethodSelectStep();
+        overlay.classList.add('visible');
+        document.body.style.overflow = 'hidden';
+    }
 
-        const confirmed = await this.showConfirmModal(
-            formatDate(this.selectedStart),
-            formatDate(this.selectedEnd),
-            estTotal
-        );
-        if (!confirmed) return;
+    closeGatewayModal() {
+        const overlay = document.getElementById('bookingGatewayOverlay');
+        if (!overlay) return;
 
-        const btnBook = document.getElementById('btnBookNow');
-        const originalContent = btnBook.innerHTML;
-        btnBook.disabled = true;
-        btnBook.innerHTML = '<span class="loading-spinner"></span> Processing...';
+        overlay.classList.remove('visible');
+        document.body.style.overflow = '';
+    }
+
+    renderMethodSelectStep() {
+        const modal = document.getElementById('gatewayModalContent');
+        modal.innerHTML = `
+            <button class="modal-close" id="gatewayCloseBtn">&times;</button>
+            <h2>Choose Booking Method</h2>
+            <span class="modal-subtitle">Select how you want to handle this rental</span>
+
+            <div class="booking-gateway-options">
+                <div class="booking-gateway-option active" data-type="ESCROW">
+                    <span class="booking-gateway-recommended">Recommended</span>
+                    <span class="option-title">AgroShare Secure Escrow</span>
+                    <p class="option-desc">Pay securely through AgroShare. Funds are locked and released after verified return.</p>
+                </div>
+                <div class="booking-gateway-option" data-type="MANUAL">
+                    <span class="option-title">Direct Manual Deal</span>
+                    <p class="option-desc">Contact the owner directly and settle offline. No platform dispute protection.</p>
+                </div>
+            </div>
+
+            <div class="booking-gateway-actions">
+                <button class="btn-secondary" id="gatewayCancelBtn">Cancel</button>
+                <button class="btn-primary" id="gatewayContinueBtn">Continue</button>
+            </div>
+        `;
+
+        // Re-bind events for the new HTML
+        const options = modal.querySelectorAll('.booking-gateway-option');
+        options.forEach(opt => {
+            opt.addEventListener('click', () => {
+                options.forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+            });
+        });
+
+        modal.querySelector('#gatewayContinueBtn').addEventListener('click', () => this.handleGatewayContinue());
+        modal.querySelector('#gatewayCancelBtn').addEventListener('click', () => this.closeGatewayModal());
+        modal.querySelector('#gatewayCloseBtn').addEventListener('click', () => this.closeGatewayModal());
+    }
+
+    async handleGatewayContinue() {
+        const modal = document.getElementById('gatewayModalContent');
+        const selectedOpt = modal.querySelector('.booking-gateway-option.active');
+        const bookingType = selectedOpt.dataset.type;
+        
+        const continueBtn = document.getElementById('gatewayContinueBtn');
+        const originalText = continueBtn.textContent;
+        
+        continueBtn.disabled = true;
+        continueBtn.innerHTML = '<span class="loading-spinner"></span> Initializing...';
 
         try {
             const formData = new FormData();
             formData.append('equipment_id', this.equipmentId);
+            formData.append('booking_type', bookingType);
             formData.append('start_datetime', document.getElementById('est-start').value);
             formData.append('end_datetime', document.getElementById('est-end').value);
+            formData.append('csrf_token', document.getElementById('global-csrf-token').value);
 
-            // Get CSRF token from the delete form or any other place it exists
-            const csrf = document.querySelector('input[name="csrf_token"]')?.value;
-            formData.append('csrf_token', csrf);
-
-            const res = await fetch('api/create-booking.php', {
+            const res = await fetch('api/initiate_booking.php', {
                 method: 'POST',
                 body: formData
             });
             const data = await res.json();
 
             if (data.success) {
-                // Show full-screen success overlay
-                this.showBookingSuccess(data);
-                // Clear selection
+                if (bookingType === 'MANUAL') {
+                    this.closeGatewayModal();
+                    this.showManualDealSuccess(data.data);
+                } else {
+                    // ESCROW path - Transition to Checkout Step
+                    this.renderEscrowCheckoutStep(data.data);
+                }
+                
+                // Clear calendar selection
                 this.selectedStart = null;
                 this.selectedEnd = null;
                 this.updateInputs();
@@ -103,14 +176,234 @@ class BookingCalendar {
                 this.render();
             } else {
                 if (window.showToast) window.showToast('error', data.message);
+                continueBtn.disabled = false;
+                continueBtn.textContent = originalText;
             }
         } catch (err) {
-            console.error('Booking error:', err);
+            console.error('Initiation error:', err);
             if (window.showToast) window.showToast('error', 'Network error. Please try again.');
-        } finally {
-            btnBook.disabled = false;
-            btnBook.innerHTML = originalContent;
+            continueBtn.disabled = false;
+            continueBtn.textContent = originalText;
         }
+    }
+
+    renderEscrowCheckoutStep(data) {
+        const modal = document.getElementById('gatewayModalContent');
+        const amount = Number(data.amount).toLocaleString('en-IN');
+
+        modal.innerHTML = `
+            <button class="modal-close" id="gatewayCloseBtn">&times;</button>
+            <h2>Checkout</h2>
+            <span class="modal-subtitle">Review and lock funds in escrow</span>
+
+            <div class="checkout-summary">
+                <div class="checkout-row">
+                    <span class="checkout-label">Rental Amount</span>
+                    <span class="checkout-value">₹${amount}</span>
+                </div>
+                <div class="checkout-row">
+                    <span class="checkout-label">Service Fee</span>
+                    <span class="checkout-value">₹0.00</span>
+                </div>
+                <div class="checkout-row">
+                    <span class="checkout-label">Total Amount</span>
+                    <span class="checkout-total">₹${amount}</span>
+                </div>
+            </div>
+
+            <div class="checkout-disclaimer">
+                By continuing, funds are locked in AgroShare escrow and released only after verified return. This ensures safety for both you and the owner.
+            </div>
+
+            <div class="booking-gateway-actions">
+                <button class="btn-secondary" id="checkoutBackBtn">Back</button>
+                <button class="btn-primary" id="payLockBtn">Pay ₹${amount} & Lock Funds</button>
+            </div>
+        `;
+
+        modal.querySelector('#checkoutBackBtn').addEventListener('click', () => this.renderMethodSelectStep());
+        modal.querySelector('#gatewayCloseBtn').addEventListener('click', () => this.closeGatewayModal());
+        modal.querySelector('#payLockBtn').addEventListener('click', () => this.submitEscrowPayment(data.transaction_id));
+    }
+
+    async submitEscrowPayment(transactionId) {
+        const modal = document.getElementById('gatewayModalContent');
+        
+        // Show processing state
+        modal.innerHTML = `
+            <div class="payment-processing-view">
+                <div class="success-icon-wrap">
+                    <span class="loading-spinner" style="width:48px; height:48px; border-width:4px;"></span>
+                </div>
+                <h3>Processing Payment</h3>
+                <p class="modal-subtitle">Connecting to secure gateway and locking funds...</p>
+            </div>
+        `;
+
+        // Simulate network delay for UX
+        await new Promise(r => setTimeout(r, 1500));
+
+        try {
+            const formData = new FormData();
+            formData.append('transaction_id', transactionId);
+            formData.append('csrf_token', document.getElementById('global-csrf-token').value);
+
+            const res = await fetch('api/process_escrow_payment.php', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                this.renderPaymentSuccessStep(data.data);
+            } else {
+                if (window.showToast) window.showToast('error', data.message);
+                // On error, return to checkout step (re-fetching amount from initiate logic if needed, 
+                // but here we can just pass a simplified re-init or back-to-start)
+                this.renderMethodSelectStep(); 
+            }
+        } catch (err) {
+            console.error('Payment error:', err);
+            if (window.showToast) window.showToast('error', 'Network error. Please try again.');
+            this.renderMethodSelectStep();
+        }
+    }
+
+    renderPaymentSuccessStep(data) {
+        const modal = document.getElementById('gatewayModalContent');
+        
+        modal.innerHTML = `
+            <div class="payment-success-view">
+                <div class="success-icon-wrap">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--primary-action)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                </div>
+                <h2>Funds Locked!</h2>
+                <p class="modal-subtitle">Your payment is held securely in escrow.</p>
+
+                <div class="checkout-summary" style="padding: 1rem;">
+                    <div class="checkout-row">
+                        <span class="checkout-label">Transaction ID</span>
+                        <span class="checkout-value" style="font-family:monospace;">${data.transaction_id}</span>
+                    </div>
+                </div>
+
+                ${data.demo_handover_otp ? `
+                <div class="demo-pin-box">
+                    <span class="demo-pin-label">Demo Handover PIN</span>
+                    <span class="demo-pin-value">${data.demo_handover_otp}</span>
+                    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem;">Share this with the owner during equipment pickup.</p>
+                </div>
+                ` : ''}
+
+                <p class="success-note" style="margin-bottom:1.5rem;">Next step: Meet the owner and verify handover using the PIN above.</p>
+
+                <div class="booking-gateway-actions" style="grid-template-columns: 1fr;">
+                    <a href="my-bookings.php" class="btn-primary" style="text-decoration:none; text-align:center; justify-content:center;">Go to My Bookings</a>
+                    <button class="btn-secondary" id="successCloseBtn">Close</button>
+                </div>
+            </div>
+        `;
+
+        modal.querySelector('#successCloseBtn').addEventListener('click', () => this.closeGatewayModal());
+    }
+
+    showManualDealSuccess(data) {
+        const contact = data.owner_contact;
+        this.showCustomSuccessModal({
+            title: 'Manual Deal Initiated',
+            subtitle: `You chose to contact the owner directly for <strong>this equipment</strong>.`,
+            details: [
+                { label: 'Transaction ID', value: data.transaction_id },
+                { label: 'Est. Amount', value: `₹${Number(data.amount).toLocaleString('en-IN')}` }
+            ],
+            owner: {
+                name: contact.name,
+                phone: contact.phone,
+                email: contact.email
+            },
+            note: 'Please contact the owner to arrange payment and handover. AgroShare protection does not apply to manual deals.'
+        });
+    }
+
+    showEscrowInitiated(data) {
+        this.showCustomSuccessModal({
+            title: 'Escrow Initiated',
+            subtitle: 'Secure booking process started.',
+            details: [
+                { label: 'Transaction ID', value: data.transaction_id },
+                { label: 'Amount to Lock', value: `₹${Number(data.amount).toLocaleString('en-IN')}` }
+            ],
+            note: 'Escrow initiated. Checkout and payment flow will be integrated in the next step.'
+        });
+    }
+
+    showCustomSuccessModal(config) {
+        document.getElementById('bookingSuccessOverlay')?.remove();
+
+        const overlay = document.createElement('div');
+        overlay.id = 'bookingSuccessOverlay';
+        overlay.className = 'booking-success-overlay';
+        
+        let detailsHtml = config.details.map(d => `
+            <div class="success-detail-row">
+                <span class="detail-label">${d.label}</span>
+                <span class="detail-value">${d.value}</span>
+            </div>
+        `).join('');
+
+        let ownerHtml = config.owner ? `
+            <div class="success-owner-card">
+                <div class="owner-badge">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div class="owner-info">
+                    <span class="owner-label">Owner Contact</span>
+                    <strong class="owner-name-display">${config.owner.name}</strong>
+                    <span style="font-size:0.8rem; color:var(--text-subtle);">${config.owner.email || ''}</span>
+                </div>
+                ${config.owner.phone ? `
+                <a href="tel:${config.owner.phone}" class="owner-phone-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Call
+                </a>` : ''}
+            </div>
+        ` : '';
+
+        overlay.innerHTML = `
+            <div class="booking-success-card">
+                <div class="success-icon-wrap">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--primary-action)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                </div>
+                <h2 class="success-title">${config.title}</h2>
+                <p class="success-subtitle">${config.subtitle || ''}</p>
+                
+                <div class="success-details">${detailsHtml}</div>
+                ${ownerHtml}
+                <p class="success-note">${config.note || ''}</p>
+
+                <div class="success-actions">
+                    <a href="my-bookings.php" class="btn-primary success-btn">Go to My Bookings</a>
+                    <button type="button" class="btn-secondary success-btn" id="successCloseBtn">Continue Browsing</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+        requestAnimationFrame(() => overlay.classList.add('visible'));
+        overlay.querySelector('#successCloseBtn').addEventListener('click', () => {
+            overlay.classList.remove('visible');
+            setTimeout(() => overlay.remove(), 300);
+        });
+    }
+
+    async submitBooking() {
+        // This method is now bypassed by openGatewayModal() in bindEvents
     }
 
     showConfirmModal(startDate, endDate, totalPrice) {
