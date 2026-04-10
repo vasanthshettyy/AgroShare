@@ -658,9 +658,51 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             const data = await res.json();
 
             if (data.success) {
-                if (window.showToast) window.showToast('success', data.message);
-                else alert(data.message);
-                setTimeout(() => location.reload(), 1500);
+                // Check if we need to show return PIN (handover success case)
+                if (otpModal.currentType === 'handover' && data.data && data.data.demo_return_otp) {
+                    otpModal.close();
+                    
+                    // Show Return PIN Success Modal
+                    const returnPin = data.data.demo_return_otp;
+                    const txnId = data.data.transaction_id || otpModal.currentTxn;
+                    
+                    const overlay = document.createElement('div');
+                    overlay.className = 'otp-modal-overlay visible';
+                    overlay.innerHTML = `
+                        <div class="otp-modal-card" style="max-width:420px;">
+                            <div style="margin-bottom:1.5rem;">
+                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--primary-action)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22 4 12 14.01 9 11.01"/>
+                                </svg>
+                            </div>
+                            <h2 class="otp-title">Handover Verified</h2>
+                            <p class="otp-subtitle" style="margin-bottom:1.5rem;">Rental is now active. Please note down the <strong>Return PIN</strong> below.</p>
+                            
+                            <div style="background:rgba(255,255,255,0.05); border:1px dashed var(--primary-action); border-radius:16px; padding:1.5rem; margin-bottom:2rem;">
+                                <span style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--primary-action); display:block; margin-bottom:0.5rem; font-weight:800;">Demo Return PIN</span>
+                                <span style="font-size:2.5rem; font-weight:900; letter-spacing:0.2em; color:#fff;">${returnPin}</span>
+                                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem;">Ask the renter for this PIN when the equipment is returned.</p>
+                            </div>
+
+                            <div style="font-size:0.8rem; color:var(--text-subtle); margin-bottom:2rem;">
+                                Transaction: <code style="color:var(--text-main);">${txnId}</code>
+                            </div>
+
+                            <button class="btn-primary" id="handoverFinalBtn" style="width:100%;">Got it, continue</button>
+                        </div>
+                    `;
+                    document.body.appendChild(overlay);
+                    document.body.style.overflow = 'hidden';
+
+                    overlay.querySelector('#handoverFinalBtn').addEventListener('click', () => {
+                        location.reload();
+                    });
+                } else {
+                    if (window.showToast) window.showToast('success', data.message);
+                    else alert(data.message);
+                    setTimeout(() => location.reload(), 1500);
+                }
             } else {
                 alert(data.message);
                 otpModal.verifyBtn.disabled = false;
