@@ -12,6 +12,65 @@ $fullName  = trim($_SESSION['full_name'] ?? '');
 $nameParts = explode(' ', $fullName);
 $initials  = !empty($nameParts[0]) ? strtoupper(substr($nameParts[0], 0, 1)) : '?';
 if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
+
+/**
+ * Render escrow progress tracker stepper bar.
+ */
+function renderEscrowProgress(string $escrowStatus): string {
+    $steps = [
+        'PENDING_PAYMENT' => ['label' => 'Payment',  'icon' => '💳'],
+        'FUNDS_LOCKED'    => ['label' => 'Handover', 'icon' => '🤝'],
+        'ACTIVE_RENTAL'   => ['label' => 'Active',   'icon' => '🚜'],
+        'COMPLETED'       => ['label' => 'Return',   'icon' => '↩️'],
+        'DONE'            => ['label' => 'Done',     'icon' => '✅'], // Map actually requires 5 steps. Let's fix map to match exactly.
+    ];
+    // Wait, the prompt says: Map status to current step: PENDING_PAYMENT -> Payment active, FUNDS_LOCKED -> Handover active, ACTIVE_RENTAL -> Return active, COMPLETED -> Done active
+    $steps = [
+        'PENDING_PAYMENT' => ['label' => 'Payment',  'icon' => '💳'],
+        'FUNDS_LOCKED'    => ['label' => 'Handover', 'icon' => '🤝'],
+        'ACTIVE_RENTAL'   => ['label' => 'Return',   'icon' => '↩️'],
+        'COMPLETED'       => ['label' => 'Done',     'icon' => '✅'],
+    ];
+    
+    // Oh wait, prompt said 5 steps: Payment, Handover, Active Rental, Return, Done.
+    // The instructions say: Map status to current step: PENDING_PAYMENT -> Payment, FUNDS_LOCKED -> Handover, ACTIVE_RENTAL -> Return (wait, Active Rental?), COMPLETED -> Done. Let's make 5 steps exactly.
+    
+    $isCancelled = ($escrowStatus === 'CANCELLED');
+    $statusMap = [
+        'PENDING_PAYMENT' => 0, // Payment
+        'FUNDS_LOCKED'    => 1, // Handover
+        'ACTIVE_RENTAL'   => 3, // Return active
+        'COMPLETED'       => 4, // Done
+    ];
+    $currentIdx = $isCancelled ? -1 : ($statusMap[$escrowStatus] ?? -1);
+
+    $uiSteps = [
+        ['label' => 'Payment', 'icon' => '💳'],
+        ['label' => 'Handover', 'icon' => '🤝'],
+        ['label' => 'Active Rental', 'icon' => '🚜'],
+        ['label' => 'Return', 'icon' => '↩️'],
+        ['label' => 'Done', 'icon' => '✅']
+    ];
+
+    $html = '<div class="escrow-tracker' . ($isCancelled ? ' is-cancelled' : '') . '">';
+    foreach ($uiSteps as $idx => $step) {
+        $cls = 'escrow-step';
+        if (!$isCancelled) {
+            if ($idx < $currentIdx) $cls .= ' step-completed';
+            elseif ($idx === $currentIdx) $cls .= ' step-active';
+        }
+        $html .= '<div class="' . $cls . '">';
+        $html .= '<div class="step-dot"><span>' . $step['icon'] . '</span></div>';
+        $html .= '<span class="step-label">' . $step['label'] . '</span>';
+        $html .= '</div>';
+        if ($idx < count($uiSteps) - 1) {
+            $lineCls = (!$isCancelled && $idx < $currentIdx) ? 'step-line step-line-done' : 'step-line';
+            $html .= '<div class="' . $lineCls . '"></div>';
+        }
+    }
+    $html .= '</div>';
+    return $html;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -429,6 +488,9 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                 <span class="info-label">Dates:</span> <span><?= date('d M', strtotime($b['start_datetime'])) ?> - <?= date('d M', strtotime($b['end_datetime'])) ?></span>
                             </div>
                         </div>
+                        <?php if ($b['booking_type'] === 'ESCROW' && $b['escrow_status']): ?>
+                            <?= renderEscrowProgress($b['escrow_status']) ?>
+                        <?php endif; ?>
                         <div class="card-footer" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
                             <div style="display: flex; flex-direction: column; gap: 6px;">
                                 <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
@@ -438,10 +500,12 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                             </div>
                             <div class="actions-wrap" style="margin-left: auto;">
                                 <?php if ($b['booking_type'] === 'ESCROW'): ?>
-                                    <?php if ($b['escrow_status'] === 'FUNDS_LOCKED'): ?>
-                                        <button class="btn-primary btn-sm btn-otp-action" data-txn="<?= $b['transaction_id'] ?>" data-type="handover">Verify Handover PIN</button>
+                                    <?php if ($b['escrow_status'] === 'PENDING_PAYMENT'): ?>
+                                        <button class="btn-primary btn-sm btn-pay-escrow" data-txn="<?= e($b['transaction_id']) ?>" data-amount="<?= $b['total_price'] ?>">💳 Pay & Lock Funds</button>
+                                    <?php elseif ($b['escrow_status'] === 'FUNDS_LOCKED'): ?>
+                                        <span style="font-size: 0.85rem; color: var(--text-muted); align-self: center; margin-right: 0.5rem;">Share handover PIN with owner at pickup.</span>
                                     <?php elseif ($b['escrow_status'] === 'ACTIVE_RENTAL'): ?>
-                                        <button class="btn-primary btn-sm btn-otp-action" data-txn="<?= $b['transaction_id'] ?>" data-type="return">Verify Return PIN</button>
+                                        <span style="font-size: 0.85rem; color: var(--text-muted); align-self: center; margin-right: 0.5rem;">Share return PIN with owner at return.</span>
                                     <?php endif; ?>
                                 <?php endif; ?>
 
@@ -514,6 +578,9 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                 </div>
                             <?php endif; ?>
                         </div>
+                        <?php if ($b['booking_type'] === 'ESCROW' && $b['escrow_status']): ?>
+                            <?= renderEscrowProgress($b['escrow_status']) ?>
+                        <?php endif; ?>
                         <div class="card-footer" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
                             <div style="display: flex; flex-direction: column; gap: 6px;">
                                 <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
@@ -553,6 +620,22 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             </div>
         </div>
     </main>
+</div>
+
+<!-- Escrow Payment Modal -->
+<div class="otp-modal-overlay" id="paymentModalOverlay">
+    <div class="otp-modal-card">
+        <h2 class="otp-title" id="paymentTitle">Pay & Lock Funds</h2>
+        <span class="otp-subtitle">Amount to be held in escrow:</span>
+        <div style="font-size:2rem; font-weight:800; color:var(--primary-action); margin: 1rem 0;">₹<span id="paymentAmount">0</span></div>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom: 1.5rem;">
+            This amount will be locked securely. The owner only receives it after you verify the return of the equipment.
+        </p>
+        <div class="otp-actions">
+            <button class="btn-secondary" id="paymentCancelBtn">Cancel</button>
+            <button class="btn-primary" id="paymentConfirmBtn">Confirm Payment</button>
+        </div>
+    </div>
 </div>
 
 <!-- OTP Verification Modal -->
@@ -624,10 +707,36 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 
     otpModal.fields.forEach((field, idx) => {
         field.addEventListener('input', (e) => {
-            if (e.target.value && idx < 3) otpModal.fields[idx + 1].focus();
+            const val = e.target.value.replace(/\D/g, '');
+            e.target.value = val.slice(0, 1);
+            if (val && idx < 3) {
+                otpModal.fields[idx + 1].focus();
+            }
+            // Auto-submit on 4th digit
+            if (idx === 3 && val) {
+                setTimeout(() => {
+                    if (!otpModal.verifyBtn.disabled) otpModal.verifyBtn.click();
+                }, 100);
+            }
         });
         field.addEventListener('keydown', (e) => {
             if (e.key === 'Backspace' && !e.target.value && idx > 0) otpModal.fields[idx - 1].focus();
+        });
+        // Paste support
+        field.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const paste = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 4);
+            if (paste.length === 0) return;
+            paste.split('').forEach((ch, i) => {
+                if (otpModal.fields[i]) otpModal.fields[i].value = ch;
+            });
+            const focusIdx = Math.min(paste.length, 3);
+            otpModal.fields[focusIdx].focus();
+            if (paste.length === 4) {
+                setTimeout(() => {
+                    if (!otpModal.verifyBtn.disabled) otpModal.verifyBtn.click();
+                }, 100);
+            }
         });
     });
 
@@ -640,12 +749,118 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
         });
     });
 
+    // Payment Modal Logic
+    const paymentModal = {
+        overlay: document.getElementById('paymentModalOverlay'),
+        amountSpan: document.getElementById('paymentAmount'),
+        cancelBtn: document.getElementById('paymentCancelBtn'),
+        confirmBtn: document.getElementById('paymentConfirmBtn'),
+        currentTxn: null,
+
+        open(txnId, amount) {
+            this.currentTxn = txnId;
+            this.amountSpan.textContent = amount ? amount : '—';
+            this.overlay.classList.add('visible');
+            document.body.style.overflow = 'hidden';
+            this.confirmBtn.disabled = false;
+            this.confirmBtn.textContent = 'Confirm Payment';
+        },
+
+        close() {
+            this.overlay.classList.remove('visible');
+            document.body.style.overflow = '';
+        },
+        
+        init() {
+            // Add close X button dynamically
+            const closeX = document.createElement('button');
+            closeX.innerHTML = '&times;';
+            closeX.style.cssText = 'position:absolute;top:15px;right:15px;background:none;border:none;font-size:1.5rem;color:var(--text-muted);cursor:pointer;line-height:1;padding:0;';
+            closeX.addEventListener('click', () => this.close());
+            this.overlay.querySelector('.otp-modal-card').style.position = 'relative';
+            this.overlay.querySelector('.otp-modal-card').appendChild(closeX);
+
+            this.cancelBtn.addEventListener('click', () => this.close());
+            this.overlay.addEventListener('click', (e) => { if (e.target === this.overlay) this.close(); });
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && this.overlay.classList.contains('visible')) {
+                    this.close();
+                }
+            });
+
+            this.confirmBtn.addEventListener('click', async () => {
+                this.confirmBtn.disabled = true;
+                this.confirmBtn.innerHTML = '<span class="loading-spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:6px;"></span>Processing...';
+
+                try {
+                    const formData = new FormData();
+                    formData.append('transaction_id', this.currentTxn);
+                    formData.append('csrf_token', document.getElementById('csrf_token').value);
+
+                    const res = await fetch('api/process_escrow_payment.php', { method: 'POST', body: formData });
+                    const data = await res.json();
+
+                    if (data.success) {
+                        showInlineToast('success', data.message || 'Payment successful!');
+                        this.close();
+                        setTimeout(() => location.reload(), 1200);
+                    } else {
+                        showInlineToast('error', data.message || 'Payment failed.');
+                        this.confirmBtn.disabled = false;
+                        this.confirmBtn.textContent = 'Confirm Payment';
+                    }
+                } catch (err) {
+                    showInlineToast('error', 'Network error. Please try again.');
+                    this.confirmBtn.disabled = false;
+                    this.confirmBtn.textContent = 'Confirm Payment';
+                }
+            });
+        }
+    };
+    
+    // Initialize Modal Events
+    paymentModal.init();
+
+    document.querySelectorAll('.btn-pay-escrow').forEach(btn => {
+        btn.addEventListener('click', () => {
+            paymentModal.open(btn.dataset.txn, btn.dataset.amount);
+        });
+    });
+
+    function showInlineToast(type, message) {
+        if (window.showToast) {
+            window.showToast(type, message);
+            return;
+        }
+        const existingToast = document.querySelector('.toast');
+        if (existingToast) existingToast.remove();
+        
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.style.position = 'fixed';
+        toast.style.bottom = '20px';
+        toast.style.right = '20px';
+        toast.style.background = type === 'error' ? 'var(--danger, #dc3545)' : 'var(--primary-action, #28a745)';
+        toast.style.color = '#fff';
+        toast.style.padding = '12px 24px';
+        toast.style.borderRadius = '8px';
+        toast.style.zIndex = '99999';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
     otpModal.verifyBtn.addEventListener('click', async () => {
         const otp = otpModal.getOTP();
-        if (otp.length !== 4) return alert('Please enter all 4 digits.');
+        if (otp.length !== 4) {
+            showInlineToast('error', 'Please enter all 4 digits.');
+            return;
+        }
 
+        // Loading spinner state
         otpModal.verifyBtn.disabled = true;
-        otpModal.verifyBtn.textContent = 'Verifying...';
+        otpModal.verifyBtn.innerHTML = '<span class="loading-spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:6px;"></span>Verifying...';
 
         try {
             const endpoint = otpModal.currentType === 'handover' ? 'api/verify_handover.php' : 'api/verify_return.php';
@@ -699,17 +914,23 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                         location.reload();
                     });
                 } else {
-                    if (window.showToast) window.showToast('success', data.message);
-                    else alert(data.message);
+                    showInlineToast('success', data.message);
                     setTimeout(() => location.reload(), 1500);
                 }
             } else {
-                alert(data.message);
+                // Shake animation on wrong PIN
+                const inputGroup = document.querySelector('.otp-input-group');
+                inputGroup.classList.add('otp-shake');
+                setTimeout(() => inputGroup.classList.remove('otp-shake'), 600);
+                otpModal.fields.forEach(f => f.value = '');
+                otpModal.fields[0].focus();
+
+                showInlineToast('error', data.message);
                 otpModal.verifyBtn.disabled = false;
                 otpModal.verifyBtn.textContent = 'Verify PIN';
             }
         } catch (err) {
-            alert('Network error. Please try again.');
+            showInlineToast('error', 'Network error. Please try again.');
             otpModal.verifyBtn.disabled = false;
             otpModal.verifyBtn.textContent = 'Verify PIN';
         }
@@ -802,12 +1023,12 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                         setTimeout(() => toast.remove(), 3000);
                     }
                 } else {
-                    alert(data.message);
+                    showInlineToast('error', data.message);
                     btn.disabled = false;
                     btn.style.opacity = '1';
                 }
             } catch (err) {
-                alert('Network error. Please try again.');
+                showInlineToast('error', 'Network error. Please try again.');
                 btn.disabled = false;
                 btn.style.opacity = '1';
             }
