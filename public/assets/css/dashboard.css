@@ -2368,3 +2368,243 @@ input[type="number"].form-input::-webkit-inner-spin-button {
     gap: 1rem;
 }
 
+/* -- OTP Shake Animation -- */
+@keyframes otpShake {
+    0%, 100% { transform: translateX(0); }
+    10%, 50%, 90% { transform: translateX(-6px); }
+    30%, 70% { transform: translateX(6px); }
+}
+
+.otp-shake {
+    animation: otpShake 0.5s ease;
+}
+
+.otp-field.otp-error {
+    border-color: var(--danger) !important;
+    background: rgba(198, 40, 40, 0.1) !important;
+}
+
+/* -- Escrow Progress Tracker -- */
+.escrow-tracker {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 1rem 0.5rem;
+    margin: 0.75rem 0 0;
+    border-top: 1px solid var(--border-color);
+    overflow-x: auto;
+}
+
+.escrow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    min-width: 56px;
+    flex-shrink: 0;
+}
+
+.step-dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.step-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    transition: color 0.3s ease;
+}
+
+.step-line {
+    flex: 1;
+    height: 2px;
+    min-width: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 1px;
+    transition: background 0.3s ease;
+    margin: 0 0.15rem;
+    align-self: center;
+    margin-bottom: 1.2rem;
+}
+
+.step-line-done {
+    background: var(--primary-action);
+    box-shadow: 0 0 8px rgba(76, 175, 120, 0.3);
+}
+
+/* Active step */
+.escrow-step.step-active .step-dot {
+    border-color: var(--primary-action);
+    background: rgba(76, 175, 120, 0.15);
+    box-shadow: 0 0 16px rgba(76, 175, 120, 0.3);
+    animation: subtlePulse 2s ease-in-out infinite;
+}
+
+.escrow-step.step-active .step-label {
+    color: var(--primary-action);
+    font-weight: 700;
+}
+
+/* Completed step */
+.escrow-step.step-completed .step-dot {
+    border-color: var(--primary-action);
+    background: var(--primary-action);
+}
+
+.escrow-step.step-completed .step-label {
+    color: var(--text-subtle);
+}
+
+/* Cancelled chip */
+.escrow-CANCELLED { color: #9E9E9E; background: rgba(158, 158, 158, 0.1); border-color: rgba(158, 158, 158, 0.2); }
+
+/* Loading spinner (inline reuse) */
+.loading-spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Escrow Progress Tracker */
+.escrow-progress, .escrow-tracker {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    padding: 1rem 0;
+    margin-bottom: 1.5rem;
+}
+.escrow-tracker.is-cancelled {
+    opacity: 0.5;
+    filter: grayscale(100%);
+}
+.escrow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+    flex: 1;
+}
+.escrow-step-dot, .step-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--surface-color, #1a2e1a);
+    border: 2px solid var(--border-color, #333);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+.escrow-step-label, .step-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted, #888);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+.step-line {
+    flex: 1;
+    height: 2px;
+    background: var(--border-color, #333);
+    margin-top: -1.5rem;
+    z-index: 1;
+}
+.step-line-done {
+    background: var(--primary-action, #2e7d32);
+}
+.escrow-step.step-completed .step-dot, .escrow-step.step-completed .escrow-step-dot {
+    background: var(--primary-action, #2e7d32);
+    border-color: var(--primary-action, #2e7d32);
+    color: #fff;
+}
+.escrow-step.step-completed .step-label, .escrow-step.step-completed .escrow-step-label {
+    color: var(--text-main, #fff);
+}
+.escrow-step.step-active .step-dot, .escrow-step.step-active .escrow-step-dot {
+    border-color: var(--primary-action, #2e7d32);
+    box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.2);
+}
+.escrow-step.step-active .step-label, .escrow-step.step-active .escrow-step-label {
+    color: var(--primary-action, #2e7d32);
+}
+@media (max-width: 600px) {
+    .escrow-step-label, .step-label { font-size: 0.6rem; }
+    .escrow-step-dot, .step-dot { width: 24px; height: 24px; font-size: 0.7rem; }
+    .step-line { margin-top: -1rem; }
+}
+
+/* OTP Shake Animation */
+@keyframes otpShake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+.otp-shake {
+    animation: otpShake 0.6s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* Pay Modal */
+.escrow-pay-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+.escrow-pay-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+.escrow-pay-modal {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    transform: scale(0.95);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+.escrow-pay-overlay.visible .escrow-pay-modal {
+    transform: scale(1);
+}
+.escrow-pay-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+.escrow-pay-actions button {
+    flex: 1;
+}
+
