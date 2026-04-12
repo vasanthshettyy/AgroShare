@@ -75,6 +75,16 @@ class BookingCalendar {
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) this.closeGatewayModal();
         });
+
+        // Robust delegated actions so cancel/close keeps working across re-renders
+        overlay.addEventListener('click', (e) => {
+            const actionEl = e.target.closest('[data-gateway-action]');
+            if (!actionEl) return;
+
+            const action = actionEl.dataset.gatewayAction;
+            if (action === 'close') this.closeGatewayModal();
+            if (action === 'method-select') this.renderMethodSelectStep();
+        });
     }
 
     openGatewayModal() {
@@ -98,7 +108,7 @@ class BookingCalendar {
     renderMethodSelectStep() {
         const modal = document.getElementById('gatewayModalContent');
         modal.innerHTML = `
-            <button class="modal-close" id="gatewayCloseBtn">&times;</button>
+            <button class="modal-close" id="gatewayCloseBtn" data-gateway-action="close">&times;</button>
             <h2>Choose Booking Method</h2>
             <span class="modal-subtitle">Select how you want to handle this rental</span>
 
@@ -115,7 +125,7 @@ class BookingCalendar {
             </div>
 
             <div class="booking-gateway-actions">
-                <button class="btn-secondary" id="gatewayCancelBtn">Cancel</button>
+                <button class="btn-secondary" id="gatewayCancelBtn" data-gateway-action="close">Cancel</button>
                 <button class="btn-primary" id="gatewayContinueBtn">Continue</button>
             </div>
         `;
@@ -130,8 +140,6 @@ class BookingCalendar {
         });
 
         modal.querySelector('#gatewayContinueBtn').addEventListener('click', () => this.handleGatewayContinue());
-        modal.querySelector('#gatewayCancelBtn').addEventListener('click', () => this.closeGatewayModal());
-        modal.querySelector('#gatewayCloseBtn').addEventListener('click', () => this.closeGatewayModal());
     }
 
     async handleGatewayContinue() {
@@ -192,7 +200,7 @@ class BookingCalendar {
         const amount = Number(data.amount).toLocaleString('en-IN');
 
         modal.innerHTML = `
-            <button class="modal-close" id="gatewayCloseBtn">&times;</button>
+            <button class="modal-close" id="gatewayCloseBtn" data-gateway-action="close">&times;</button>
             <h2>Checkout</h2>
             <span class="modal-subtitle">Review and lock funds in escrow</span>
 
@@ -216,13 +224,12 @@ class BookingCalendar {
             </div>
 
             <div class="booking-gateway-actions">
-                <button class="btn-secondary" id="checkoutBackBtn">Back</button>
+                <button class="btn-secondary" id="checkoutBackBtn" data-gateway-action="method-select">Back</button>
+                <button class="btn-secondary" id="checkoutCancelBtn" data-gateway-action="close">Cancel</button>
                 <button class="btn-primary" id="payLockBtn">Pay ₹${amount} & Lock Funds</button>
             </div>
         `;
 
-        modal.querySelector('#checkoutBackBtn').addEventListener('click', () => this.renderMethodSelectStep());
-        modal.querySelector('#gatewayCloseBtn').addEventListener('click', () => this.closeGatewayModal());
         modal.querySelector('#payLockBtn').addEventListener('click', () => this.submitEscrowPayment(data.transaction_id));
     }
 
@@ -257,15 +264,11 @@ class BookingCalendar {
             if (data.success) {
                 this.renderPaymentSuccessStep(data.data);
             } else {
-                if (window.showToast) window.showToast('error', data.message);
-                // On error, return to checkout step (re-fetching amount from initiate logic if needed, 
-                // but here we can just pass a simplified re-init or back-to-start)
-                this.renderMethodSelectStep(); 
+                this.renderPaymentErrorStep(transactionId, data.message);
             }
         } catch (err) {
             console.error('Payment error:', err);
-            if (window.showToast) window.showToast('error', 'Network error. Please try again.');
-            this.renderMethodSelectStep();
+            this.renderPaymentErrorStep(transactionId, 'Network error. Please try again.');
         }
     }
 
@@ -302,12 +305,33 @@ class BookingCalendar {
 
                 <div class="booking-gateway-actions" style="grid-template-columns: 1fr;">
                     <a href="my-bookings.php" class="btn-primary" style="text-decoration:none; text-align:center; justify-content:center;">Go to My Bookings</a>
-                    <button class="btn-secondary" id="successCloseBtn">Close</button>
+                    <button class="btn-secondary" id="successCloseBtn" data-gateway-action="close">Close</button>
                 </div>
             </div>
         `;
+    }
 
-        modal.querySelector('#successCloseBtn').addEventListener('click', () => this.closeGatewayModal());
+    renderPaymentErrorStep(transactionId, errorMessage) {
+        const modal = document.getElementById('gatewayModalContent');
+        modal.innerHTML = `
+            <div class="payment-success-view">
+                <div class="success-icon-wrap">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--danger, #c62828)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="15" y1="9" x2="9" y2="15"/>
+                        <line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                </div>
+                <h2>Payment Failed</h2>
+                <p class="modal-subtitle">${errorMessage}</p>
+
+                <div class="booking-gateway-actions" style="grid-template-columns: 1fr 1fr; margin-top: 1.5rem;">
+                    <button class="btn-secondary" data-gateway-action="close">Close</button>
+                    <button class="btn-primary" id="retryPayBtn">Retry Payment</button>
+                </div>
+            </div>
+        `;
+        modal.querySelector('#retryPayBtn').addEventListener('click', () => this.submitEscrowPayment(transactionId));
     }
 
     showManualDealSuccess(data) {
