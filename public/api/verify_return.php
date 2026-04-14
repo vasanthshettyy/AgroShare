@@ -85,11 +85,6 @@ try {
         $updateBooking->bind_param('s', $transactionId);
         $updateBooking->execute();
 
-        // Equipment availability release: set is_available = 1
-        $updateEq = $conn->prepare("UPDATE equipment SET is_available = 1 WHERE id = ?");
-        $updateEq->bind_param('i', $txn['equipment_id']);
-        $updateEq->execute();
-
         // Optional Audit Log
         logAuditEvent($conn, 'escrow_completed', (int)$txn['renter_id'], "Escrow transaction $transactionId completed successfully.");
 

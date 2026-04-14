@@ -352,9 +352,9 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
                     <?php endif; ?>
                     <!-- Availability badge overlay -->
                     <?php if (!$eq['is_available']): ?>
-                    <span class="eq-card-badge unavailable">Unavailable</span>
+                    <span class="eq-card-badge unavailable">Off-market</span>
                     <?php else: ?>
-                    <span class="eq-card-badge available">Available</span>
+                    <span class="eq-card-badge available">Listed</span>
                     <?php endif; ?>
                 </div>
 

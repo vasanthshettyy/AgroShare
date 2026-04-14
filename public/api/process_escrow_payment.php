@@ -75,11 +75,6 @@ try {
         $updateBooking->bind_param('s', $transactionId);
         $updateBooking->execute();
 
-        // Mark equipment as unavailable (rental confirmed)
-        $updateEq = $conn->prepare("UPDATE equipment SET is_available = 0 WHERE id = ?");
-        $updateEq->bind_param('i', $txn['equipment_id']);
-        $updateEq->execute();
-
         // Optional: Get equipment title for notifications
         $eqStmt = $conn->prepare("SELECT title FROM equipment WHERE id = ?");
         $eqStmt->bind_param('i', $txn['equipment_id']);

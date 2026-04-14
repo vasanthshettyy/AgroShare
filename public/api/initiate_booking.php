@@ -126,14 +126,6 @@ try {
         $bookingStmt->execute();
         $bookingStmt->close();
 
-        // Manual path: Mark equipment as unavailable immediately
-        if ($bookingType === 'MANUAL') {
-            $updateEq = $conn->prepare("UPDATE equipment SET is_available = 0 WHERE id = ?");
-            $updateEq->bind_param('i', $eqId);
-            $updateEq->execute();
-            $updateEq->close();
-        }
-
         $conn->commit();
 
         // G) Notification hooks

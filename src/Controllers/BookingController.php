@@ -188,18 +188,6 @@ function updateBookingStatus(mysqli $conn, int $bookingId, int $userId, string $
         $stmt->bind_param('si', $newStatus, $bookingId);
         $stmt->execute();
 
-        if ($newStatus === 'confirmed') {
-            $stmt = $conn->prepare("UPDATE equipment SET is_available = 0 WHERE id = ?");
-            $stmt->bind_param('i', $booking['equipment_id']);
-            $stmt->execute();
-        }
-
-        if ($newStatus === 'completed' || ($newStatus === 'cancelled' && $current === 'confirmed')) {
-            $stmt = $conn->prepare("UPDATE equipment SET is_available = 1 WHERE id = ?");
-            $stmt->bind_param('i', $booking['equipment_id']);
-            $stmt->execute();
-        }
-
         // Sync ESCROW transaction on cancel
         if ($newStatus === 'cancelled' && $isEscrow && !empty($booking['transaction_id'])) {
             cancelEscrowTransaction($conn, $booking['transaction_id']);
