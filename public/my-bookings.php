@@ -503,9 +503,9 @@ function renderEscrowProgress(string $escrowStatus): string {
                                     <?php if ($b['escrow_status'] === 'PENDING_PAYMENT'): ?>
                                         <button class="btn-primary btn-sm btn-pay-escrow" data-txn="<?= e($b['transaction_id']) ?>" data-amount="<?= $b['total_price'] ?>">💳 Pay & Lock Funds</button>
                                     <?php elseif ($b['escrow_status'] === 'FUNDS_LOCKED'): ?>
-                                        <span style="font-size: 0.85rem; color: var(--text-muted); align-self: center; margin-right: 0.5rem;">Share handover PIN with owner at pickup.</span>
+                                        <span style="font-size: 0.85rem; color: var(--text-muted); align-self: center; margin-right: 0.5rem;">Handover PIN: <strong style="color:var(--primary-action); letter-spacing: 0.1em;"><?= e($b['handover_otp']) ?></strong></span>
                                     <?php elseif ($b['escrow_status'] === 'ACTIVE_RENTAL'): ?>
-                                        <span style="font-size: 0.85rem; color: var(--text-muted); align-self: center; margin-right: 0.5rem;">Share return PIN with owner at return.</span>
+                                        <button class="btn-primary btn-sm btn-otp-action" data-txn="<?= e($b['transaction_id']) ?>" data-type="return">↩ Return Equipment</button>
                                     <?php endif; ?>
                                 <?php endif; ?>
 
@@ -593,7 +593,7 @@ function renderEscrowProgress(string $escrowStatus): string {
                                     <?php if ($b['escrow_status'] === 'FUNDS_LOCKED'): ?>
                                         <button class="btn-primary btn-sm btn-otp-action" data-txn="<?= $b['transaction_id'] ?>" data-type="handover">Verify Handover PIN</button>
                                     <?php elseif ($b['escrow_status'] === 'ACTIVE_RENTAL'): ?>
-                                        <button class="btn-primary btn-sm btn-otp-action" data-txn="<?= $b['transaction_id'] ?>" data-type="return">Verify Return PIN</button>
+                                        <span style="font-size: 0.85rem; color: var(--text-muted); align-self: center; margin-right: 0.5rem;">Return PIN: <strong style="color:var(--primary-action); letter-spacing: 0.1em;"><?= e($b['return_otp']) ?></strong></span>
                                     <?php endif; ?>
                                 <?php endif; ?>
 
@@ -684,11 +684,10 @@ function renderEscrowProgress(string $escrowStatus): string {
         open(txnId, type) {
             this.currentTxn = txnId;
             this.currentType = type;
-            document.getElementById('otpTitle').textContent = type === 'handover' ? 'Handover Verification' : 'Return Verification';
-            document.getElementById('otpSubtitle').textContent = type === 'handover' 
-                ? 'Ask the renter for the handover PIN to start the rental.' 
-                : 'Ask the renter for the return PIN to complete the deal.';
-            
+            document.getElementById('otpTitle').textContent = type === 'handover' ? 'Handover Verification' : 'Return Equipment';
+            document.getElementById('otpSubtitle').textContent = type === 'handover'
+                ? 'Ask the renter for the handover PIN to start the rental.'
+                : 'Enter the return PIN provided by the owner to complete the return.';            
             this.fields.forEach(f => f.value = '');
             this.overlay.classList.add('visible');
             document.body.style.overflow = 'hidden';
