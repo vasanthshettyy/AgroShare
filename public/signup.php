@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $full_name        = trim($_POST['full_name'] ?? '');
     $phone            = trim($_POST['phone'] ?? '');
-    $email            = trim($_POST['email'] ?? '');
+    $email            = strtolower(trim($_POST['email'] ?? ''));
     $password         = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
     $city             = trim($_POST['city'] ?? '');
@@ -39,7 +39,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['phone'] = 'Valid 10-digit Indian mobile required.';
     }
 
-    if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    if (empty($email)) {
+        $errors['email'] = 'Email address is required.';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors['email'] = 'Enter a valid email address.';
     }
 
@@ -58,14 +60,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($city))  { $errors['city']  = 'City is required.';  }
     if (empty($state)) { $errors['state'] = 'State is required.'; }
 
-    // Duplicate phone check
+    // Duplicate checks
     if (empty($errors)) {
+        // Check phone
         $stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
         $stmt->bind_param('s', $phone);
         $stmt->execute();
         $stmt->store_result();
         if ($stmt->num_rows > 0) {
             $errors['phone'] = 'This phone number is already registered.';
+        }
+        $stmt->close();
+
+        // Check email
+        $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt->bind_param('s', $email);
+        $stmt->execute();
+        $stmt->store_result();
+        if ($stmt->num_rows > 0) {
+            $errors['email'] = 'This email address is already registered.';
         }
         $stmt->close();
     }
@@ -378,6 +391,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-top: 3px;
         }
 
+        /* AJAX status styles */
+        .ajax-status {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-top: 3px;
+            min-height: 1rem;
+        }
+        .status-checking { color: var(--text-muted); }
+        .status-available { color: var(--primary-action); }
+        .status-error { color: var(--danger); }
+
         /* Password strength meter */
         .pw-strength {
             height: 3px;
@@ -559,17 +584,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                            placeholder="e.g. 9876543210"
                            class="form-input<?= isset($errors['phone']) ? ' is-invalid' : '' ?>"
                            required maxlength="10" inputmode="tel" autocomplete="tel">
+                    <span id="phone-status" class="ajax-status" aria-live="polite"></span>
                     <?php if (isset($errors['phone'])): ?>
                         <span class="error-msg" role="alert"><?= e($errors['phone']) ?></span>
                     <?php endif; ?>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="email">Email <span class="opt">(optional)</span></label>
+                    <label class="form-label" for="email">Email address</label>
                     <input type="email" id="email" name="email"
                            value="<?= e($old['email'] ?? '') ?>"
                            placeholder="e.g. rajesh@email.com"
                            class="form-input<?= isset($errors['email']) ? ' is-invalid' : '' ?>"
-                           autocomplete="email">
+                           required autocomplete="email">
+                    <span id="email-status" class="ajax-status" aria-live="polite"></span>
                     <?php if (isset($errors['email'])): ?>
                         <span class="error-msg" role="alert"><?= e($errors['email']) ?></span>
                     <?php endif; ?>
@@ -736,6 +763,98 @@ if (pwInput) {
             pwHint.style.color     = l.color;
         }
     });
+}
+
+// Prevent Enter from submitting, move to next input
+const signupForm = document.getElementById('signup-form');
+const formInputs = Array.from(signupForm.querySelectorAll('input:not([type="hidden"]):not([type="checkbox"])'));
+formInputs.forEach((input, index) => {
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const next = formInputs[index + 1];
+            if (next) next.focus();
+        }
+    });
+});
+
+// ── AJAX Availability Checks ──────────────────────────────
+const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
+function debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
+async function checkAvailability(field, inputElement, statusElement) {
+    const value = inputElement.value.trim();
+    if (!value) {
+        statusElement.textContent = '';
+        statusElement.className = 'ajax-status';
+        return;
+    }
+
+    // Basic format checks before hitting API
+    if (field === 'phone' && !/^[6-9]\d{9}$/.test(value)) {
+        statusElement.textContent = 'Invalid format';
+        statusElement.className = 'ajax-status status-error';
+        return;
+    }
+    if (field === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        statusElement.textContent = 'Invalid format';
+        statusElement.className = 'ajax-status status-error';
+        return;
+    }
+
+    statusElement.textContent = 'Checking...';
+    statusElement.className = 'ajax-status status-checking';
+
+    try {
+        const response = await fetch('api/check-signup-availability.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ field, value, csrf_token: csrfToken })
+        });
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+            statusElement.textContent = data.message;
+            statusElement.className = 'ajax-status status-error';
+        } else if (data.exists) {
+            statusElement.textContent = data.message;
+            statusElement.className = 'ajax-status status-error';
+        } else {
+            statusElement.textContent = data.message;
+            statusElement.className = 'ajax-status status-available';
+        }
+    } catch (e) {
+        statusElement.textContent = 'Error checking availability';
+        statusElement.className = 'ajax-status status-error';
+    }
+}
+
+const phoneInput = document.getElementById('phone');
+const phoneStatus = document.getElementById('phone-status');
+const emailInput = document.getElementById('email');
+const emailStatus = document.getElementById('email-status');
+
+if (phoneInput && phoneStatus) {
+    const checkPhone = () => checkAvailability('phone', phoneInput, phoneStatus);
+    phoneInput.addEventListener('input', debounce(checkPhone, 400));
+    phoneInput.addEventListener('blur', checkPhone);
+}
+
+if (emailInput && emailStatus) {
+    const checkEmail = () => checkAvailability('email', emailInput, emailStatus);
+    emailInput.addEventListener('input', debounce(checkEmail, 400));
+    emailInput.addEventListener('blur', checkEmail);
 }
 </script>
 </body>
