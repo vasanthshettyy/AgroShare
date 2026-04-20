@@ -170,6 +170,109 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <!DOCTYPE html><html><head><script>';
+                        echo 'sessionStorage.setItem("agroshare_tab","1");';
+                        echo 'window.location.href="' . $redirect . '";';
+                        echo '</script></head><body></body></html>';
+                        exit();
+                    }
+                    header('Location: ' . $redirect);
+                    exit();
+                }
+            } else {
+                $errors['general'] = 'Invalid credentials.';
+                $maskedId = (strlen($identifier) >= 4) ? substr($identifier, 0, 2) . '***' . substr($identifier, -2) : '***';
+                $ip = $_SERVER['REMOTE_ADDR'] ?? 'Unknown IP';
+                logAuditEvent($conn, 'login_failed', null, "Failed login attempt for: " . $maskedId . " from IP: " . $ip);
+            }
+        }
+    } else {
+        // --- SIGNUP LOGIC ---
+        $full_name        = trim($_POST['full_name'] ?? '');
+        $phone            = trim($_POST['phone'] ?? '');
+        $email            = strtolower(trim($_POST['email'] ?? ''));
+        $password         = $_POST['password'] ?? '';
+        $confirm_password = $_POST['confirm_password'] ?? '';
+        $city             = trim($_POST['city'] ?? '');
+        $state            = trim($_POST['state'] ?? '');
+
+        $old = compact('full_name', 'phone', 'email', 'city', 'state');
+
+        if (empty($full_name)) {
+            $errors['full_name'] = 'Full name is required.';
+        } elseif (mb_strlen($full_name) > 120) {
+            $errors['full_name'] = 'Max 120 characters.';
+        }
+
+        if (empty($phone)) {
+            $errors['phone'] = 'Phone number is required.';
+        } elseif (!preg_match('/^[6-9]\d{9}$/', $phone)) {
+            $errors['phone'] = 'Valid 10-digit Indian mobile required.';
+        }
+
+        if (empty($email)) {
+            $errors['email'] = 'Email address is required.';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = 'Enter a valid email address.';
+        }
+
+        if (empty($password)) {
+            $errors['password'] = 'Password is required.';
+        } elseif (strlen($password) < 8) {
+            $errors['password'] = 'Min 8 characters required.';
+        } elseif (!preg_match('/\d/', $password)) {
+            $errors['password'] = 'Must contain at least one number.';
+        }
+
+        if ($password !== $confirm_password) {
+            $errors['confirm_password'] = 'Passwords do not match.';
+        }
+
+        if (empty($city))  { $errors['city']  = 'City is required.';  }
+        if (empty($state)) { $errors['state'] = 'State is required.'; }
+
+        // Duplicate checks
+        if (empty($errors)) {
+            $stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
+            $stmt->bind_param('s', $phone);
+            $stmt->execute();
+            $stmt->store_result();
+            if ($stmt->num_rows > 0) {
+                $errors['phone'] = 'This phone number is already registered.';
+            }
+            $stmt->close();
+
+            $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+            $stmt->bind_param('s', $email);
+            $stmt->execute();
+            $stmt->store_result();
+            if ($stmt->num_rows > 0) {
+                $errors['email'] = 'This email address is already registered.';
+            }
+            $stmt->close();
+        }
+
+        if (empty($errors)) {
+            $password_hash  = password_hash($password, PASSWORD_ARGON2ID);
+            $email_value    = !empty($email) ? $email : null;
+            $village_value  = $city;
+            $district_value = $city;
+
+            $stmt = $conn->prepare(
+                "INSERT INTO users (full_name, phone, email, password_hash, village, district, state)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)"
+            );
+            $stmt->bind_param('sssssss', $full_name, $phone, $email_value, $password_hash, $village_value, $district_value, $state);
+            $stmt->execute();
+            $stmt->close();
+
+            setFlash('success', 'Account created! Please log in to get started.');
+            header('Location: login.php');
+            exit();
+        }
+    }
+}
+?>
+<!DOCTYPE html><html><head><script>';
                     echo 'sessionStorage.setItem("agroshare_tab","1");';
                     echo 'window.location.href="' . $redirect . '";';
                     echo '</script></head><body></body></html>';
