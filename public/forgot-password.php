@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../src/Helpers/mail.php';
 
 if (isset($_SESSION['user_id'])) {
     header('Location: dashboard.php');
@@ -7,27 +8,31 @@ if (isset($_SESSION['user_id'])) {
 }
 
 $errors = [];
-$old_phone = '';
+$old_email = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Always reset verified state when a new recovery attempt starts.
+    unset($_SESSION['reset_verified']);
+
     if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
         $errors['general'] = 'Invalid form submission. Please try again.';
     }
 
-    $phone = trim($_POST['phone'] ?? '');
-    $old_phone = $phone;
+    $email = strtolower(trim($_POST['email'] ?? ''));
+    $old_email = $email;
 
     if (empty($errors)) {
-        if (empty($phone)) {
-            $errors['phone'] = 'Phone number is required.';
-        } elseif (!preg_match('/^[6-9]\d{9}$/', $phone)) {
-            $errors['phone'] = 'Valid 10-digit Indian mobile required.';
+        if (empty($email)) {
+            $errors['email'] = 'Email address is required.';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = 'Enter a valid email address.';
         }
     }
 
     if (empty($errors)) {
-        $stmt = $conn->prepare("SELECT COUNT(*) as count FROM password_resets WHERE phone = ? AND created_at > DATE_SUB(NOW(), INTERVAL 15 MINUTE)");
-        $stmt->bind_param('s', $phone);
+        // Rate limit: Max 3 requests per 15 mins for this email
+        $stmt = $conn->prepare("SELECT COUNT(*) as count FROM password_resets WHERE email = ? AND created_at > DATE_SUB(NOW(), INTERVAL 15 MINUTE)");
+        $stmt->bind_param('s', $email);
         $stmt->execute();
         $rateLimit = $stmt->get_result()->fetch_assoc()['count'] ?? 0;
         $stmt->close();
@@ -35,21 +40,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($rateLimit >= 3) {
             $errors['general'] = 'Too many requests. Please try again after 15 minutes.';
         } else {
-            $stmt = $conn->prepare("UPDATE password_resets SET used = 1 WHERE phone = ? AND used = 0");
-            $stmt->bind_param('s', $phone);
+            $otpDispatched = false;
+
+            // Find user
+            $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+            $stmt->bind_param('s', $email);
             $stmt->execute();
+            $user = $stmt->get_result()->fetch_assoc();
             $stmt->close();
 
-            $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            if ($user) {
+                // Invalidate old tokens
+                $stmt = $conn->prepare("UPDATE password_resets SET is_used = 1 WHERE email = ? AND is_used = 0");
+                $stmt->bind_param('s', $email);
+                $stmt->execute();
+                $stmt->close();
 
-            $stmt = $conn->prepare("INSERT INTO password_resets (phone, otp, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))");
-            $stmt->bind_param('ss', $phone, $otp);
-            $stmt->execute();
-            $stmt->close();
+                // Generate 6-digit OTP
+                $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
-            $_SESSION['reset_phone'] = $phone;
+                // Store OTP
+                $stmt = $conn->prepare("INSERT INTO password_resets (user_id, phone, email, otp, expires_at) VALUES (?, '', ?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))");
+                $stmt->bind_param('iss', $user['id'], $email, $otp);
+                $stmt->execute();
+                $stmt->close();
 
-            setFlash('success', "If the phone number is registered, an OTP has been sent. (Demo OTP: {$otp})");
+                // Send Email
+                $otpDispatched = sendOtpEmail($email, $otp);
+                if (!$otpDispatched) {
+                    error_log('OTP email dispatch failed for password reset: ' . $email);
+                }
+            }
+
+            // Generic flow and message to avoid account/email enumeration.
+            $_SESSION['reset_email'] = $email;
+            setFlash('success', "If this email is registered, an OTP has been sent. Please check your inbox/spam folder.");
             header('Location: verify-otp.php');
             exit();
         }
@@ -113,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         Back to Login
     </a>
     <h1>Forgot Password</h1>
-    <p>Enter your registered mobile number. We will send you an OTP to reset your password.</p>
+    <p>Enter your registered email address. We will send you an OTP to reset your password.</p>
 
     <?php if (!empty($errors['general'])): ?>
         <div class="alert alert-error" role="alert"><?= e($errors['general']) ?></div>
@@ -122,17 +147,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <form method="POST" action="" novalidate>
         <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-        
+
         <div class="form-group">
-            <label class="form-label" for="phone">Phone Number</label>
+            <label class="form-label" for="email">Email Address</label>
             <div class="input-wrap">
-                <input type="tel" id="phone" name="phone" value="<?= e($old_phone) ?>" placeholder="10-digit mobile" class="form-input has-icon<?= isset($errors['phone']) ? ' is-invalid' : '' ?>" required maxlength="10" autofocus>
+                <input type="email" id="email" name="email" value="<?= e($old_email) ?>" placeholder="e.g. farmer@example.com" class="form-input has-icon<?= isset($errors['email']) ? ' is-invalid' : '' ?>" required autofocus>
                 <span class="input-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.9-.9a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16.92z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
                 </span>
             </div>
-            <?php if (isset($errors['phone'])): ?>
-                <span class="error-msg"><?= e($errors['phone']) ?></span>
+            <?php if (isset($errors['email'])): ?>
+                <span class="error-msg"><?= e($errors['email']) ?></span>
             <?php endif; ?>
         </div>
 

@@ -6,7 +6,7 @@ if (isset($_SESSION['user_id'])) {
     exit();
 }
 
-if (!isset($_SESSION['reset_phone'])) {
+if (!isset($_SESSION['reset_email'])) {
     header('Location: forgot-password.php');
     exit();
 }
@@ -29,16 +29,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
-        $phone = $_SESSION['reset_phone'];
+        $email = $_SESSION['reset_email'];
 
-        $stmt = $conn->prepare("SELECT id FROM password_resets WHERE phone = ? AND otp = ? AND used = 0 AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1");
-        $stmt->bind_param('ss', $phone, $otp);
+        $stmt = $conn->prepare("SELECT id FROM password_resets WHERE email = ? AND otp = ? AND is_used = 0 AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1");
+        $stmt->bind_param('ss', $email, $otp);
         $stmt->execute();
         $resetRow = $stmt->get_result()->fetch_assoc();
         $stmt->close();
 
         if ($resetRow) {
-            $stmt = $conn->prepare("UPDATE password_resets SET used = 1 WHERE id = ?");
+            $stmt = $conn->prepare("UPDATE password_resets SET is_used = 1 WHERE id = ?");
             $stmt->bind_param('i', $resetRow['id']);
             $stmt->execute();
             $stmt->close();
@@ -48,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         } else {
             $errors['general'] = 'Invalid or expired OTP.';
+            unset($_SESSION['reset_verified']);
         }
     }
 }
@@ -106,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         Back
     </a>
     <h1>Verify OTP</h1>
-    <p>Enter the 6-digit OTP sent to <?= e($_SESSION['reset_phone']) ?>.</p>
+    <p>Enter the 6-digit OTP sent to <?= e($_SESSION['reset_email']) ?>.</p>
 
     <?php if (!empty($errors['general'])): ?>
         <div class="alert alert-error" role="alert"><?= e($errors['general']) ?></div>

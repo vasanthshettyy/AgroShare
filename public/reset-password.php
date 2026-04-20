@@ -6,7 +6,7 @@ if (isset($_SESSION['user_id'])) {
     exit();
 }
 
-if (!isset($_SESSION['reset_phone']) || !isset($_SESSION['reset_verified'])) {
+if (!isset($_SESSION['reset_email']) || !($_SESSION['reset_verified'] ?? false)) {
     header('Location: forgot-password.php');
     exit();
 }
@@ -24,6 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         if (strlen($password) < 8) {
             $errors['password'] = 'Password must be at least 8 characters long.';
+        } elseif (!preg_match('/\d/', $password)) {
+            $errors['password'] = 'Password must include at least one number.';
         }
         if ($password !== $confirm) {
             $errors['confirm_password'] = 'Passwords do not match.';
@@ -31,18 +33,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
-        $phone = $_SESSION['reset_phone'];
+        $email = $_SESSION['reset_email'];
         $hash = password_hash($password, PASSWORD_ARGON2ID);
 
-        $stmt = $conn->prepare("UPDATE users SET password_hash = ? WHERE phone = ?");
-        $stmt->bind_param('ss', $hash, $phone);
+        $stmt = $conn->prepare("UPDATE users SET password_hash = ? WHERE email = ?");
+        $stmt->bind_param('ss', $hash, $email);
         
         if ($stmt->execute()) {
-            unset($_SESSION['reset_phone'], $_SESSION['reset_verified']);
+            // Success - Clear recovery session keys
+            unset($_SESSION['reset_email']);
+            unset($_SESSION['reset_verified']);
+
             setFlash('success', 'Your password has been reset successfully. Please log in.');
             header('Location: login.php');
             exit();
-        } else {
+        }
+ else {
             $errors['general'] = 'Failed to reset password. Please try again later.';
         }
         $stmt->close();
