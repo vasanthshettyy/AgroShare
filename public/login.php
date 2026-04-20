@@ -11,7 +11,7 @@ if (isset($_SESSION['user_id'])) {
 }
 
 $errors    = [];
-$old_phone = '';
+$old_identifier = '';
 
 // ── Handle POST ─────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -20,16 +20,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['general'] = 'Invalid form submission. Please try again.';
     }
 
-    $phone    = trim($_POST['phone'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $remember = isset($_POST['remember_me']);
-    $old_phone = $phone;
+    $identifier = trim($_POST['identifier'] ?? '');
+    // Normalize if it looks like an email
+    if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+        $identifier = strtolower($identifier);
+    }
+    $password   = $_POST['password'] ?? '';
+    $remember   = isset($_POST['remember_me']);
+    $old_identifier = $identifier;
 
     if (empty($errors)) {
-        if (empty($phone)) {
-            $errors['phone'] = 'Phone number is required.';
-        } elseif (!preg_match('/^[6-9]\d{9}$/', $phone)) {
-            $errors['phone'] = 'Valid 10-digit Indian mobile required.';
+        if (empty($identifier)) {
+            $errors['identifier'] = 'Phone number or email is required.';
         }
 
         if (empty($password)) {
@@ -38,8 +40,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
-        $stmt = $conn->prepare("SELECT id, full_name, password_hash, role, is_active FROM users WHERE phone = ?");
-        $stmt->bind_param('s', $phone);
+        // Authenticate by matching phone OR email
+        $stmt = $conn->prepare("SELECT id, full_name, password_hash, role, is_active FROM users WHERE phone = ? OR email = ?");
+        $stmt->bind_param('ss', $identifier, $identifier);
         $stmt->execute();
         $user = $stmt->get_result()->fetch_assoc();
         $stmt->close();
@@ -48,9 +51,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (isset($user['is_active']) && $user['is_active'] == 0) {
                 $errors['general'] = 'Your account has been deactivated. Please contact support.';
                 // Log failed login attempt due to deactivation
-                $maskedPhone = (strlen($phone) >= 2) ? str_repeat('*', strlen($phone)-2) . substr($phone, -2) : $phone;
+                $maskedId = (strlen($identifier) >= 4) ? substr($identifier, 0, 2) . '***' . substr($identifier, -2) : '***';
                 $ip = $_SERVER['REMOTE_ADDR'] ?? 'Unknown IP';
-                logAuditEvent($conn, 'login_failed', $user['id'], "Failed login attempt (Account Deactivated) for phone: " . $maskedPhone . " from IP: " . $ip);
+                logAuditEvent($conn, 'login_failed', $user['id'], "Failed login attempt (Account Deactivated) for: " . $maskedId . " from IP: " . $ip);
             } else {
                 session_regenerate_id(true);
                 $_SESSION['user_id']       = $user['id'];
@@ -77,12 +80,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit();
             }
         } else {
-            $errors['general'] = 'Invalid phone number or password.';
+            $errors['general'] = 'Invalid credentials.';
 
             // Log failed login attempt
-            $maskedPhone = (strlen($phone) >= 2) ? str_repeat('*', strlen($phone)-2) . substr($phone, -2) : $phone;
+            $maskedId = (strlen($identifier) >= 4) ? substr($identifier, 0, 2) . '***' . substr($identifier, -2) : '***';
             $ip = $_SERVER['REMOTE_ADDR'] ?? 'Unknown IP';
-            logAuditEvent($conn, 'login_failed', null, "Failed login attempt for phone: " . $maskedPhone . " from IP: " . $ip);
+            logAuditEvent($conn, 'login_failed', null, "Failed login attempt for: " . $maskedId . " from IP: " . $ip);
         }
     }
 }
@@ -591,7 +594,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </a>
         <div class="form-head">
             <h1>Log In</h1>
-            <p>Enter your phone number and password to continue.</p>
+            <p>Enter your phone number or email and password to continue.</p>
         </div>
 
         <?php if (!empty($errors['general'])): ?>
@@ -602,24 +605,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="POST" action="" novalidate>
             <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
 
-            <!-- Phone -->
+            <!-- Identifier (Phone or Email) -->
             <div class="form-group">
-                <label class="form-label" for="phone">Phone Number</label>
+                <label class="form-label" for="identifier">Phone Number or Email</label>
                 <div class="input-wrap">
-                    <input type="tel" id="phone" name="phone"
-                           value="<?= e($old_phone) ?>"
-                           placeholder="10-digit mobile (e.g. 9876543210)"
-                           class="form-input has-icon<?= isset($errors['phone']) ? ' is-invalid' : '' ?>"
-                           required maxlength="10" autofocus inputmode="tel">
+                    <input type="text" id="identifier" name="identifier"
+                           value="<?= e($old_identifier) ?>"
+                           placeholder="Enter phone or email"
+                           class="form-input has-icon<?= isset($errors['identifier']) ? ' is-invalid' : '' ?>"
+                           required autofocus>
                     <span class="input-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.9-.9a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16.92z"/>
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
                         </svg>
                     </span>
                 </div>
-                <?php if (isset($errors['phone'])): ?>
-                    <span class="error-msg" role="alert"><?= e($errors['phone']) ?></span>
+                <?php if (isset($errors['identifier'])): ?>
+                    <span class="error-msg" role="alert"><?= e($errors['identifier']) ?></span>
                 <?php endif; ?>
             </div>
 
@@ -702,6 +706,19 @@ if (toggleBtn) {
         toggleBtn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
     });
 }
+
+// Prevent Enter from submitting, move to next input
+const authForm = document.querySelector('form');
+const formInputs = Array.from(authForm.querySelectorAll('input:not([type="hidden"]):not([type="checkbox"])'));
+formInputs.forEach((input, index) => {
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const next = formInputs[index + 1];
+            if (next) next.focus();
+        }
+    });
+});
 </script>
 </body>
 </html>
