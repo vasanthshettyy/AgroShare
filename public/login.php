@@ -571,7 +571,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .btn-submit {
             width: 100%; height: 48px;
             background: linear-gradient(135deg, var(--primary-action), var(--accent-dark));
-            color: #FFF; border: none;
+            color: #FFF; 
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: var(--radius-sm);
             font-family: var(--font);
             font-size: 0.95rem; font-weight: 700;
@@ -579,6 +580,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: flex; align-items: center;
             justify-content: center; gap: 8px;
             margin-top: 6px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Glass shimmer effect */
+        .btn-submit::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 40px;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.25);
+            transform: rotate(30deg);
+            transition: all 0s;
+            filter: blur(10px);
+            opacity: 0;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(76, 175, 120, 0.35);
+            border-color: rgba(255, 255, 255, 0.4);
+            filter: brightness(1.05);
+        }
+
+        .btn-submit:hover::after {
+            left: 140%;
+            transition: all 0.7s cubic-bezier(0.19, 1, 0.22, 1);
+            opacity: 1;
+        }
+
+        .btn-submit:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(76, 175, 120, 0.3);
+            filter: brightness(0.95);
         }
         .btn-submit svg { width: 17px; height: 17px; }
         
@@ -721,6 +760,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 Log In
             </button>
         </form>
+
+        <div class="trust-badges-container">
+            <div class="trust-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span>100% Verified Profiles</span>
+            </div>
+            <div class="trust-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span>Secure P2P Network</span>
+            </div>
+            <div class="trust-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                <span>End-to-End Encrypted</span>
+            </div>
+        </div>
 
         
     
