@@ -648,20 +648,161 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: var(--secondary-action);
         }
 
-        /* Overlay buttons */
-        .overlay-toggle-btn {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.4);
-            color: #FFF;
-            padding: 10px 20px;
-            border-radius: 20px;
+        /* Pane switch row (top in-form toggle controls) */
+        .auth-switch-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 16px;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+        .signup-pane-container .auth-switch-row,
+        .signup-pane-container .pane-toggle-bar {
+            justify-content: flex-start;
+        }
+        .pane-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: 0.1px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: transform 0.2s ease, color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+        }
+        .pane-toggle-btn:hover {
+            color: var(--text-main);
+            border-color: rgba(64,161,144,0.55);
+            background: rgba(64,161,144,0.12);
+        }
+        .pane-toggle-btn:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px var(--secondary-10);
+            border-color: var(--secondary-action);
+        }
+        #switch-to-signup:hover {
+            transform: translateX(3px);
+        }
+        #switch-to-login:hover {
+            transform: translateX(-3px);
+        }
+
+        /* ── Responsive ──────────────────────────────────── */
+        @media (max-width: 768px) {
+            .auth-slider-container {
+                min-height: auto;
+                display: flex;
+                flex-direction: column;
+            }
+            .login-pane-container,
+            .signup-pane-container,
+            .overlay-container {
+                position: relative;
+                width: 100%;
+                left: 0 !important;
+                right: 0 !important;
+                transform: none !important;
+                opacity: 1 !important;
+                z-index: 1 !important;
+                pointer-events: auto !important;
+                transition: none !important;
+            }
+            .signup-pane-container {
+                display: none;
+            }
+            .auth-slider-container.right-panel-active .login-pane-container {
+                display: none;
+            }
+            .auth-slider-container.right-panel-active .signup-pane-container {
+                display: flex;
+            }
+            .overlay-container {
+                order: -1;
+            }
+            .panel-content p {
+                display: none;
+            }
+            .auth-form-panel { padding: 24px 20px; }
+            .auth-panel { padding: 32px 28px 28px; }
+            .panel-content h2 { font-size: 1.35rem; }
+        }
+
+        /* -- New In-Form Switch Buttons -- */
+        .auth-switch-row {
+            display: flex;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .auth-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--primary-10);
+            border: 1px solid var(--border-color);
+            border-radius: 100px;
+            color: var(--primary-action);
+            font-size: 0.875rem;
             font-weight: 600;
-            margin-top: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
             cursor: pointer;
         }
 
-    </style>
-</head>
+        .auth-chip span {
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .auth-chip:hover {
+            background: var(--accent-soft);
+            border-color: var(--primary-action);
+            color: var(--text-main);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .auth-chip.go-right:hover span { transform: translateX(4px); }
+        .auth-chip.go-left:hover span { transform: translateX(-4px); }
+
+        @media (max-width: 480px) {
+            .auth-switch-row { margin-bottom: 20px; }
+            .auth-chip { padding: 6px 12px; font-size: 0.8rem; }
+        }
+
+        /* -- Trust Badges -- */
+        .trust-badges-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+        .trust-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #9ca3af;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .trust-badge svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }        </style></head>
 <body>
 
 <div id="auth-slider-container" class="auth-slider-container">
@@ -669,6 +810,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="login-pane-container">
         <div class="auth-form-panel">
 
+        <div class="auth-switch-row">
+            <button type="button" id="switch-to-signup" class="auth-chip go-right">Sign Up <span>&rarr;</span></button>
+        </div>
         
         <div class="form-head">
             <h1>Log In</h1>
@@ -791,6 +935,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="signup-pane-container">
         <div class="auth-form-panel">
 
+        <div class="auth-switch-row">
+            <button type="button" id="switch-to-login" class="auth-chip go-left"><span>&larr;</span> Log In</button>
+        </div>
         
         <div class="form-head">
             <h1>Create Account</h1>
@@ -962,42 +1109,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="panel-content">
-            <h2>Welcome back, farmer.</h2>
-            <p>Access your equipment listings, manage bookings, and join community pooling campaigns — all in one place.</p>
-            <div class="panel-features">
-                <div class="feature-chip">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="2" stroke-linecap="round">
-                        <path d="M3 11V5h9l3 6m0 0H3m12 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m14 0h2a2 2 0 0 1 2 2v4h-3.5"/>
-                        <circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/>
-                    </svg>
-                    Share &amp; rent farm equipment
+            <div class="content-login">
+                <h2>Welcome back, farmer.</h2>
+                <p>Access your equipment listings, manage bookings, and join community pooling campaigns — all in one place.</p>
+                <div class="panel-features">
+                    <div class="feature-chip">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round">
+                            <path d="M3 11V5h9l3 6m0 0H3m12 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m14 0h2a2 2 0 0 1 2 2v4h-3.5"/>
+                            <circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/>
+                        </svg>
+                        Share &amp; rent farm equipment
+                    </div>
+                    <div class="feature-chip">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                        Bulk-buy pooling campaigns
+                    </div>
+                    <div class="feature-chip">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                        Verified farmer trust scores
+                    </div>
                 </div>
-                <div class="feature-chip">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="2" stroke-linecap="round">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
-                    </svg>
-                    Bulk-buy pooling campaigns
-                </div>
-                <div class="feature-chip">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="2" stroke-linecap="round">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                    </svg>
-                    Verified farmer trust scores
+            </div>
+
+            <div class="content-signup">
+                <h2>Join the AgroShare network.</h2>
+                <p>Thousands of Indian farmers already rent, share, and bulk-buy together. It takes less than 2 minutes to get started.</p>
+
+                <div class="steps-indicator">
+                    <div class="step-item">
+                        <div class="step-num done">✓</div>
+                        <span class="step-text">Visit AgroShare</span>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-num" style="background:rgba(255,255,255,0.25);border-color:rgba(255,255,255,0.5);">2</div>
+                        <span class="step-text">Create your account <em style="color:rgba(255,255,255,0.5);font-style:normal;">(you are here)</em></span>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-num">3</div>
+                        <span class="step-text">List or rent equipment</span>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-num">4</div>
+                        <span class="step-text">Join community pooling</span>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="panel-footer">© <?= date('Y') ?> <?= e(APP_NAME) ?>. P2P farmer network.</div>
-    
-            <div style="margin-top: 30px;">
-                <button type="button" id="show-signup-panel" class="overlay-toggle-btn">Sign Up</button>
-                <button type="button" id="show-login-panel" class="overlay-toggle-btn">Log In</button>
-            </div>
         </div>
     </div>
 
@@ -1007,17 +1175,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 'use strict';
 
 // ── Panel Toggle Logic ────────────────────────────────────
-const container = document.getElementById('auth-slider-container');
-const showSignupBtn = document.getElementById('show-signup-panel');
-const showLoginBtn = document.getElementById('show-login-panel');
+const container         = document.getElementById('auth-slider-container');
+const switchToSignupBtn = document.getElementById('switch-to-signup');
+const switchToLoginBtn  = document.getElementById('switch-to-login');
 
-if (container && showSignupBtn && showLoginBtn) {
-    if (showSignupBtn.type === 'button' && showLoginBtn.type === 'button') {
-        showSignupBtn.addEventListener('click', () => {
+if (container) {
+    if (switchToSignupBtn) {
+        switchToSignupBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             container.classList.add('right-panel-active');
         });
-
-        showLoginBtn.addEventListener('click', () => {
+    }
+    if (switchToLoginBtn) {
+        switchToLoginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             container.classList.remove('right-panel-active');
         });
     }
@@ -1031,8 +1202,8 @@ document.querySelectorAll('.pw-toggle').forEach(btn => {
         
         if (btn.id === 'pw-toggle-login') {
             input = document.querySelector('.login-pane-container #password');
-            showSvg = document.getElementById('eye-open');
-            hideSvg = document.getElementById('eye-closed');
+            showSvg = document.querySelector('.login-pane-container #eye-open');
+            hideSvg = document.querySelector('.login-pane-container #eye-closed');
         } else {
             const targetId = btn.dataset.target;
             input = document.querySelector(`.signup-pane-container #${targetId}`);

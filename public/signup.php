@@ -497,8 +497,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             .auth-form-panel { padding: 22px 18px; }
             .auth-panel { padding: 22px 18px; }
         }
-    </style>
-</head>
+
+        /* -- New In-Form Switch Buttons -- */
+        .auth-switch-row {
+            display: flex;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .auth-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--primary-10);
+            border: 1px solid var(--border-color);
+            border-radius: 100px;
+            color: var(--primary-action);
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .auth-chip span {
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .auth-chip:hover {
+            background: var(--accent-soft);
+            border-color: var(--primary-action);
+            color: var(--text-main);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .auth-chip.go-right:hover span { transform: translateX(4px); }
+        .auth-chip.go-left:hover span { transform: translateX(-4px); }
+
+        @media (max-width: 480px) {
+            .auth-switch-row { margin-bottom: 20px; }
+            .auth-chip { padding: 6px 12px; font-size: 0.8rem; }
+        }
+        </style></head>
 <body>
 
 <div class="auth-wrapper">
