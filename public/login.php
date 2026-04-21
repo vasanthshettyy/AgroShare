@@ -280,6 +280,168 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             transition: transform 0.6s ease-in-out;
         }
 
+        /* ── Overlay Inner Graphics ──────────────────────── */
+        .auth-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+        .auth-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle at 20% 80%, rgba(180,207,191,0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(64,161,144,0.15) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .auth-panel::after {
+            content: '';
+            position: absolute;
+            bottom: -60px;
+            right: -60px;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            border: 40px solid rgba(255,255,255,0.05);
+            pointer-events: none;
+        }
+
+        .panel-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .panel-brand-mark {
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            border: 1.5px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .panel-brand-mark svg { color: #FFF; }
+        .panel-brand-name {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #FFF;
+            letter-spacing: -0.4px;
+        }
+
+        .panel-content {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+        .content-login, .content-signup {
+            position: absolute;
+            width: 100%;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .content-login {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(0);
+        }
+        .content-signup {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(20px);
+        }
+        .auth-slider-container.right-panel-active .content-login {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(-20px);
+        }
+        .auth-slider-container.right-panel-active .content-signup {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(0);
+        }
+
+        .panel-content h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #FFF;
+            line-height: 1.25;
+            margin-bottom: 14px;
+            letter-spacing: -0.5px;
+        }
+        .panel-content p {
+            font-size: 0.88rem;
+            color: rgba(255,255,255,0.72);
+            line-height: 1.65;
+            margin-bottom: 28px;
+        }
+
+        /* Feature chips */
+        .panel-features {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .feature-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 40px;
+            padding: 8px 14px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.88);
+        }
+        .feature-chip svg { flex-shrink: 0; color: var(--accent-soft); }
+
+        /* Progress step indicator (Signup) */
+        .steps-indicator {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .step-num {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            border: 1.5px solid rgba(255,255,255,0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; font-weight: 800;
+            color: #FFF; flex-shrink: 0;
+        }
+        .step-num.done {
+            background: var(--secondary-action);
+            border-color: var(--secondary-action);
+        }
+        .step-text {
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.82);
+        }
+
+        .panel-footer {
+            position: relative;
+            z-index: 1;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.45);
+        }
+
         /* ── Sliding Animation States ────────────────────── */
         .auth-slider-container.right-panel-active .login-pane-container {
             opacity: 0;
