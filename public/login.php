@@ -241,7 +241,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: flex;
             flex-direction: column;
             justify-content: center;
-            transition: all 0.6s ease-in-out;
+            /* Subtle 20px grid pattern */
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            background-size: 20px 20px;
+            /* Synchronize pane fade with overlay slide */
+            transition: opacity 0.6s ease-in-out, z-index 0.6s ease-in-out;
         }
 
         .login-pane-container {
