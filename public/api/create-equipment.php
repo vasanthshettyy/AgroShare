@@ -65,7 +65,7 @@ $images    = $eq['images'] ? json_decode($eq['images'], true) : [];
 $thumbnail = !empty($images) ? htmlspecialchars($images[0], ENT_QUOTES, 'UTF-8') : '';
 
 // Build card HTML string
-$cardHtml = '<a href="equipment-detail.php?id=' . (int)$eq['id'] . '" class="eq-card" style="animation-delay:0s;">';
+$cardHtml = '<a href="my-equipment-detail.php?id=' . (int)$eq['id'] . '" class="eq-card" style="animation-delay:0s;">';
 $cardHtml .= '<div class="eq-card-image">';
 if ($thumbnail) {
     $cardHtml .= '<img src="' . $thumbnail . '" alt="' . htmlspecialchars($eq['title'], ENT_QUOTES, 'UTF-8') . '" loading="lazy">';

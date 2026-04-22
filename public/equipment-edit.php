@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $updated = updateEquipment($conn, $equipmentId, (int)$_SESSION['user_id'], $formData, $imagesJson);
         if ($updated) {
             setFlash('success', 'Equipment updated successfully!');
-            header('Location: equipment-detail.php?id=' . $equipmentId);
+            header('Location: my-equipment-detail.php?id=' . $equipmentId);
             exit();
         } else {
             setFlash('error', 'Could not update equipment.');
@@ -174,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h1>Edit Equipment</h1>
                 <p>Update the details for <strong><?= e($eq['title']) ?></strong>.</p>
             </div>
-            <a href="equipment-detail.php?id=<?= $equipmentId ?>" class="btn-secondary" role="button">
+            <a href="my-equipment-detail.php?id=<?= $equipmentId ?>" class="btn-secondary" role="button">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
                 Back to Details
             </a>
@@ -316,7 +316,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div class="form-actions">
-                <a href="equipment-detail.php?id=<?= $equipmentId ?>" class="btn-secondary">Cancel</a>
+                <a href="my-equipment-detail.php?id=<?= $equipmentId ?>" class="btn-secondary">Cancel</a>
                 <button type="submit" class="btn-primary">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
                     Save Changes

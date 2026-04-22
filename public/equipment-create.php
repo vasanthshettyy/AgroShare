@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($newId) {
             setFlash('success', 'Equipment listed successfully!');
-            header('Location: equipment-detail.php?id=' . $newId);
+            header('Location: my-equipment-detail.php?id=' . $newId);
             exit();
         } else {
             setFlash('error', 'Something went wrong. Please try again.');
