@@ -336,8 +336,9 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
                 $images    = $eq['images'] ? json_decode($eq['images'], true) : [];
                 $thumbnail = !empty($images) ? e($images[0]) : '';
                 $isOwner   = $isLoggedIn && (int)$eq['owner_id'] === (int)$_SESSION['user_id'];
+                $detailPage = $isOwner ? 'my-equipment-detail.php' : 'equipment-detail.php';
             ?>
-            <a href="equipment-detail.php?id=<?= (int)$eq['id'] ?>" class="eq-card" style="animation-delay: <?= 0.06 * $index ?>s;">
+            <a href="<?= $detailPage ?>?id=<?= (int)$eq['id'] ?>" class="eq-card" style="animation-delay: <?= 0.06 * $index ?>s;">
                 <div class="eq-card-image">
                     <?php if ($thumbnail): ?>
                     <img src="<?= $thumbnail ?>" alt="<?= e($eq['title']) ?>" loading="lazy">
