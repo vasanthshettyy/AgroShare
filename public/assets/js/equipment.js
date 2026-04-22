@@ -114,8 +114,10 @@
     if (!btn) return;
 
     const equipmentId = btn.dataset.id;
-    const labelEl     = btn.querySelector('.toggle-label');
+    const labelEl     = btn.querySelector('.toggle-label'); // Detail page
+    const spanEl      = btn.querySelector('span');         // Management page
     const statusBadge = document.getElementById('statusBadge');
+    const manageStatus = document.getElementById('manageAvailStatus');
 
     btn.addEventListener('click', async () => {
         btn.disabled = true;
@@ -125,7 +127,8 @@
             const formData = new FormData();
             formData.append('equipment_id', equipmentId);
             
-            const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
+            const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || 
+                            document.getElementById('global-csrf-token')?.value || '';
             formData.append('csrf_token', csrfToken);
 
             const res  = await fetch('api/toggle-availability.php', {
@@ -134,33 +137,41 @@
             });
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
             
-            let data;
-            try {
-                data = await res.json();
-            } catch (jsonErr) {
-                console.error('JSON Parse Error:', jsonErr);
-                throw new Error('Server returned an invalid response. Please check server logs.');
-            }
+            const data = await res.json();
 
             if (data.success) {
                 const isNowAvailable = Boolean(data.is_available === 1 || data.is_available === true || data.is_available === '1');
 
-                // Update button
+                // 1. Update the button itself
                 btn.classList.toggle('is-available', isNowAvailable);
                 btn.classList.toggle('is-unavailable', !isNowAvailable);
-                if (labelEl) labelEl.textContent = isNowAvailable ? 'Available for Booking' : 'Unavailable';
+                btn.classList.toggle('is-active', isNowAvailable); 
+                btn.classList.toggle('is-offline', !isNowAvailable); 
 
-                // Update badge
+                // 2. Update button text
+                if (labelEl) {
+                    labelEl.textContent = isNowAvailable ? 'Available for Booking' : 'Unavailable';
+                } else if (spanEl) {
+                    spanEl.textContent = isNowAvailable ? 'Active' : 'Offline';
+                }
+
+                // 3. Update status displays outside button
                 if (statusBadge) {
                     statusBadge.textContent = isNowAvailable ? 'Available' : 'Unavailable';
                     statusBadge.className = 'badge ' + (isNowAvailable ? 'badge-active' : 'badge-cancelled');
                 }
+                
+                if (manageStatus) {
+                    manageStatus.textContent = isNowAvailable ? 'Visible & Active' : 'Hidden from Browse';
+                    manageStatus.style.color = isNowAvailable ? 'var(--secondary-action)' : 'var(--danger)';
+                }
 
-                showToast('success', isNowAvailable ? 'Listing is now available for booking.' : 'Listing is now marked unavailable.');
+                showToast('success', isNowAvailable ? 'Listing is now active.' : 'Listing is now offline.');
             } else {
                 showToast('error', data.message || 'Could not update availability.');
             }
         } catch (err) {
+            console.error('Toggle error:', err);
             showToast('error', 'Network error. Please try again.');
         } finally {
             btn.disabled = false;
