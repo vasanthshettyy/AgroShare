@@ -42,25 +42,11 @@ if (hasBookingConflict($conn, $eqId, $start, $end)) {
 // 2. Pricing (Server-side calculation only)
 $totalPrice = calculateServerSidePrice($conn, $eqId, $start, $end);
 
-// Derive pricing_mode (always daily now)
-$pricingMode = 'daily';
-
-// 3. Get Owner ID
-$stmt = $conn->prepare("SELECT owner_id FROM equipment WHERE id = ?");
-$stmt->bind_param('i', $eqId);
-$stmt->execute();
-$ownerId = $stmt->get_result()->fetch_column();
-
-if ($ownerId == $userId) {
-    echo json_encode(['success' => false, 'message' => 'You cannot book your own equipment.']);
-    exit();
-}
-
 // 4. Insert
-$sql = "INSERT INTO bookings (equipment_id, renter_id, owner_id, start_datetime, end_datetime, pricing_mode, total_price, status) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')";
+$sql = "INSERT INTO bookings (equipment_id, renter_id, owner_id, start_datetime, end_datetime, total_price, status) 
+        VALUES (?, ?, ?, ?, ?, ?, 'pending')";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param('iiisssd', $eqId, $userId, $ownerId, $start, $end, $pricingMode, $totalPrice);
+$stmt->bind_param('iiisss', $eqId, $userId, $ownerId, $start, $end, $totalPrice);
 
 if ($stmt->execute()) {
     // Get owner details for the success confirmation card

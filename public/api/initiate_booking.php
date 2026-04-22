@@ -121,7 +121,7 @@ try {
 
         // Insert into Bookings
         $bookingStatus = ($bookingType === 'ESCROW') ? 'pending' : 'confirmed';
-        $bookingStmt = $conn->prepare("INSERT INTO bookings (transaction_id, equipment_id, renter_id, owner_id, start_datetime, end_datetime, pricing_mode, total_price, status) VALUES (?, ?, ?, ?, ?, ?, 'daily', ?, ?)");
+        $bookingStmt = $conn->prepare("INSERT INTO bookings (transaction_id, equipment_id, renter_id, owner_id, start_datetime, end_datetime, total_price, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         $bookingStmt->bind_param('siiissds', $txnId, $eqId, $renterId, $ownerId, $startStr, $endStr, $amount, $bookingStatus);
         $bookingStmt->execute();
         $bookingStmt->close();

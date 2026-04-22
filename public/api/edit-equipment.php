@@ -38,10 +38,6 @@ $existingImages = $eq['images'] ? json_decode($eq['images'], true) : [];
 
 // Validate form data
 $formData = $_POST;
-// Auto-derive hourly rate from daily (daily/8) since UI only shows daily pricing
-if (isset($formData['price_per_day']) && is_numeric($formData['price_per_day'])) {
-    $formData['price_per_hour'] = round((float)$formData['price_per_day'] / 8, 2);
-}
 $errors   = validateEquipmentData($formData);
 
 // Handle image removals

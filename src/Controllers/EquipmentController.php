@@ -45,12 +45,6 @@ function validateEquipmentData(array $data): array
         $errors['description'] = 'Please add a description.';
     }
 
-    // Price per hour
-    $pph = $data['price_per_hour'] ?? '';
-    if (!is_numeric($pph) || (float)$pph <= 0) {
-        $errors['price_per_hour'] = 'Enter a valid hourly price.';
-    }
-
     // Price per day
     $ppd = $data['price_per_day'] ?? '';
     if (!is_numeric($ppd) || (float)$ppd <= 0) {
@@ -170,9 +164,9 @@ function deleteEquipmentImages(array $imagePaths): void
 function createEquipment(mysqli $conn, array $data, array $imagePaths): int|false
 {
     $sql = "INSERT INTO equipment 
-            (owner_id, title, category, description, price_per_hour, price_per_day, 
+            (owner_id, title, category, description, price_per_day, 
              includes_operator, location_village, location_district, images, `condition`)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $conn->prepare($sql);
 
@@ -180,7 +174,6 @@ function createEquipment(mysqli $conn, array $data, array $imagePaths): int|fals
     $title            = trim($data['title']);
     $category         = $data['category'];
     $description      = trim($data['description']);
-    $pricePerHour     = (float)$data['price_per_hour'];
     $pricePerDay      = (float)$data['price_per_day'];
     $includesOperator = isset($data['includes_operator']) ? 1 : 0;
     $village          = trim($data['location_village']);
@@ -189,9 +182,9 @@ function createEquipment(mysqli $conn, array $data, array $imagePaths): int|fals
     $condition        = $data['condition'];
 
     $stmt->bind_param(
-        'isssddissss',
+        'isssdissss',
         $ownerId, $title, $category, $description,
-        $pricePerHour, $pricePerDay, $includesOperator,
+        $pricePerDay, $includesOperator,
         $village, $district, $imagesJson, $condition
     );
 
@@ -210,7 +203,7 @@ function updateEquipment(mysqli $conn, int $equipmentId, int $ownerId, array $da
 {
     $sql = "UPDATE equipment SET 
                 title = ?, category = ?, description = ?, 
-                price_per_hour = ?, price_per_day = ?, includes_operator = ?,
+                price_per_day = ?, includes_operator = ?,
                 location_village = ?, location_district = ?, images = ?, `condition` = ?
             WHERE id = ? AND owner_id = ?";
 
@@ -219,7 +212,6 @@ function updateEquipment(mysqli $conn, int $equipmentId, int $ownerId, array $da
     $title            = trim($data['title']);
     $category         = $data['category'];
     $description      = trim($data['description']);
-    $pricePerHour     = (float)$data['price_per_hour'];
     $pricePerDay      = (float)$data['price_per_day'];
     $includesOperator = isset($data['includes_operator']) ? 1 : 0;
     $village          = trim($data['location_village']);
@@ -227,9 +219,9 @@ function updateEquipment(mysqli $conn, int $equipmentId, int $ownerId, array $da
     $condition        = $data['condition'];
 
     $stmt->bind_param(
-        'sssddissssii',
+        'sssdissssii',
         $title, $category, $description,
-        $pricePerHour, $pricePerDay, $includesOperator,
+        $pricePerDay, $includesOperator,
         $village, $district, $imagesJson, $condition,
         $equipmentId, $ownerId
     );

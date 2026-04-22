@@ -4,9 +4,7 @@
  *
  * Expects: GET/POST with equipment_id, start_datetime, end_datetime.
  * Rules:
- *   - Duration in hours = (end - start).
- *   - If < 8 hrs, use hourly rate.
- *   - If >= 8 hrs, compare (hours * hourly) vs (days * daily) and return cheaper.
+ *   - Price is calculated strictly on daily basis.
  *
  * Returns: JSON { success: bool, total_price: float, breakdown: string }
  */

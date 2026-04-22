@@ -89,8 +89,7 @@ $cardHtml .= htmlspecialchars($eq['location_village'], ENT_QUOTES, 'UTF-8') . ',
 $cardHtml .= '</p>';
 $cardHtml .= '<div class="eq-card-pricing">';
 $cardHtml .= '<span class="eq-card-price">₹' . number_format($eq['price_per_day'], 0) . '<small>/day</small></span>';
-$cardHtml .= '<span class="eq-card-price-hourly">₹' . number_format($eq['price_per_hour'], 0) . '/hr</span>';
-$cardHtml .= '</div></div>';
+$cardHtml .= '</div>';
 
 $cardHtml .= '<div class="eq-card-footer">';
 $cardHtml .= '<div class="eq-card-owner"><span class="eq-card-owner-name">' . htmlspecialchars($eq['owner_name'], ENT_QUOTES, 'UTF-8') . '</span></div>';
