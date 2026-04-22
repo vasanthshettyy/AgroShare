@@ -33,7 +33,6 @@ $formData = [
     'title'            => $eq['title'],
     'category'         => $eq['category'],
     'description'      => $eq['description'],
-    'price_per_hour'   => $eq['price_per_hour'],
     'price_per_day'    => $eq['price_per_day'],
     'includes_operator'=> $eq['includes_operator'],
     'location_village' => $eq['location_village'],
@@ -232,24 +231,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                     Pricing
                 </h2>
+
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="eq-price-hour" class="form-label">Price per Hour (â‚¹)</label>
-                        <input type="number" name="price_per_hour" id="eq-price-hour" class="form-input <?= isset($errors['price_per_hour']) ? 'has-error' : '' ?>"
-                               min="0" step="50" value="<?= e($formData['price_per_hour'] ?? '') ?>" required>
-                        <?php if (isset($errors['price_per_hour'])): ?><span class="form-error"><?= e($errors['price_per_hour']) ?></span><?php endif; ?>
-                    </div>
-                    <div class="form-group">
-                        <label for="eq-price-day" class="form-label">Price per Day (â‚¹)</label>
+                        <label for="eq-price-day" class="form-label">Price per Day (₹)</label>
                         <input type="number" name="price_per_day" id="eq-price-day" class="form-input <?= isset($errors['price_per_day']) ? 'has-error' : '' ?>"
                                min="0" step="100" value="<?= e($formData['price_per_day'] ?? '') ?>" required>
                         <?php if (isset($errors['price_per_day'])): ?><span class="form-error"><?= e($errors['price_per_day']) ?></span><?php endif; ?>
                     </div>
-                    <div class="form-group">
-                        <label class="form-checkbox-label">
+
+                    <div class="form-group" style="justify-content: flex-end; padding-bottom: 0.8rem;">
+                        <label class="form-checkbox-label" style="display: flex; align-items: center; gap: 0.75rem;">
                             <input type="checkbox" name="includes_operator" value="1" class="form-checkbox"
-                                   <?= !empty($formData['includes_operator']) ? 'checked' : '' ?>>
-                            <span class="checkbox-visual"></span>
+                                   <?= !empty($formData['includes_operator']) ? 'checked' : '' ?> style="display: none;">
+                            <span class="checkbox-visual" style="margin: 0;"></span>
                             <span>Includes Operator</span>
                         </label>
                     </div>

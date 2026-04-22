@@ -32,8 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'location_village' => $_POST['location_village'] ?? '',
         'location_district' => $_POST['location_district'] ?? '',
     ];
-    // Auto-derive hourly rate from daily (daily/8) to keep DB column populated
-    $formData['price_per_hour'] = is_numeric($formData['price_per_day']) ? round((float)$formData['price_per_day'] / 8, 2) : '';
     $errors   = validateEquipmentData($formData);
 
     // Process images
@@ -248,7 +246,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="eq-price-day" class="form-label">Price per Day (â‚¹)</label>
+                        <label for="eq-price-day" class="form-label">Price per Day (₹)</label>
                         <input type="number" name="price_per_day" id="eq-price-day" class="form-input <?= isset($errors['price_per_day']) ? 'has-error' : '' ?>"
                                placeholder="3000" min="0" step="100"
                                value="<?= e($formData['price_per_day'] ?? '') ?>" required>
@@ -257,11 +255,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php endif; ?>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-checkbox-label">
+                    <div class="form-group" style="justify-content: flex-end; padding-bottom: 0.8rem;">
+                        <label class="form-checkbox-label" style="display: flex; align-items: center; gap: 0.75rem;">
                             <input type="checkbox" name="includes_operator" value="1" class="form-checkbox"
-                                   <?= !empty($formData['includes_operator']) ? 'checked' : '' ?>>
-                            <span class="checkbox-visual"></span>
+                                   <?= !empty($formData['includes_operator']) ? 'checked' : '' ?> style="display: none;">
+                            <span class="checkbox-visual" style="margin: 0;"></span>
                             <span>Includes Operator</span>
                         </label>
                     </div>
