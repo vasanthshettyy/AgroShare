@@ -531,7 +531,9 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
 <!-- Equipment Creation Modal -->
 <div id="equipmentModal" class="modal-overlay">
     <div class="modal-content">
-        <button type="button" class="modal-close" id="modalCloseBtn" aria-label="Close modal">&times;</button>
+        <button type="button" class="modal-close" id="modalCloseBtn" aria-label="Close modal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
         <div class="modal-header">
             <h2>List New Equipment</h2>
             <p>Add a tool or machine to share with farmers nearby.</p>
@@ -558,18 +560,6 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                             <option value="harvester">Harvester</option>
                             <option value="seeder">Seeder</option>
                             <option value="sprayer">Sprayer</option>
-                            <option value="plough">Plough</option>
-                            <option value="chain_saw">Chain Saw</option>
-                            <option value="rotavator">Rotavator</option>
-                            <option value="cultivator">Cultivator</option>
-                            <option value="thresher">Thresher</option>
-                            <option value="water_pump">Water Pump</option>
-                            <option value="earth_auger">Earth Auger</option>
-                            <option value="baler">Baler</option>
-                            <option value="trolley">Trolley</option>
-                            <option value="brush_cutter">Brush Cutter</option>
-                            <option value="power_tiller">Power Tiller</option>
-                            <option value="chaff_cutter">Chaff Cutter</option>
                             <option value="other">Other</option>
                         </select>
                     </div>
@@ -597,17 +587,13 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 </h2>
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="eq-price-hour" class="form-label">Price per Hour (₹)</label>
-                        <input type="number" name="price_per_hour" id="eq-price-hour" class="form-input" placeholder="500" min="0" step="50" required>
-                    </div>
-                    <div class="form-group">
                         <label for="eq-price-day" class="form-label">Price per Day (₹)</label>
                         <input type="number" name="price_per_day" id="eq-price-day" class="form-input" placeholder="3000" min="0" step="100" required>
                     </div>
-                    <div class="form-group">
-                        <label class="form-checkbox-label">
-                            <input type="checkbox" name="includes_operator" value="1" class="form-checkbox">
-                            <span class="checkbox-visual"></span>
+                    <div class="form-group" style="justify-content: flex-end; padding-bottom: 0.8rem;">
+                        <label class="form-checkbox-label" style="display: flex; align-items: center; gap: 0.75rem;">
+                            <input type="checkbox" name="includes_operator" value="1" class="form-checkbox" style="display: none;">
+                            <span class="checkbox-visual" style="margin: 0;"></span>
                             <span>Includes Operator</span>
                         </label>
                     </div>
@@ -639,7 +625,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                     Photos (up to 5)
                 </h2>
                 <div class="image-upload-zone" id="imageUploadZone">
-                    <input type="file" name="images[]" id="eq-images" accept="image/jpeg,image/png,image/webp" multiple class="image-upload-input">
+                    <input type="file" name="images[]" id="eq-images" accept="image/jpeg,image/png,image/webp" multiple class="image-upload-input" style="display: none;">
                     <div class="upload-placeholder" id="uploadPlaceholder">
                         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
                             <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
@@ -654,11 +640,10 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 </div>
             </div>
             
-            <div class="form-actions">
-                <button type="button" class="btn-secondary" id="cancelBtn">Cancel</button>
-                <button type="submit" class="btn-primary" id="submitBtn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+            <div class="form-actions" style="margin-top: 2rem; border: none; padding: 0; justify-content: flex-end; gap: 1rem;">
+                <button type="button" class="btn-secondary" id="cancelBtn" style="min-height: auto; padding: 0.7rem 1.5rem; font-size: 0.85rem; border-radius: 40px;">Cancel</button>
+                <button type="submit" class="btn-primary" id="submitBtn" style="min-height: auto; padding: 0.7rem 1.5rem; font-size: 0.85rem; border-radius: 40px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="margin-right: 4px;">
                         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
                     List Equipment
