@@ -417,7 +417,14 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                     <div class="booking-card" id="booking-<?= $b['id'] ?>">
                         <div class="card-header">
                             <h3 class="eq-title"><?= e($b['equipment_title']) ?></h3>
-                            <span class="price-tag">₹<?= number_format($b['total_price'], 0) ?></span>
+                            <div style="text-align: right;">
+                                <span class="price-tag">₹<?= number_format($b['total_price'] + $b['deposit_amount'], 0) ?></span>
+                                <?php if ($b['deposit_amount'] > 0): ?>
+                                    <div style="font-size: 0.65rem; color: var(--text-subtle); margin-top: 2px;">
+                                        (includes ₹<?= number_format($b['deposit_amount'], 0) ?> Deposit)
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="info-row">
@@ -441,6 +448,9 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                 <?php if ($b['status'] === 'active'): ?>
                                     <button class="btn-primary btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="completed">Mark Completed</button>
                                 <?php endif; ?>
+                                <?php if ($b['status'] === 'completed'): ?>
+                                    <button class="btn-danger btn-sm btn-dispute" data-id="<?= $b['id'] ?>" style="background: var(--danger, #dc3545);">Raise Dispute</button>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -458,7 +468,14 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                     <div class="booking-card" id="booking-<?= $b['id'] ?>">
                         <div class="card-header">
                             <h3 class="eq-title"><?= e($b['equipment_title']) ?></h3>
-                            <span class="price-tag">₹<?= number_format($b['total_price'], 0) ?></span>
+                            <div style="text-align: right;">
+                                <span class="price-tag">₹<?= number_format($b['total_price'] + $b['deposit_amount'], 0) ?></span>
+                                <?php if ($b['deposit_amount'] > 0): ?>
+                                    <div style="font-size: 0.65rem; color: var(--text-subtle); margin-top: 2px;">
+                                        (includes ₹<?= number_format($b['deposit_amount'], 0) ?> Deposit)
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="info-row">
@@ -655,6 +672,50 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                         
                         setTimeout(() => toast.remove(), 3000);
                     }
+                } else {
+                    showInlineToast('error', data.message);
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                }
+            } catch (err) {
+                showInlineToast('error', 'Network error. Please try again.');
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            }
+        });
+    });
+
+    // Dispute Management
+    document.querySelectorAll('.btn-dispute').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const bookingId = btn.dataset.id;
+            const confirmed = confirm("Are you sure you want to dispute this deposit return?");
+            if (!confirmed) return;
+
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+
+            try {
+                const formData = new FormData();
+                formData.append('booking_id', bookingId);
+                formData.append('csrf_token', document.getElementById('csrf_token').value);
+
+                const res = await fetch('api/raise_dispute.php', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.success) {
+                    const card = document.getElementById(`booking-${bookingId}`);
+                    const badge = card.querySelector('.status-badge');
+                    const actions = card.querySelector('.actions-wrap');
+
+                    badge.className = 'status-badge status-disputed';
+                    badge.textContent = 'disputed';
+                    badge.style.background = 'rgba(255, 87, 34, 0.15)';
+                    badge.style.color = '#FF5722';
+                    badge.style.border = '1px solid rgba(255, 87, 34, 0.2)';
+
+                    actions.remove();
+                    showInlineToast('success', data.message);
                 } else {
                     showInlineToast('error', data.message);
                     btn.disabled = false;

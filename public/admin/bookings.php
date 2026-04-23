@@ -84,6 +84,7 @@ $bookings = getBookingsForAdmin($conn);
                         <th>Renter</th>
                         <th>Owner</th>
                         <th>Dates</th>
+                        <th>Price & Deposit</th>
                         <th>Status</th>
                         <th>Action</th>
                     </tr>
@@ -96,13 +97,29 @@ $bookings = getBookingsForAdmin($conn);
                         <td><?= e($b['renter_name']) ?></td>
                         <td><?= e($b['owner_name']) ?></td>
                         <td><?= date('M d', strtotime($b['start_datetime'])) ?> - <?= date('M d', strtotime($b['end_datetime'])) ?></td>
-                        <td><?= e(ucfirst($b['status'])) ?></td>
+                        <td>
+                            Rent: ₹<?= (float)$b['total_price'] ?><br>
+                            <small style="color: var(--text-muted);">Dep: ₹<?= (float)$b['deposit_amount'] ?></small>
+                        </td>
+                        <td>
+                            <?php if ($b['status'] === 'disputed'): ?>
+                                <span style="background: var(--danger); color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.8rem;">Disputed</span>
+                            <?php else: ?>
+                                <?= e(ucfirst($b['status'])) ?>
+                            <?php endif; ?>
+                        </td>
                         <td>
                             <?php if (in_array($b['status'], ['pending', 'confirmed', 'active'])): ?>
                             <form method="POST" action="api/admin-booking-override.php" style="display:inline;" onsubmit="return confirm('Force cancel this booking?');">
                                 <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
                                 <input type="hidden" name="booking_id" value="<?= (int)$b['id'] ?>">
                                 <button type="submit" class="action-btn">Force Cancel</button>
+                            </form>
+                            <?php elseif ($b['status'] === 'disputed'): ?>
+                            <form method="POST" action="api/admin-resolve-dispute.php" style="display:inline;" onsubmit="return confirm('Mark this dispute as manually resolved?');">
+                                <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+                                <input type="hidden" name="booking_id" value="<?= (int)$b['id'] ?>">
+                                <button type="submit" class="action-btn" style="background: #e67e22;">Resolve</button>
                             </form>
                             <?php endif; ?>
                         </td>
