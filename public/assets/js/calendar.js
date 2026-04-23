@@ -59,16 +59,16 @@ class BookingCalendar {
 
     async submitBooking() {
         if (!this.selectedStart || !this.selectedEnd) return;
-        
+
         const btnBook = document.getElementById('btnBookNow');
         const originalHtml = btnBook.innerHTML;
-        
+
         const confirmed = await this.showConfirmModal(
             this.selectedStart.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
             this.selectedEnd.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
             document.getElementById('est-total').textContent
         );
-        
+
         if (!confirmed) return;
 
         btnBook.disabled = true;
@@ -88,15 +88,16 @@ class BookingCalendar {
             const data = await res.json();
 
             if (data.success) {
+                const titleEl = document.querySelector('.product-title');
                 this.showBookingSuccess({
-                    equipment_title: document.querySelector('.detail-title').textContent,
+                    equipment_title: titleEl ? titleEl.textContent : 'this equipment',
                     start_date: document.getElementById('est-start').value,
                     end_date: document.getElementById('est-end').value,
                     total_price: data.data.amount,
                     owner_name: data.data.owner_contact.name,
                     owner_phone: data.data.owner_contact.phone
                 });
-                
+
                 // Clear selection
                 this.selectedStart = null;
                 this.selectedEnd = null;
@@ -441,7 +442,7 @@ class BookingCalendar {
             // Show sticky bar only if the main button is NOT in the viewport
             stickyBar.classList.toggle('is-visible', !entry.isIntersecting);
         });
-    }, { 
+    }, {
         threshold: 0,
         rootMargin: '0px 0px -10px 0px' // Offset slightly to ensure smooth transition
     });
@@ -476,6 +477,65 @@ class BookingCalendar {
 
     syncStates();
 })();
+
+// ── Pricing Calculator ─────────────────────────────────────
+// Called by updateInputs() after every date selection.
+window.calculatePricing = function () {
+    const startInput = document.getElementById('est-start');
+    const endInput = document.getElementById('est-end');
+    const estResult = document.getElementById('est-result');
+    const estTotal = document.getElementById('est-total');
+    const estBreakdown = document.getElementById('est-breakdown');
+    const stickyTotal = document.getElementById('sticky-est-total');
+
+    if (!startInput || !endInput || !estResult) return;
+
+    const startVal = startInput.value;
+    const endVal = endInput.value;
+
+    if (!startVal || !endVal) {
+        estResult.style.display = 'none';
+        return;
+    }
+
+    // Price per day — read from the visible price display on the page
+    const pricePerDayEl = document.querySelector('.price-display .val');
+    const pricePerDay = pricePerDayEl ? parseFloat(pricePerDayEl.textContent.replace(/,/g, '')) : 0;
+
+    // Safety deposit — read from hidden input injected by PHP
+    const depositInput = document.getElementById('eq-deposit');
+    const deposit = depositInput ? parseFloat(depositInput.value) || 0 : 0;
+
+    // Day count
+    const startTime = new Date(startVal).getTime();
+    const endTime = new Date(endVal).getTime();
+    const diffMs = endTime - startTime;
+    const days = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+
+    const rentalCost = days * pricePerDay;
+    const totalCost = rentalCost + deposit;
+
+    // Update UI
+    estTotal.textContent = '₹' + totalCost.toLocaleString('en-IN');
+
+    if (deposit > 0) {
+        estBreakdown.textContent =
+            '₹' + pricePerDay.toLocaleString('en-IN') +
+            ' × ' + days + ' day' + (days > 1 ? 's' : '') +
+            ' + ₹' + deposit.toLocaleString('en-IN') + ' refundable deposit';
+    } else {
+        estBreakdown.textContent =
+            '₹' + pricePerDay.toLocaleString('en-IN') +
+            ' × ' + days + ' day' + (days > 1 ? 's' : '');
+    }
+
+    estResult.style.display = 'block';
+
+    // Sync sticky bar
+    if (stickyTotal) {
+        stickyTotal.textContent = '₹' + totalCost.toLocaleString('en-IN');
+    }
+};
 
 // Global initialization
 document.addEventListener('DOMContentLoaded', () => {

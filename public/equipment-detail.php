@@ -311,6 +311,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                             <tr><th>Structural Condition</th><td><?= e(ucfirst($eq['condition'])) ?></td></tr>
                             <tr><th>Operational Support</th><td><?= $eq['includes_operator'] ? 'Professional Operator Included' : 'Equipment Only' ?></td></tr>
                             <tr><th>Service Location</th><td><?= e($eq['location_village']) ?>, <?= e($eq['location_district']) ?></td></tr>
+                            <?php if ((float)$eq['safety_deposit'] > 0): ?>
+                            <tr><th>Safety Deposit</th><td>₹<?= number_format($eq['safety_deposit'], 0) ?> (Refundable)</td></tr>
+                            <?php endif; ?>
                             <tr><th>Platform Listing Date</th><td><?= date('d M Y', strtotime($eq['created_at'])) ?></td></tr>
                         </table>
                     </div>
@@ -375,6 +378,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                             <span class="val"><?= number_format($eq['price_per_day'], 0) ?></span>
                             <span class="per">/ day</span>
                         </div>
+                        <?php if ((float)($eq['safety_deposit'] ?? 0) > 0): ?>
+                        <div class="deposit-display" style="font-size: 0.85rem; color: var(--text-muted); margin-top: -0.5rem; margin-bottom: 0.5rem; font-weight: 600;">
+                            + ₹<?= number_format($eq['safety_deposit'], 0) ?> Refundable Deposit
+                        </div>
+                        <?php endif; ?>
+                        <input type="hidden" id="eq-deposit" value="<?= (float)($eq['safety_deposit'] ?? 0) ?>">
+                        
                         <div class="price-features">
                             <?php if ($eq['includes_operator']): ?>
                             <div class="p-feature">
@@ -515,6 +525,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     <div class="form-group">
                         <label for="edit-eq-price-day" class="form-label">Price per Day (₹)</label>
                         <input type="number" name="price_per_day" id="edit-eq-price-day" class="form-input" value="<?= (float)$eq['price_per_day'] ?>" min="0" step="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-eq-safety-deposit" class="form-label">Safety Deposit (₹)</label>
+                        <input type="number" name="safety_deposit" id="edit-eq-safety-deposit" class="form-input" value="<?= (float)($eq['safety_deposit'] ?? 0) ?>" min="0" step="100">
                     </div>
                     <div class="form-group" style="justify-content: flex-end; padding-bottom: 0.8rem;">
                         <label class="form-checkbox-label" style="display: flex; align-items: center; gap: 0.75rem;">
