@@ -2216,3 +2216,144 @@ button:focus-visible,
     border-color: var(--primary-action);
     background: var(--primary-10);
 }
+
+/* -- Sticky Booking Sidebar -- */
+.product-booking-sidebar {
+  position: sticky;
+  top: 1rem;
+  height: fit-content;
+  align-self: start;
+}
+.product-layout-grid {
+  align-items: start;
+}
+
+/* -- Row Cards Base -- */
+.pd-row {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: var(--shadow-md);
+}
+.pd-row + .pd-row { margin-top: 1.25rem; }
+
+/* -- Row 1 Hero -- */
+.pd-row-hero {
+  flex-direction: row;
+  gap: 1.75rem;
+  align-items: flex-start;
+  padding: 1.5rem;
+}
+.pd-hero-gallery { flex: 0 0 55%; min-width: 0; }
+.pd-hero-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 0.25rem;
+}
+.pd-hero-info .product-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+.pd-tag-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.pd-category-tag {
+  background: rgba(76,175,120,0.12);
+  color: var(--primary-action);
+  border: 1px solid var(--primary-action);
+  padding: 0.25rem 0.75rem;
+  border-radius: 40px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.pd-condition-tag {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  padding: 0.25rem 0.75rem;
+  border-radius: 40px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.pd-cond-excellent { color: var(--secondary-action); border-color: var(--secondary-action); background: rgba(90,180,170,0.08); }
+.pd-cond-good { color: var(--primary-action); border-color: var(--primary-action); background: rgba(76,175,120,0.10); }
+.pd-cond-fair { color: var(--amber); border-color: var(--amber); background: rgba(158,102,7,0.08); }
+.pd-unavail { color: var(--danger, #A31616); border-color: var(--danger, #A31616); background: rgba(163,22,22,0.08); }
+.pd-location-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.pd-location-row svg { color: var(--primary-action); flex-shrink: 0; }
+.pd-hero-info .specs-table { width: 100%; font-size: 0.82rem; }
+
+/* -- Row 2 About -- */
+.pd-feature-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.25rem;
+}
+.pd-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(76,175,120,0.1);
+  color: var(--primary-action);
+  border: 1px solid rgba(76,175,120,0.25);
+  padding: 0.4rem 0.9rem;
+  border-radius: 40px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  transition: background 0.2s ease;
+}
+.pd-badge:hover { background: rgba(76,175,120,0.18); }
+
+/* -- Row 3 Owner -- */
+.pd-owner-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+.pd-owner-meta { flex: 1; display: flex; flex-direction: column; gap: 0.2rem; }
+.pd-owner-stats { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-left: auto; }
+.pd-stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(76,175,120,0.1);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.pd-stat-chip svg { color: var(--amber); }
+
+/* -- Responsive -- */
+@media (max-width: 900px) {
+  .pd-row-hero { flex-direction: column; }
+  .pd-hero-gallery, .pd-hero-info { flex: none; width: 100%; }
+  .product-booking-sidebar { position: static; }
+  .pd-owner-stats { margin-left: 0; }
+}
+@media (max-width: 600px) {
+  .pd-row { padding: 1.25rem; }
+  .pd-row-hero { padding: 1rem; }
+}
