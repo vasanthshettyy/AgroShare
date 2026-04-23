@@ -28,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'condition' => $_POST['condition'] ?? '',
         'description' => $_POST['description'] ?? '',
         'price_per_day' => $_POST['price_per_day'] ?? '',
+        'safety_deposit' => $_POST['safety_deposit'] ?? '',
         'includes_operator' => $_POST['includes_operator'] ?? '',
         'location_village' => $_POST['location_village'] ?? '',
         'location_district' => $_POST['location_district'] ?? '',
@@ -252,6 +253,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                value="<?= e($formData['price_per_day'] ?? '') ?>" required>
                         <?php if (isset($errors['price_per_day'])): ?>
                         <span class="form-error"><?= e($errors['price_per_day']) ?></span>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eq-safety-deposit" class="form-label">Safety Deposit (Optional, ₹)</label>
+                        <input type="number" name="safety_deposit" id="eq-safety-deposit" class="form-input <?= isset($errors['safety_deposit']) ? 'has-error' : '' ?>"
+                               placeholder="1000" min="0" step="100"
+                               value="<?= e($formData['safety_deposit'] ?? '') ?>">
+                        <?php if (isset($errors['safety_deposit'])): ?>
+                        <span class="form-error"><?= e($errors['safety_deposit']) ?></span>
                         <?php endif; ?>
                     </div>
 

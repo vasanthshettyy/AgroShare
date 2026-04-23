@@ -365,6 +365,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         <tr><th>Structural Condition</th><td><?= e(ucfirst($eq['condition'])) ?></td></tr>
                         <tr><th>Operator Included</th><td><?= $eq['includes_operator'] ? 'Yes' : 'No' ?></td></tr>
                         <tr><th>Base Price (Daily)</th><td>₹<?= number_format($eq['price_per_day'], 0) ?></td></tr>
+                        <?php if ((float)$eq['safety_deposit'] > 0): ?>
+                        <tr><th>Safety Deposit (Refundable)</th><td>₹<?= number_format($eq['safety_deposit'], 0) ?></td></tr>
+                        <?php endif; ?>
                         <tr><th>Created On</th><td><?= date('d M Y', strtotime($eq['created_at'])) ?></td></tr>
                     </table>
                 </div>
@@ -424,7 +427,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         <label for="edit-eq-price-day" class="form-label">Price per Day (₹)</label>
                         <input type="number" name="price_per_day" id="edit-eq-price-day" class="form-input" value="<?= (float)$eq['price_per_day'] ?>" min="0" step="100" required>
                     </div>
-                    <div class="form-group" style="justify-content: flex-end; padding-bottom: 0.8rem;">
+                    <div class="form-group">
+                        <label for="edit-eq-safety-deposit" class="form-label">Safety Deposit (₹)</label>
+                        <input type="number" name="safety_deposit" id="edit-eq-safety-deposit" class="form-input" value="<?= (float)($eq['safety_deposit'] ?? 0) ?>" min="0" step="100">
+                    </div>
+                    <div class="form-group full-width" style="padding-bottom: 0.8rem;">
                         <label class="form-checkbox-label" style="display: flex; align-items: center; gap: 0.75rem;">
                             <input type="checkbox" name="includes_operator" value="1" class="form-checkbox" <?= $eq['includes_operator'] ? 'checked' : '' ?> style="display: none;">
                             <span class="checkbox-visual" style="margin: 0;"></span>

@@ -34,6 +34,7 @@ $formData = [
     'category'         => $eq['category'],
     'description'      => $eq['description'],
     'price_per_day'    => $eq['price_per_day'],
+    'safety_deposit'   => $eq['safety_deposit'],
     'includes_operator'=> $eq['includes_operator'],
     'location_village' => $eq['location_village'],
     'location_district'=> $eq['location_district'],
@@ -239,6 +240,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                min="0" step="100" value="<?= e($formData['price_per_day'] ?? '') ?>" required>
                         <?php if (isset($errors['price_per_day'])): ?><span class="form-error"><?= e($errors['price_per_day']) ?></span><?php endif; ?>
                     </div>
+
+                    <div class="form-group">
+                        <label for="eq-safety-deposit" class="form-label">Safety Deposit (Optional, ₹)</label>
+                        <input type="number" name="safety_deposit" id="eq-safety-deposit" class="form-input <?= isset($errors['safety_deposit']) ? 'has-error' : '' ?>"
+                               placeholder="0" min="0" step="100" value="<?= e($formData['safety_deposit'] ?? '') ?>">
+                        <span style="font-size:0.75rem; color: var(--text-muted); margin-top: 4px; display: block;">Renter pays this in cash at pickup. Fully refunded on safe return.</span>
+                        <?php if (isset($errors['safety_deposit'])): ?><span class="form-error"><?= e($errors['safety_deposit']) ?></span><?php endif; ?>
+                    </div>
+
 
                     <div class="form-group" style="justify-content: flex-end; padding-bottom: 0.8rem;">
                         <label class="form-checkbox-label" style="display: flex; align-items: center; gap: 0.75rem;">

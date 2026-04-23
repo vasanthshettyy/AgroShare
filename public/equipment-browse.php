@@ -488,7 +488,11 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
                         <label for="eq-price-day" class="form-label">Price per Day (₹)</label>
                         <input type="number" name="price_per_day" id="eq-price-day" class="form-input" placeholder="3000" min="0" step="100" required>
                     </div>
-                    <div class="form-group" style="justify-content: flex-end; padding-bottom: 0.8rem;">
+                    <div class="form-group">
+                        <label for="eq-safety-deposit" class="form-label">Safety Deposit (₹)</label>
+                        <input type="number" name="safety_deposit" id="eq-safety-deposit" class="form-input" placeholder="0" min="0" step="100">
+                    </div>
+                    <div class="form-group full-width" style="padding-bottom: 0.8rem;">
                         <label class="form-checkbox-label" style="display: flex; align-items: center; gap: 0.75rem;">
                             <input type="checkbox" name="includes_operator" value="1" class="form-checkbox" style="display: none;">
                             <span class="checkbox-visual" style="margin: 0;"></span>
