@@ -232,21 +232,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 Back to Browse
             </a>
             
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem;">
-                <div class="product-header-main">
-                    <div class="product-meta">
-                        <span class="category-tag"><?= e(ucfirst(str_replace('_', ' ', $eq['category']))) ?></span>
-                        <span class="condition-tag <?= e($eq['condition']) ?>"><?= e(ucfirst($eq['condition'])) ?></span>
-                        <?php if (!$eq['is_available']): ?>
-                            <span class="condition-tag" style="background: rgba(183, 28, 28, 0.1); color: var(--danger);">Unavailable</span>
-                        <?php endif; ?>
-                    </div>
-                    <div class="product-location-brief" style="margin-top: 0.5rem;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                        <?= e($eq['location_village']) ?>, <?= e($eq['location_district']) ?>
-                    </div>
-                </div>
-
+            <div style="display: flex; justify-content: flex-end; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem;">
                 <?php if ($isOwner): ?>
                 <div class="owner-actions">
                     <button class="btn-toggle-avail <?= $eq['is_available'] ? 'is-available' : 'is-unavailable' ?>"
@@ -277,77 +263,107 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
             <!-- —— LEFT COLUMN: Main Info ────────────────────────── -->
             <div class="product-main-content">
-                <!-- Image Gallery -->
-                <div class="product-image-frame">
-                    <div class="detail-gallery">
-                        <?php if (!empty($images)): ?>
-                        <div class="gallery-main">
-                            <img src="<?= e($images[0]) ?>" alt="<?= e($eq['title']) ?>" id="galleryMainImg" class="gallery-main-img">
+                <!-- ROW 1: Hero Section -->
+                <div class="pd-row pd-row-hero">
+                    <div class="pd-hero-gallery">
+                        <div class="detail-gallery">
+                            <?php if (!empty($images)): ?>
+                            <div class="gallery-main">
+                                <img src="<?= e($images[0]) ?>" alt="<?= e($eq['title']) ?>" id="galleryMainImg" class="gallery-main-img">
+                            </div>
+                            <?php if (count($images) > 1): ?>
+                            <div class="gallery-thumbs">
+                                <?php foreach ($images as $i => $img): ?>
+                                <button class="gallery-thumb <?= $i === 0 ? 'active' : '' ?>"
+                                        data-src="<?= e($img) ?>" aria-label="View photo <?= $i+1 ?>">
+                                    <img src="<?= e($img) ?>" alt="Photo <?= $i+1 ?>" loading="lazy">
+                                </button>
+                                <?php endforeach; ?>
+                            </div>
+                            <?php endif; ?>
+                            <?php else: ?>
+                            <div class="gallery-empty">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent-soft)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                <p>No photos uploaded</p>
+                            </div>
+                            <?php endif; ?>
                         </div>
-                        <?php if (count($images) > 1): ?>
-                        <div class="gallery-thumbs">
-                            <?php foreach ($images as $i => $img): ?>
-                            <button class="gallery-thumb <?= $i === 0 ? 'active' : '' ?>"
-                                    data-src="<?= e($img) ?>" aria-label="View photo <?= $i+1 ?>">
-                                <img src="<?= e($img) ?>" alt="Photo <?= $i+1 ?>" loading="lazy">
-                            </button>
-                            <?php endforeach; ?>
+                    </div>
+
+                    <div class="pd-hero-info">
+                        <h1 class="product-title"><?= e($eq['title']) ?></h1>
+                        <div class="pd-tag-row">
+                            <span class="pd-category-tag"><?= e(ucfirst(str_replace('_', ' ', $eq['category']))) ?></span>
+                            <span class="pd-condition-tag pd-cond-<?= e($eq['condition']) ?>"><?= e(ucfirst($eq['condition'])) ?></span>
+                            <?php if (!$eq['is_available']): ?>
+                                <span class="pd-condition-tag pd-unavail">Unavailable</span>
+                            <?php endif; ?>
                         </div>
+                        <div class="pd-location-row">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            <?= e($eq['location_village']) ?>, <?= e($eq['location_district']) ?>
+                        </div>
+                        <table class="specs-table">
+                            <tr><th>Equipment Class</th><td><?= e(ucfirst(str_replace('_', ' ', $eq['category']))) ?></td></tr>
+                            <tr><th>Structural Condition</th><td><?= e(ucfirst($eq['condition'])) ?></td></tr>
+                            <tr><th>Operational Support</th><td><?= $eq['includes_operator'] ? 'Professional Operator Included' : 'Equipment Only' ?></td></tr>
+                            <tr><th>Service Location</th><td><?= e($eq['location_village']) ?>, <?= e($eq['location_district']) ?></td></tr>
+                            <tr><th>Platform Listing Date</th><td><?= date('d M Y', strtotime($eq['created_at'])) ?></td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ROW 2: About Section -->
+                <div class="pd-row pd-row-about">
+                    <span class="section-label">About this equipment</span>
+                    <p class="description-text"><?= nl2br(e($eq['description'])) ?></p>
+                    <div class="pd-feature-badges">
+                        <span class="pd-badge">✓ Verified Local Listing</span>
+                        <?php if ($eq['includes_operator']): ?>
+                            <span class="pd-badge">✓ Operator Included</span>
                         <?php endif; ?>
-                        <?php else: ?>
-                        <div class="gallery-empty">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent-soft)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                            <p>No photos uploaded</p>
-                        </div>
+                        <?php if ($eq['condition'] === 'excellent'): ?>
+                            <span class="pd-badge">✓ Excellent Condition</span>
+                        <?php elseif ($eq['condition'] === 'good'): ?>
+                            <span class="pd-badge">✓ Good Condition</span>
+                        <?php endif; ?>
+                        <?php if ($eq['owner_verified']): ?>
+                            <span class="pd-badge">✓ Verified Owner</span>
                         <?php endif; ?>
                     </div>
                 </div>
 
-                <h1 class="product-title"><?= e($eq['title']) ?></h1>
-
-                <!-- Specs -->
-                <div class="premium-section">
-                    <span class="section-label">Technical Specifications</span>
-                    <table class="specs-table">
-                        <tr><th>Equipment Class</th><td><?= e(ucfirst(str_replace('_', ' ', $eq['category']))) ?></td></tr>
-                        <tr><th>Structural Condition</th><td><?= e(ucfirst($eq['condition'])) ?></td></tr>
-                        <tr><th>Operational Support</th><td><?= $eq['includes_operator'] ? 'Professional Operator Included' : 'Equipment Only' ?></td></tr>
-                        <tr><th>Service Location</th><td><?= e($eq['location_village']) ?>, <?= e($eq['location_district']) ?></td></tr>
-                        <tr><th>Platform Listing Date</th><td><?= date('d M Y', strtotime($eq['created_at'])) ?></td></tr>
-                    </table>
-                </div>
-
-                <!-- Description -->
-                <div class="premium-section">
-                    <span class="section-label">Overview</span>
-                    <p class="description-text"><?= nl2br(e($eq['description'])) ?></p>
-                </div>
-
-                <!-- Owner Info -->
-                <div class="premium-section">
-                    <span class="section-label">Listed By</span>
-                    <div class="owner-premium-card">
+                <!-- ROW 3: Owner Section -->
+                <div class="pd-row pd-row-owner">
+                    <span class="section-label">Owner Details</span>
+                    <div class="pd-owner-card">
                         <div class="owner-initials">
                             <?= strtoupper(substr(trim($eq['owner_name'] ?? ''), 0, 1)) ?: '?' ?>
                         </div>
-                        <div class="owner-info">
+                        <div class="pd-owner-meta">
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
                                 <span class="owner-name"><?= e($eq['owner_name']) ?></span>
                                 <?php if ($eq['owner_verified']): ?>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--secondary-action)" stroke="none" title="Verified Farmer"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--secondary-action)" stroke="none" title="Verified Farmer"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 <?php endif; ?>
                             </div>
                             <span class="owner-loc"><?= e($eq['owner_village']) ?>, <?= e($eq['owner_district']) ?></span>
+                        </div>
+                        <div class="pd-owner-stats">
                             <?php if ($eq['owner_trust'] > 0): ?>
-                            <div class="owner-trust">
+                            <div class="pd-stat-chip">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--amber)" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                                <?= number_format($eq['owner_trust'], 1) ?> Trust Rating
+                                <?= number_format($eq['owner_trust'], 1) ?> Trust Score
                             </div>
                             <?php endif; ?>
                         </div>
                     </div>
                 </div>
             </div>
+
 
             <!-- —— RIGHT COLUMN: Booking Sidebar ────────────────── -->
             <aside class="product-booking-sidebar">

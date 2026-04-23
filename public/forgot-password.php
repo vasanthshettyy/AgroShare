@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
                 // Store OTP
-                $stmt = $conn->prepare("INSERT INTO password_resets (user_id, phone, email, otp, expires_at) VALUES (?, '', ?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))");
+                $stmt = $conn->prepare("INSERT INTO password_resets (user_id, phone, email, otp, expires_at) VALUES (?, '', ?, ?, DATE_ADD(NOW(), INTERVAL 1 MINUTE))");
                 $stmt->bind_param('iss', $user['id'], $email, $otp);
                 $stmt->execute();
                 $stmt->close();
