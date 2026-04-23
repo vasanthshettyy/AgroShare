@@ -552,13 +552,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 </div>
 <?php endif; ?>
 
-<!-- Booking Gateway Modal -->
-<div class="booking-gateway-overlay" id="bookingGatewayOverlay">
-    <div class="booking-gateway-modal" id="gatewayModalContent">
-        <!-- Content injected via JS: renderMethodSelectStep() -->
-    </div>
-</div>
-
 <?php if ($isLoggedIn) require_once __DIR__ . '/includes/profile-modal.php'; ?>
 <script src="assets/js/dashboard.js" defer></script>
 <script src="assets/js/equipment.js?v=<?= time() ?>" defer></script>

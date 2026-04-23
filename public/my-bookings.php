@@ -13,64 +13,6 @@ $nameParts = explode(' ', $fullName);
 $initials  = !empty($nameParts[0]) ? strtoupper(substr($nameParts[0], 0, 1)) : '?';
 if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 
-/**
- * Render escrow progress tracker stepper bar.
- */
-function renderEscrowProgress(string $escrowStatus): string {
-    $steps = [
-        'PENDING_PAYMENT' => ['label' => 'Payment',  'icon' => '💳'],
-        'FUNDS_LOCKED'    => ['label' => 'Handover', 'icon' => '🤝'],
-        'ACTIVE_RENTAL'   => ['label' => 'Active',   'icon' => '🚜'],
-        'COMPLETED'       => ['label' => 'Return',   'icon' => '↩️'],
-        'DONE'            => ['label' => 'Done',     'icon' => '✅'], // Map actually requires 5 steps. Let's fix map to match exactly.
-    ];
-    // Wait, the prompt says: Map status to current step: PENDING_PAYMENT -> Payment active, FUNDS_LOCKED -> Handover active, ACTIVE_RENTAL -> Return active, COMPLETED -> Done active
-    $steps = [
-        'PENDING_PAYMENT' => ['label' => 'Payment',  'icon' => '💳'],
-        'FUNDS_LOCKED'    => ['label' => 'Handover', 'icon' => '🤝'],
-        'ACTIVE_RENTAL'   => ['label' => 'Return',   'icon' => '↩️'],
-        'COMPLETED'       => ['label' => 'Done',     'icon' => '✅'],
-    ];
-    
-    // Oh wait, prompt said 5 steps: Payment, Handover, Active Rental, Return, Done.
-    // The instructions say: Map status to current step: PENDING_PAYMENT -> Payment, FUNDS_LOCKED -> Handover, ACTIVE_RENTAL -> Return (wait, Active Rental?), COMPLETED -> Done. Let's make 5 steps exactly.
-    
-    $isCancelled = ($escrowStatus === 'CANCELLED');
-    $statusMap = [
-        'PENDING_PAYMENT' => 0, // Payment
-        'FUNDS_LOCKED'    => 1, // Handover
-        'ACTIVE_RENTAL'   => 3, // Return active
-        'COMPLETED'       => 4, // Done
-    ];
-    $currentIdx = $isCancelled ? -1 : ($statusMap[$escrowStatus] ?? -1);
-
-    $uiSteps = [
-        ['label' => 'Payment', 'icon' => '💳'],
-        ['label' => 'Handover', 'icon' => '🤝'],
-        ['label' => 'Active Rental', 'icon' => '🚜'],
-        ['label' => 'Return', 'icon' => '↩️'],
-        ['label' => 'Done', 'icon' => '✅']
-    ];
-
-    $html = '<div class="escrow-tracker' . ($isCancelled ? ' is-cancelled' : '') . '">';
-    foreach ($uiSteps as $idx => $step) {
-        $cls = 'escrow-step';
-        if (!$isCancelled) {
-            if ($idx < $currentIdx) $cls .= ' step-completed';
-            elseif ($idx === $currentIdx) $cls .= ' step-active';
-        }
-        $html .= '<div class="' . $cls . '">';
-        $html .= '<div class="step-dot"><span>' . $step['icon'] . '</span></div>';
-        $html .= '<span class="step-label">' . $step['label'] . '</span>';
-        $html .= '</div>';
-        if ($idx < count($uiSteps) - 1) {
-            $lineCls = (!$isCancelled && $idx < $currentIdx) ? 'step-line step-line-done' : 'step-line';
-            $html .= '<div class="' . $lineCls . '"></div>';
-        }
-    }
-    $html .= '</div>';
-    return $html;
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -488,31 +430,15 @@ function renderEscrowProgress(string $escrowStatus): string {
                                 <span class="info-label">Dates:</span> <span><?= date('d M', strtotime($b['start_datetime'])) ?> - <?= date('d M', strtotime($b['end_datetime'])) ?></span>
                             </div>
                         </div>
-                        <?php if ($b['booking_type'] === 'ESCROW' && $b['escrow_status']): ?>
-                            <?= renderEscrowProgress($b['escrow_status']) ?>
-                        <?php endif; ?>
                         <div class="card-footer" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
                             <div style="display: flex; flex-direction: column; gap: 6px;">
                                 <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
-                                <?php if ($b['booking_type'] === 'ESCROW' && $b['escrow_status']): ?>
-                                    <span class="escrow-chip escrow-<?= $b['escrow_status'] ?>"><?= str_replace('_', ' ', $b['escrow_status']) ?></span>
-                                <?php endif; ?>
                             </div>
                             <div class="actions-wrap" style="margin-left: auto;">
-                                <?php if ($b['booking_type'] === 'ESCROW'): ?>
-                                    <?php if ($b['escrow_status'] === 'PENDING_PAYMENT'): ?>
-                                        <button class="btn-primary btn-sm btn-pay-escrow" data-txn="<?= e($b['transaction_id']) ?>" data-amount="<?= $b['total_price'] ?>">💳 Pay & Lock Funds</button>
-                                    <?php elseif ($b['escrow_status'] === 'FUNDS_LOCKED'): ?>
-                                        <span style="font-size: 0.85rem; color: var(--text-muted); align-self: center; margin-right: 0.5rem;">Handover PIN: <strong style="color:var(--primary-action); letter-spacing: 0.1em;"><?= e($b['handover_otp']) ?></strong></span>
-                                    <?php elseif ($b['escrow_status'] === 'ACTIVE_RENTAL'): ?>
-                                        <button class="btn-primary btn-sm btn-otp-action" data-txn="<?= e($b['transaction_id']) ?>" data-type="return">↩ Return Equipment</button>
-                                    <?php endif; ?>
-                                <?php endif; ?>
-
                                 <?php if (in_array($b['status'], ['pending', 'confirmed'])): ?>
                                     <button class="btn-secondary btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="cancelled">Cancel</button>
                                 <?php endif; ?>
-                                <?php if ($b['status'] === 'active' && $b['booking_type'] !== 'ESCROW'): ?>
+                                <?php if ($b['status'] === 'active'): ?>
                                     <button class="btn-primary btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="completed">Mark Completed</button>
                                 <?php endif; ?>
                             </div>
@@ -578,25 +504,11 @@ function renderEscrowProgress(string $escrowStatus): string {
                                 </div>
                             <?php endif; ?>
                         </div>
-                        <?php if ($b['booking_type'] === 'ESCROW' && $b['escrow_status']): ?>
-                            <?= renderEscrowProgress($b['escrow_status']) ?>
-                        <?php endif; ?>
                         <div class="card-footer" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
                             <div style="display: flex; flex-direction: column; gap: 6px;">
                                 <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
-                                <?php if ($b['booking_type'] === 'ESCROW' && $b['escrow_status']): ?>
-                                    <span class="escrow-chip escrow-<?= $b['escrow_status'] ?>"><?= str_replace('_', ' ', $b['escrow_status']) ?></span>
-                                <?php endif; ?>
                             </div>
                             <div class="actions-wrap" style="margin-left: auto;">
-                                <?php if ($b['booking_type'] === 'ESCROW'): ?>
-                                    <?php if ($b['escrow_status'] === 'FUNDS_LOCKED'): ?>
-                                        <button class="btn-primary btn-sm btn-otp-action" data-txn="<?= $b['transaction_id'] ?>" data-type="handover">Verify Handover PIN</button>
-                                    <?php elseif ($b['escrow_status'] === 'ACTIVE_RENTAL'): ?>
-                                        <span style="font-size: 0.85rem; color: var(--text-muted); align-self: center; margin-right: 0.5rem;">Return PIN: <strong style="color:var(--primary-action); letter-spacing: 0.1em;"><?= e($b['return_otp']) ?></strong></span>
-                                    <?php endif; ?>
-                                <?php endif; ?>
-
                                 <?php
                                     $btnData = 'data-id="' . $b['id'] . '"'
                                              . ' data-renter="' . e($b['renter_name']) . '"'
@@ -608,9 +520,7 @@ function renderEscrowProgress(string $escrowStatus): string {
                                     <button class="btn-primary btn-sm status-action" <?= $btnData ?> data-status="confirmed">Accept</button>
                                     <button class="btn-secondary btn-sm status-action" <?= $btnData ?> data-status="cancelled">Decline</button>
                                 <?php elseif ($b['status'] === 'confirmed'): ?>
-                                    <?php if ($b['booking_type'] !== 'ESCROW'): ?>
-                                        <button class="btn-primary btn-sm status-action" <?= $btnData ?> data-status="completed">Mark Completed</button>
-                                    <?php endif; ?>
+                                    <button class="btn-primary btn-sm status-action" <?= $btnData ?> data-status="completed">Mark Completed</button>
                                     <button class="btn-secondary btn-sm status-action" <?= $btnData ?> data-status="cancelled">Cancel</button>
                                 <?php endif; ?>
                             </div>
@@ -620,42 +530,6 @@ function renderEscrowProgress(string $escrowStatus): string {
             </div>
         </div>
     </main>
-</div>
-
-<!-- Escrow Payment Modal -->
-<div class="otp-modal-overlay" id="paymentModalOverlay">
-    <div class="otp-modal-card">
-        <h2 class="otp-title" id="paymentTitle">Pay & Lock Funds</h2>
-        <span class="otp-subtitle">Amount to be held in escrow:</span>
-        <div style="font-size:2rem; font-weight:800; color:var(--primary-action); margin: 1rem 0;">₹<span id="paymentAmount">0</span></div>
-        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom: 1.5rem;">
-            This amount will be locked securely. The owner only receives it after you verify the return of the equipment.
-        </p>
-        <div class="otp-actions">
-            <button class="btn-secondary" id="paymentCancelBtn">Cancel</button>
-            <button class="btn-primary" id="paymentConfirmBtn">Confirm Payment</button>
-        </div>
-    </div>
-</div>
-
-<!-- OTP Verification Modal -->
-<div class="otp-modal-overlay" id="otpModalOverlay">
-    <div class="otp-modal-card">
-        <h2 class="otp-title" id="otpTitle">Verify PIN</h2>
-        <span class="otp-subtitle" id="otpSubtitle">Enter the 4-digit PIN provided by the other party.</span>
-
-        <div class="otp-input-group">
-            <input type="text" class="otp-field" maxlength="1" pattern="\d*" inputmode="numeric">
-            <input type="text" class="otp-field" maxlength="1" pattern="\d*" inputmode="numeric">
-            <input type="text" class="otp-field" maxlength="1" pattern="\d*" inputmode="numeric">
-            <input type="text" class="otp-field" maxlength="1" pattern="\d*" inputmode="numeric">
-        </div>
-
-        <div class="otp-actions">
-            <button class="btn-secondary" id="otpCancelBtn">Cancel</button>
-            <button class="btn-primary" id="otpVerifyBtn">Verify PIN</button>
-        </div>
-    </div>
 </div>
 
 <input type="hidden" id="csrf_token" value="<?= generateCsrfToken() ?>">
@@ -669,161 +543,6 @@ function renderEscrowProgress(string $escrowStatus): string {
             document.querySelectorAll('.tab-btn, .booking-grid').forEach(el => el.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById(btn.dataset.tab).classList.add('active');
-        });
-    });
-
-    // OTP Modal Logic
-    const otpModal = {
-        overlay: document.getElementById('otpModalOverlay'),
-        fields: document.querySelectorAll('.otp-field'),
-        verifyBtn: document.getElementById('otpVerifyBtn'),
-        cancelBtn: document.getElementById('otpCancelBtn'),
-        currentTxn: null,
-        currentType: null,
-
-        open(txnId, type) {
-            this.currentTxn = txnId;
-            this.currentType = type;
-            document.getElementById('otpTitle').textContent = type === 'handover' ? 'Handover Verification' : 'Return Equipment';
-            document.getElementById('otpSubtitle').textContent = type === 'handover'
-                ? 'Ask the renter for the handover PIN to start the rental.'
-                : 'Enter the return PIN provided by the owner to complete the return.';            
-            this.fields.forEach(f => f.value = '');
-            this.overlay.classList.add('visible');
-            document.body.style.overflow = 'hidden';
-            this.fields[0].focus();
-        },
-
-        close() {
-            this.overlay.classList.remove('visible');
-            document.body.style.overflow = '';
-        },
-
-        getOTP() {
-            return Array.from(this.fields).map(f => f.value).join('');
-        }
-    };
-
-    otpModal.fields.forEach((field, idx) => {
-        field.addEventListener('input', (e) => {
-            const val = e.target.value.replace(/\D/g, '');
-            e.target.value = val.slice(0, 1);
-            if (val && idx < 3) {
-                otpModal.fields[idx + 1].focus();
-            }
-            // Auto-submit on 4th digit
-            if (idx === 3 && val) {
-                setTimeout(() => {
-                    if (!otpModal.verifyBtn.disabled) otpModal.verifyBtn.click();
-                }, 100);
-            }
-        });
-        field.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace' && !e.target.value && idx > 0) otpModal.fields[idx - 1].focus();
-        });
-        // Paste support
-        field.addEventListener('paste', (e) => {
-            e.preventDefault();
-            const paste = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 4);
-            if (paste.length === 0) return;
-            paste.split('').forEach((ch, i) => {
-                if (otpModal.fields[i]) otpModal.fields[i].value = ch;
-            });
-            const focusIdx = Math.min(paste.length, 3);
-            otpModal.fields[focusIdx].focus();
-            if (paste.length === 4) {
-                setTimeout(() => {
-                    if (!otpModal.verifyBtn.disabled) otpModal.verifyBtn.click();
-                }, 100);
-            }
-        });
-    });
-
-    otpModal.cancelBtn.addEventListener('click', () => otpModal.close());
-    otpModal.overlay.addEventListener('click', (e) => { if (e.target === otpModal.overlay) otpModal.close(); });
-
-    document.querySelectorAll('.btn-otp-action').forEach(btn => {
-        btn.addEventListener('click', () => {
-            otpModal.open(btn.dataset.txn, btn.dataset.type);
-        });
-    });
-
-    // Payment Modal Logic
-    const paymentModal = {
-        overlay: document.getElementById('paymentModalOverlay'),
-        amountSpan: document.getElementById('paymentAmount'),
-        cancelBtn: document.getElementById('paymentCancelBtn'),
-        confirmBtn: document.getElementById('paymentConfirmBtn'),
-        currentTxn: null,
-
-        open(txnId, amount) {
-            this.currentTxn = txnId;
-            this.amountSpan.textContent = amount ? amount : '—';
-            this.overlay.classList.add('visible');
-            document.body.style.overflow = 'hidden';
-            this.confirmBtn.disabled = false;
-            this.confirmBtn.textContent = 'Confirm Payment';
-        },
-
-        close() {
-            this.overlay.classList.remove('visible');
-            document.body.style.overflow = '';
-        },
-        
-        init() {
-            // Add close X button dynamically
-            const closeX = document.createElement('button');
-            closeX.innerHTML = '&times;';
-            closeX.style.cssText = 'position:absolute;top:15px;right:15px;background:none;border:none;font-size:1.5rem;color:var(--text-muted);cursor:pointer;line-height:1;padding:0;';
-            closeX.addEventListener('click', () => this.close());
-            this.overlay.querySelector('.otp-modal-card').style.position = 'relative';
-            this.overlay.querySelector('.otp-modal-card').appendChild(closeX);
-
-            this.cancelBtn.addEventListener('click', () => this.close());
-            this.overlay.addEventListener('click', (e) => { if (e.target === this.overlay) this.close(); });
-            
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && this.overlay.classList.contains('visible')) {
-                    this.close();
-                }
-            });
-
-            this.confirmBtn.addEventListener('click', async () => {
-                this.confirmBtn.disabled = true;
-                this.confirmBtn.innerHTML = '<span class="loading-spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:6px;"></span>Processing...';
-
-                try {
-                    const formData = new FormData();
-                    formData.append('transaction_id', this.currentTxn);
-                    formData.append('csrf_token', document.getElementById('csrf_token').value);
-
-                    const res = await fetch('api/process_escrow_payment.php', { method: 'POST', body: formData });
-                    const data = await res.json();
-
-                    if (data.success) {
-                        showInlineToast('success', data.message || 'Payment successful!');
-                        this.close();
-                        setTimeout(() => location.reload(), 1200);
-                    } else {
-                        showInlineToast('error', data.message || 'Payment failed.');
-                        this.confirmBtn.disabled = false;
-                        this.confirmBtn.textContent = 'Confirm Payment';
-                    }
-                } catch (err) {
-                    showInlineToast('error', 'Network error. Please try again.');
-                    this.confirmBtn.disabled = false;
-                    this.confirmBtn.textContent = 'Confirm Payment';
-                }
-            });
-        }
-    };
-    
-    // Initialize Modal Events
-    paymentModal.init();
-
-    document.querySelectorAll('.btn-pay-escrow').forEach(btn => {
-        btn.addEventListener('click', () => {
-            paymentModal.open(btn.dataset.txn, btn.dataset.amount);
         });
     });
 
@@ -849,91 +568,6 @@ function renderEscrowProgress(string $escrowStatus): string {
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }
-
-    otpModal.verifyBtn.addEventListener('click', async () => {
-        const otp = otpModal.getOTP();
-        if (otp.length !== 4) {
-            showInlineToast('error', 'Please enter all 4 digits.');
-            return;
-        }
-
-        // Loading spinner state
-        otpModal.verifyBtn.disabled = true;
-        otpModal.verifyBtn.innerHTML = '<span class="loading-spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:6px;"></span>Verifying...';
-
-        try {
-            const endpoint = otpModal.currentType === 'handover' ? 'api/verify_handover.php' : 'api/verify_return.php';
-            const formData = new FormData();
-            formData.append('transaction_id', otpModal.currentTxn);
-            formData.append('submitted_otp', otp);
-            formData.append('csrf_token', document.getElementById('csrf_token').value);
-
-            const res = await fetch(endpoint, { method: 'POST', body: formData });
-            const data = await res.json();
-
-            if (data.success) {
-                // Check if we need to show return PIN (handover success case)
-                if (otpModal.currentType === 'handover' && data.data && data.data.demo_return_otp) {
-                    otpModal.close();
-                    
-                    // Show Return PIN Success Modal
-                    const returnPin = data.data.demo_return_otp;
-                    const txnId = data.data.transaction_id || otpModal.currentTxn;
-                    
-                    const overlay = document.createElement('div');
-                    overlay.className = 'otp-modal-overlay visible';
-                    overlay.innerHTML = `
-                        <div class="otp-modal-card" style="max-width:420px;">
-                            <div style="margin-bottom:1.5rem;">
-                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--primary-action)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                    <polyline points="22 4 12 14.01 9 11.01"/>
-                                </svg>
-                            </div>
-                            <h2 class="otp-title">Handover Verified</h2>
-                            <p class="otp-subtitle" style="margin-bottom:1.5rem;">Rental is now active. Please note down the <strong>Return PIN</strong> below.</p>
-                            
-                            <div style="background:rgba(255,255,255,0.05); border:1px dashed var(--primary-action); border-radius:16px; padding:1.5rem; margin-bottom:2rem;">
-                                <span style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--primary-action); display:block; margin-bottom:0.5rem; font-weight:800;">Demo Return PIN</span>
-                                <span style="font-size:2.5rem; font-weight:900; letter-spacing:0.2em; color:#fff;">${returnPin}</span>
-                                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem;">Ask the renter for this PIN when the equipment is returned.</p>
-                            </div>
-
-                            <div style="font-size:0.8rem; color:var(--text-subtle); margin-bottom:2rem;">
-                                Transaction: <code style="color:var(--text-main);">${txnId}</code>
-                            </div>
-
-                            <button class="btn-primary" id="handoverFinalBtn" style="width:100%;">Got it, continue</button>
-                        </div>
-                    `;
-                    document.body.appendChild(overlay);
-                    document.body.style.overflow = 'hidden';
-
-                    overlay.querySelector('#handoverFinalBtn').addEventListener('click', () => {
-                        location.reload();
-                    });
-                } else {
-                    showInlineToast('success', data.message);
-                    setTimeout(() => location.reload(), 1500);
-                }
-            } else {
-                // Shake animation on wrong PIN
-                const inputGroup = document.querySelector('.otp-input-group');
-                inputGroup.classList.add('otp-shake');
-                setTimeout(() => inputGroup.classList.remove('otp-shake'), 600);
-                otpModal.fields.forEach(f => f.value = '');
-                otpModal.fields[0].focus();
-
-                showInlineToast('error', data.message);
-                otpModal.verifyBtn.disabled = false;
-                otpModal.verifyBtn.textContent = 'Verify PIN';
-            }
-        } catch (err) {
-            showInlineToast('error', 'Network error. Please try again.');
-            otpModal.verifyBtn.disabled = false;
-            otpModal.verifyBtn.textContent = 'Verify PIN';
-        }
-    });
 
     // Reveal Contact Info Logic
     document.querySelectorAll('.btn-reveal-contact').forEach(btn => {

@@ -1,6 +1,6 @@
 <?php
 /**
- * initiate_booking.php — Module 12.C Full Business Logic for Escrow Flow.
+ * initiate_booking.php — Standard Booking Initiation Flow.
  */
 
 header('Content-Type: application/json; charset=utf-8');
@@ -24,13 +24,12 @@ if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
 
 try {
     $eqId        = (int)($_POST['equipment_id'] ?? 0);
-    $bookingType = $_POST['booking_type'] ?? '';
     $startStr    = $_POST['start_datetime'] ?? '';
     $endStr      = $_POST['end_datetime'] ?? '';
     $renterId    = (int)$_SESSION['user_id'];
 
     // A) Basic Validation
-    if ($eqId <= 0 || !in_array($bookingType, ['ESCROW', 'MANUAL'], true) || empty($startStr) || empty($endStr)) {
+    if ($eqId <= 0 || empty($startStr) || empty($endStr)) {
         echo json_encode(['success' => false, 'message' => 'Missing or invalid details.']);
         exit();
     }
@@ -92,82 +91,38 @@ try {
         }
         $conflictStmt->close();
 
-        // Generate Transaction ID
-        $txnId = '';
-        $isUnique = false;
-        $retries = 0;
-        while (!$isUnique && $retries < 5) {
-            $txnId = 'TXN-' . date('YmdHis') . '-' . mt_rand(1000, 9999);
-            $checkTxn = $conn->prepare("SELECT transaction_id FROM transactions WHERE transaction_id = ?");
-            $checkTxn->bind_param('s', $txnId);
-            $checkTxn->execute();
-            if ($checkTxn->get_result()->num_rows === 0) {
-                $isUnique = true;
-            }
-            $checkTxn->close();
-            $retries++;
-        }
-
-        if (!$isUnique) {
-            throw new Exception('Failed to generate a unique transaction ID.');
-        }
-
-        // Insert into Transactions
-        $txnStatus = ($bookingType === 'ESCROW') ? 'PENDING_PAYMENT' : 'MANUAL_DEAL_INITIATED';
-        $txnStmt = $conn->prepare("INSERT INTO transactions (transaction_id, equipment_id, renter_id, owner_id, booking_type, amount, status) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $txnStmt->bind_param('siiisds', $txnId, $eqId, $renterId, $ownerId, $bookingType, $amount, $txnStatus);
-        $txnStmt->execute();
-        $txnStmt->close();
-
         // Insert into Bookings
-        $bookingStatus = ($bookingType === 'ESCROW') ? 'pending' : 'confirmed';
-        $bookingStmt = $conn->prepare("INSERT INTO bookings (transaction_id, equipment_id, renter_id, owner_id, start_datetime, end_datetime, total_price, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-        $bookingStmt->bind_param('siiissds', $txnId, $eqId, $renterId, $ownerId, $startStr, $endStr, $amount, $bookingStatus);
+        $bookingStatus = 'pending'; // Default to pending until owner approves
+        $bookingStmt = $conn->prepare("INSERT INTO bookings (equipment_id, renter_id, owner_id, start_datetime, end_datetime, total_price, status) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $bookingStmt->bind_param('iiissds', $eqId, $renterId, $ownerId, $startStr, $endStr, $amount, $bookingStatus);
         $bookingStmt->execute();
         $bookingStmt->close();
 
         $conn->commit();
 
         // G) Notification hooks
-        if ($bookingType === 'ESCROW') {
-            createNotification($conn, $ownerId, "New Escrow booking initiated for '$eqTitle'. Awaiting payment from renter.");
-            
-            echo json_encode([
-                'success' => true,
-                'message' => 'Booking initiated. Proceed to lock funds.',
-                'data' => [
-                    'booking_type'   => 'ESCROW',
-                    'transaction_id' => $txnId,
-                    'amount'         => $amount,
-                    'next_step'      => 'PROCESS_PAYMENT'
-                ]
-            ]);
-        } else {
-            createNotification($conn, $ownerId, "New Manual deal initiated for '$eqTitle'. Contact renter to coordinate.");
+        createNotification($conn, $ownerId, "New booking request for '$eqTitle' from renter. Please coordinate.");
 
-            // Fetch owner contact
-            $ownerStmt = $conn->prepare("SELECT full_name, phone, email FROM users WHERE id = ?");
-            $ownerStmt->bind_param('i', $ownerId);
-            $ownerStmt->execute();
-            $owner = $ownerStmt->get_result()->fetch_assoc();
-            $ownerStmt->close();
+        // Fetch owner contact
+        $ownerStmt = $conn->prepare("SELECT full_name, phone, email FROM users WHERE id = ?");
+        $ownerStmt->bind_param('i', $ownerId);
+        $ownerStmt->execute();
+        $owner = $ownerStmt->get_result()->fetch_assoc();
+        $ownerStmt->close();
 
-            echo json_encode([
-                'success' => true,
-                'message' => 'Manual deal initiated. Contact owner directly.',
-                'data' => [
-                    'booking_type'   => 'MANUAL',
-                    'transaction_id' => $txnId,
-                    'amount'         => $amount,
-                    'owner_contact'  => [
-                        'name'  => $owner['full_name'],
-                        'phone' => $owner['phone'],
-                        'email' => $owner['email']
-                    ],
-                    'next_step'      => 'SHOW_OWNER_CONTACT'
-                ]
-            ]);
-        }
+        echo json_encode([
+            'success' => true,
+            'message' => 'Booking request initiated. Contact owner directly.',
+            'data' => [
+                'amount'         => $amount,
+                'owner_contact'  => [
+                    'name'  => $owner['full_name'],
+                    'phone' => $owner['phone'],
+                    'email' => $owner['email']
+                ],
+                'next_step'      => 'SHOW_OWNER_CONTACT'
+            ]
+        ]);
 
     } catch (Exception $e) {
         $conn->rollback();

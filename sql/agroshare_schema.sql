@@ -14,7 +14,6 @@ DROP TABLE IF EXISTS pooling_pledges;
 DROP TABLE IF EXISTS pooling_campaigns;
 DROP TABLE IF EXISTS reviews;
 DROP TABLE IF EXISTS bookings;
-DROP TABLE IF EXISTS transactions;
 DROP TABLE IF EXISTS equipment;
 DROP TABLE IF EXISTS users;
 SET FOREIGN_KEY_CHECKS = 1;
@@ -77,50 +76,11 @@ CREATE TABLE equipment (
 
 
 -- ============================================================
--- TABLE 3: transactions
--- Escrow and manual deal tracking for Module 12.
--- ============================================================
-CREATE TABLE transactions (
-    transaction_id      VARCHAR(50)         NOT NULL,
-    equipment_id        INT UNSIGNED        NOT NULL,
-    renter_id           INT UNSIGNED        NOT NULL,
-    owner_id            INT UNSIGNED        NOT NULL,
-    booking_type        ENUM('ESCROW','MANUAL') NOT NULL,
-    amount              DECIMAL(10,2)       NOT NULL,
-    status              ENUM('PENDING_PAYMENT','FUNDS_LOCKED','ACTIVE_RENTAL','COMPLETED','DISPUTED','MANUAL_DEAL_INITIATED') NOT NULL,
-    handover_otp        INT(4)              DEFAULT NULL,
-    return_otp          INT(4)              DEFAULT NULL,
-    created_at          TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    PRIMARY KEY (transaction_id),
-    INDEX idx_transactions_renter (renter_id, status, created_at),
-    INDEX idx_transactions_owner (owner_id, status, created_at),
-    INDEX idx_transactions_equipment (equipment_id, status, created_at),
-    INDEX idx_transactions_type_status (booking_type, status),
-
-    CONSTRAINT fk_transactions_equipment
-        FOREIGN KEY (equipment_id) REFERENCES equipment(id)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE,
-    CONSTRAINT fk_transactions_renter
-        FOREIGN KEY (renter_id) REFERENCES users(id)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE,
-    CONSTRAINT fk_transactions_owner
-        FOREIGN KEY (owner_id) REFERENCES users(id)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
--- ============================================================
--- TABLE 4: bookings
+-- TABLE 3: bookings
 -- Rental reservations linking a renter to a piece of equipment.
 -- ============================================================
 CREATE TABLE bookings (
     id              INT UNSIGNED        NOT NULL AUTO_INCREMENT,
-    transaction_id  VARCHAR(50)         NULL DEFAULT NULL,
     equipment_id    INT UNSIGNED        NOT NULL,
     renter_id       INT UNSIGNED        NOT NULL,
     owner_id        INT UNSIGNED        NOT NULL COMMENT 'Denormalized from equipment for fast queries',
@@ -137,7 +97,6 @@ CREATE TABLE bookings (
     INDEX idx_bookings_conflict (equipment_id, status, start_datetime, end_datetime),
     INDEX idx_bookings_renter (renter_id, status),
     INDEX idx_bookings_owner (owner_id, status),
-    INDEX idx_bookings_transaction (transaction_id),
 
     CONSTRAINT fk_bookings_equipment
         FOREIGN KEY (equipment_id) REFERENCES equipment(id)
@@ -150,10 +109,6 @@ CREATE TABLE bookings (
     CONSTRAINT fk_bookings_owner
         FOREIGN KEY (owner_id) REFERENCES users(id)
         ON DELETE RESTRICT
-        ON UPDATE CASCADE,
-    CONSTRAINT fk_bookings_transaction
-        FOREIGN KEY (transaction_id) REFERENCES transactions(transaction_id)
-        ON DELETE SET NULL
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

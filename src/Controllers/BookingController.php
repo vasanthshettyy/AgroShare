@@ -52,15 +52,13 @@ function autoPromoteBookings(mysqli $conn, int $userId): void
 {
     $now = date('Y-m-d H:i:s');
     
-    // confirmed -> active (skip ESCROW bookings — they use PIN-gated handover)
+    // confirmed -> active
     $sql1 = "UPDATE bookings b
-             LEFT JOIN transactions t ON b.transaction_id = t.transaction_id
              SET b.status = 'active' 
              WHERE (b.renter_id = ? OR b.owner_id = ?) 
              AND b.status = 'confirmed' 
              AND b.start_datetime <= ? 
-             AND b.end_datetime > ?
-             AND (t.booking_type IS NULL OR t.booking_type != 'ESCROW')";
+             AND b.end_datetime > ?";
     $stmt1 = $conn->prepare($sql1);
     if ($stmt1) {
         $stmt1->bind_param('iiss', $userId, $userId, $now, $now);
@@ -68,14 +66,12 @@ function autoPromoteBookings(mysqli $conn, int $userId): void
         $stmt1->close();
     }
 
-    // active -> completed (skip ESCROW bookings — they use PIN-gated return)
+    // active -> completed
     $sql2 = "UPDATE bookings b
-             LEFT JOIN transactions t ON b.transaction_id = t.transaction_id
              SET b.status = 'completed' 
              WHERE (b.renter_id = ? OR b.owner_id = ?) 
              AND b.status = 'active' 
-             AND b.end_datetime <= ?
-             AND (t.booking_type IS NULL OR t.booking_type != 'ESCROW')";
+             AND b.end_datetime <= ?";
     $stmt2 = $conn->prepare($sql2);
     if ($stmt2) {
         $stmt2->bind_param('iis', $userId, $userId, $now);
@@ -91,12 +87,10 @@ function getRentalsForUser(mysqli $conn, int $userId): array
 {
     autoPromoteBookings($conn, $userId);
     
-    $sql = "SELECT b.*, e.title as equipment_title, u.full_name as owner_name, u.phone as owner_phone,
-                   t.booking_type, t.status as escrow_status, t.handover_otp
+    $sql = "SELECT b.*, e.title as equipment_title, u.full_name as owner_name, u.phone as owner_phone
             FROM bookings b
             JOIN equipment e ON b.equipment_id = e.id
             JOIN users u ON b.owner_id = u.id
-            LEFT JOIN transactions t ON b.transaction_id = t.transaction_id
             WHERE b.renter_id = ?
             ORDER BY b.created_at DESC";
     $stmt = $conn->prepare($sql);
@@ -115,12 +109,10 @@ function getRequestsForOwner(mysqli $conn, int $userId): array
     $sql = "SELECT b.*, e.title as equipment_title, 
                    u.full_name as renter_name, u.phone as renter_phone, u.email as renter_email,
                    u.village as renter_village, u.district as renter_district,
-                   u.trust_score as renter_trust, u.is_verified as renter_verified,
-                   t.booking_type, t.status as escrow_status, t.return_otp
+                   u.trust_score as renter_trust, u.is_verified as renter_verified
             FROM bookings b
             JOIN equipment e ON b.equipment_id = e.id
             JOIN users u ON b.renter_id = u.id
-            LEFT JOIN transactions t ON b.transaction_id = t.transaction_id
             WHERE b.owner_id = ?
             ORDER BY b.created_at DESC";
     $stmt = $conn->prepare($sql);
@@ -147,13 +139,12 @@ function updateBookingStatus(mysqli $conn, int $bookingId, int $userId, string $
     $validStatuses = ['confirmed', 'completed', 'cancelled'];
     if (!in_array($newStatus, $validStatuses)) return false;
 
-    // Fetch booking details with transaction info
+    // Fetch booking details
     $stmt = $conn->prepare(
-        "SELECT b.status, b.owner_id, b.renter_id, b.equipment_id, b.transaction_id,
-                e.title as eq_title, t.booking_type, t.status as txn_status
+        "SELECT b.status, b.owner_id, b.renter_id, b.equipment_id,
+                e.title as eq_title
          FROM bookings b
          JOIN equipment e ON b.equipment_id = e.id
-         LEFT JOIN transactions t ON b.transaction_id = t.transaction_id
          WHERE b.id = ?"
     );
     $stmt->bind_param('i', $bookingId);
@@ -165,7 +156,6 @@ function updateBookingStatus(mysqli $conn, int $bookingId, int $userId, string $
     $isOwner  = (int)$booking['owner_id'] === $userId;
     $isRenter = (int)$booking['renter_id'] === $userId;
     $current  = $booking['status'];
-    $isEscrow = ($booking['booking_type'] === 'ESCROW');
 
     // State Machine & Permission Enforcement
     if ($newStatus === 'confirmed') {
@@ -177,8 +167,6 @@ function updateBookingStatus(mysqli $conn, int $bookingId, int $userId, string $
     }
 
     if ($newStatus === 'completed') {
-        // Block manual completion for ESCROW bookings — must go through PIN verification
-        if ($isEscrow && $booking['txn_status'] !== 'COMPLETED') return false;
         if ((!$isOwner && !$isRenter) || !in_array($current, ['confirmed', 'active'])) return false;
     }
 
@@ -187,11 +175,6 @@ function updateBookingStatus(mysqli $conn, int $bookingId, int $userId, string $
         $stmt = $conn->prepare("UPDATE bookings SET status = ? WHERE id = ?");
         $stmt->bind_param('si', $newStatus, $bookingId);
         $stmt->execute();
-
-        // Sync ESCROW transaction on cancel
-        if ($newStatus === 'cancelled' && $isEscrow && !empty($booking['transaction_id'])) {
-            cancelEscrowTransaction($conn, $booking['transaction_id']);
-        }
 
         // --- Notifications ---
         $eqTitle = $booking['eq_title'];
@@ -219,16 +202,4 @@ function updateBookingStatus(mysqli $conn, int $bookingId, int $userId, string $
         $conn->rollback();
         return false;
     }
-}
-
-/**
- * Cancel an ESCROW transaction and release equipment.
- */
-function cancelEscrowTransaction(mysqli $conn, string $transactionId): void
-{
-    $stmt = $conn->prepare(
-        "UPDATE transactions SET status = 'CANCELLED', handover_otp = NULL, return_otp = NULL, updated_at = CURRENT_TIMESTAMP WHERE transaction_id = ? AND status IN ('PENDING_PAYMENT', 'FUNDS_LOCKED', 'ACTIVE_RENTAL')"
-    );
-    $stmt->bind_param('s', $transactionId);
-    $stmt->execute();
 }
