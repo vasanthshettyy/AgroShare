@@ -46,11 +46,17 @@ if (!$startTime || !$endTime || $endTime <= $startTime) {
 $durationSeconds = $endTime - $startTime;
 $durationHours   = $durationSeconds / 3600;
 
-$dailyRate  = (float)$eq['price_per_day'];
-$dayCount   = max(1, (int)ceil($durationHours / 24));
+$dailyRate    = (float)$eq['price_per_day'];
+$safetyDeposit = (float)($eq['safety_deposit'] ?? 0);
+$dayCount      = max(1, (int)ceil($durationHours / 24));
 
-$totalPrice = $dayCount * $dailyRate;
-$breakdown  = sprintf("%d day%s × ₹%s/day", $dayCount, $dayCount > 1 ? 's' : '', number_format($dailyRate, 0));
+$rentalPrice = $dayCount * $dailyRate;
+$totalPrice  = $rentalPrice + $safetyDeposit;
+
+$breakdown = sprintf("Rent: ₹%s (%d day%s) ", number_format($rentalPrice, 0), $dayCount, $dayCount > 1 ? 's' : '');
+if ($safetyDeposit > 0) {
+    $breakdown .= sprintf("+ Deposit: ₹%s", number_format($safetyDeposit, 0));
+}
 
 echo json_encode([
     'success'     => true,

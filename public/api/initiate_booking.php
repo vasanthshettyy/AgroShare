@@ -43,7 +43,7 @@ try {
     }
 
     // B) Load Equipment & Ownership Check
-    $stmt = $conn->prepare("SELECT owner_id, price_per_day, is_available, title FROM equipment WHERE id = ?");
+    $stmt = $conn->prepare("SELECT owner_id, price_per_day, safety_deposit, is_available, title FROM equipment WHERE id = ?");
     $stmt->bind_param('i', $eqId);
     $stmt->execute();
     $eq = $stmt->get_result()->fetch_assoc();
@@ -65,6 +65,7 @@ try {
 
     $ownerId = (int)$eq['owner_id'];
     $pricePerDay = (float)$eq['price_per_day'];
+    $safetyDeposit = (float)($eq['safety_deposit'] ?? 0);
     $eqTitle = $eq['title'];
 
     // C) Overlap Prevention (Pre-check)
@@ -76,7 +77,9 @@ try {
     // D) Calculate Amount
     $durationHours = ($endTime - $startTime) / 3600;
     $dayCount = max(1, (int)ceil($durationHours / 24));
-    $amount = $dayCount * $pricePerDay;
+    
+    $rentalAmount = $dayCount * $pricePerDay;
+    $totalAmount  = $rentalAmount + $safetyDeposit;
 
     // E) Atomic DB Transaction
     $conn->begin_transaction();
@@ -93,8 +96,8 @@ try {
 
         // Insert into Bookings
         $bookingStatus = 'pending'; // Default to pending until owner approves
-        $bookingStmt = $conn->prepare("INSERT INTO bookings (equipment_id, renter_id, owner_id, start_datetime, end_datetime, total_price, status) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $bookingStmt->bind_param('iiissds', $eqId, $renterId, $ownerId, $startStr, $endStr, $amount, $bookingStatus);
+        $bookingStmt = $conn->prepare("INSERT INTO bookings (equipment_id, renter_id, owner_id, start_datetime, end_datetime, total_price, deposit_amount, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $bookingStmt->bind_param('iiissdds', $eqId, $renterId, $ownerId, $startStr, $endStr, $rentalAmount, $safetyDeposit, $bookingStatus);
         $bookingStmt->execute();
         $bookingStmt->close();
 
@@ -114,7 +117,7 @@ try {
             'success' => true,
             'message' => 'Booking request initiated. Contact owner directly.',
             'data' => [
-                'amount'         => $amount,
+                'amount'         => $totalAmount,
                 'owner_contact'  => [
                     'name'  => $owner['full_name'],
                     'phone' => $owner['phone'],
