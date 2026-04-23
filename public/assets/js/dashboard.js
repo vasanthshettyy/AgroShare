@@ -50,10 +50,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         const item = document.createElement('div');
                         item.className = `notif-item ${n.is_read == 0 ? 'unread' : ''}`;
                         item.dataset.id = n.id;
-                        
+
                         // Parse date
                         const d = new Date(n.created_at);
-                        const timeStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        const timeStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
                         const msgDiv = document.createElement('div');
                         msgDiv.textContent = n.message;
@@ -71,10 +71,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                     formData.append('id', n.id);
                                     const csrfToken = document.getElementById('global-csrf-token') || document.querySelector('input[name="csrf_token"]');
                                     if (csrfToken) formData.append('csrf_token', csrfToken.value);
-                                    
+
                                     const mRes = await fetch('api/mark-notification-read.php', { method: 'POST', body: formData });
                                     const mData = await mRes.json();
-                                    
+
                                     if (mData.success) {
                                         item.classList.remove('unread');
                                         // Update dot counter visually
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Fetch initially
         fetchNotifications();
-        
+
         // Optional: Poll every 30 seconds
         setInterval(fetchNotifications, 30000);
     }
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ── 1. Theme Persistence ──────────────────────────────────────
    Force dark mode as the default theme.
    ─────────────────────────────────────────────────────────── */
-(function(){
+(function () {
     var t = localStorage.getItem('theme') || 'dark';
     document.documentElement.setAttribute('data-theme', t);
 })();
@@ -288,13 +288,13 @@ document.addEventListener('DOMContentLoaded', () => {
     listEquipmentBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            
+
             if (equipmentModal) {
                 equipmentModal.classList.add('show-modal');
                 document.body.style.overflow = 'hidden'; // Prevent background scroll
             } else {
                 console.warn('Modal element #equipmentModal not found, redirecting...');
-                window.location.href = 'equipment-create.php';
+                window.location.href = 'equipment-browse.php?mine=1&action=list';
             }
         });
     });
@@ -333,29 +333,29 @@ document.addEventListener('DOMContentLoaded', () => {
     if (equipmentForm) {
         equipmentForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const submitBtn = document.getElementById('submitBtn');
             const originalText = submitBtn ? submitBtn.innerHTML : '';
             if (submitBtn) {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<span>Listing...</span>';
             }
-            
+
             // Clear previous errors
             document.querySelectorAll('.form-error-msg').forEach(el => el.remove());
             document.querySelectorAll('.has-error').forEach(el => el.classList.remove('has-error'));
-            
+
             try {
                 const formData = new FormData(equipmentForm);
-                
+
                 const basePath = document.documentElement.dataset.basePath || '';
                 const response = await fetch(`${basePath}/api/create-equipment.php`, {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     if (result.new_csrf) {
                         const csrfInput = document.getElementById('csrfToken');
@@ -399,7 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const openProfileModal = async (e) => {
         if (e) e.preventDefault();
-        
+
         // Find modal again in case DOM was updated
         const modal = document.getElementById('profileModal');
         if (!modal) {
@@ -415,7 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (result.success) {
                 const user = result.data;
-                
+
                 // Safe population helper
                 const setVal = (id, val) => {
                     const el = document.getElementById(id);
@@ -428,13 +428,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 setVal('prof-village', user.village);
                 setVal('prof-district', user.district);
                 setVal('prof-state', user.state);
-                
+
                 // Avatar preview
                 const preview = document.getElementById('prof-photo-preview');
                 if (preview && user.profile_photo) {
                     preview.src = user.profile_photo;
                 }
-                
+
                 // Badges
                 const badgeContainer = document.getElementById('prof-badges');
                 if (badgeContainer) {
@@ -469,7 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
             openProfileModal(e);
         }
     });
-    
+
     const closeProfileModal = () => {
         const modal = document.getElementById('profileModal');
         if (modal) {
@@ -507,7 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const form = e.target;
             const submitBtn = document.getElementById('profileSubmitBtn');
             const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Update Profile';
-            
+
             if (submitBtn) {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = 'Updating...';
@@ -557,20 +557,20 @@ window.clearImagePreviews = clearImagePreviews;
 
 if (imageUploadZone && imageInput) {
     imageUploadZone.addEventListener('click', () => imageInput.click());
-    
+
     imageUploadZone.addEventListener('dragover', (e) => {
         e.preventDefault();
         imageUploadZone.classList.add('dragover');
     });
-    
+
     imageUploadZone.addEventListener('dragleave', () => {
         imageUploadZone.classList.remove('dragover');
     });
-    
+
     imageUploadZone.addEventListener('drop', (e) => {
         e.preventDefault();
         imageUploadZone.classList.remove('dragover');
-        
+
         const files = e.dataTransfer.files;
         if (files.length > 0) {
             const dt = new DataTransfer();
@@ -582,7 +582,7 @@ if (imageUploadZone && imageInput) {
             imageInput.dispatchEvent(new Event('change'));
         }
     });
-    
+
     imageInput.addEventListener('change', (e) => {
         const files = e.target.files;
         if (files.length > 5) {
@@ -590,7 +590,7 @@ if (imageUploadZone && imageInput) {
             imageInput.value = '';
             return;
         }
-        
+
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
             if (!file.type.startsWith('image/')) {
@@ -604,10 +604,10 @@ if (imageUploadZone && imageInput) {
                 return;
             }
         }
-        
+
         // Clear previous previews
         clearImagePreviews();
-        
+
         // Create previews
         Array.from(files).forEach((file, index) => {
             if (file.type.startsWith('image/')) {
