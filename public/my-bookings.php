@@ -421,7 +421,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                             <div class="info-row">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                                 <span class="info-label">Owner:</span> 
-                                <span><?= e($b['owner_name']) ?></span>
+                                <button type="button" class="btn-text-link" onclick="showUserReviews(<?= (int)$b['owner_id'] ?>)"><?= e($b['owner_name']) ?></button>
                             </div>
                             <div class="info-row">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
@@ -479,7 +479,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                             <div class="info-row">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                                 <span class="info-label">Renter:</span> 
-                                <span><?= e($b['renter_name']) ?></span>
+                                <button type="button" class="btn-text-link" onclick="showUserReviews(<?= (int)$b['renter_id'] ?>)"><?= e($b['renter_name']) ?></button>
                             </div>
                             <div class="info-row">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
@@ -493,7 +493,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                             <?= strtoupper(substr(trim($b['renter_name'] ?? ''), 0, 1)) ?: '?' ?>
                                         </div>
                                         <div class="renter-meta">
-                                            <span class="renter-name-link"><?= e($b['renter_name']) ?></span>
+                                            <button type="button" class="renter-name-link btn-text-link" onclick="showUserReviews(<?= (int)$b['renter_id'] ?>)"><?= e($b['renter_name']) ?></button>
                                             <div class="renter-sub-meta">
                                                 <span>📍 <?= e($b['renter_village']) ?>, <?= e($b['renter_district']) ?></span>
                                                 <span>•</span>
@@ -570,148 +570,208 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             .review-premium-modal {
                 background: var(--glass-bg-heavy) !important;
                 border: 1px solid var(--glass-border) !important;
-                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+                box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.6) !important;
                 position: relative;
+                overflow: hidden;
+            }
+            .review-premium-modal::before {
+                content: '';
+                position: absolute;
+                top: 0; left: 0; right: 0; height: 4px;
+                background: linear-gradient(90deg, var(--primary-action), var(--secondary-action));
             }
             .modal-close-x {
                 position: absolute;
-                top: 1.5rem;
-                right: 1.5rem;
-                background: none;
-                border: none;
+                top: 1.25rem;
+                right: 1.25rem;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid var(--border-color);
                 color: var(--text-muted);
                 cursor: pointer;
-                padding: 0.5rem;
-                transition: color 0.2s;
+                padding: 0.4rem;
+                border-radius: 8px;
+                transition: all 0.2s;
                 z-index: 10;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
-            .modal-close-x:hover { color: var(--text-main); }
+            .modal-close-x:hover { 
+                color: var(--text-main); 
+                background: rgba(255,255,255,0.1);
+                transform: rotate(90deg);
+            }
             
             .premium-title {
-                font-size: 1.5rem;
-                font-weight: 700;
+                font-size: 1.4rem;
+                font-weight: 800;
                 color: var(--text-main);
-                margin-bottom: 0.5rem;
+                margin-bottom: 0.25rem;
+                letter-spacing: -0.02em;
             }
             .premium-subtitle {
-                font-size: 0.875rem;
+                font-size: 0.85rem;
                 color: var(--text-muted);
-                margin-bottom: 1.5rem;
+                margin-bottom: 1.25rem;
+                line-height: 1.4;
             }
 
-            /* Liquid Fill Star Animation */
+            /* Star & Trust Layout */
+            .rating-overview-row {
+                display: flex;
+                align-items: center;
+                gap: 1.25rem;
+                margin-bottom: 1.25rem;
+            }
+
+            /* Liquid Fill Star Animation (Vector Precision) */
             .liquid-stars-wrapper {
                 position: relative;
-                display: inline-flex;
-                gap: 0.4rem;
+                width: 190px;
+                height: 36px;
                 cursor: pointer;
                 user-select: none;
-                --star-fill-width: 0%;
-                margin-bottom: 1.75rem;
-                padding: 5px;
-                border-radius: 12px;
-                transition: background 0.2s;
+                margin-bottom: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: transform 0.2s ease;
             }
             .liquid-stars-wrapper:hover {
-                background: rgba(255, 255, 255, 0.03);
+                transform: scale(1.02);
             }
             
-            .stars-background, .stars-active {
-                display: flex;
-                gap: 0.4rem;
-            }
-            .stars-background {
-                color: rgba(255, 255, 255, 0.1);
-            }
-            .stars-active {
-                position: absolute;
-                top: 5px;
-                left: 5px;
-                width: var(--star-fill-width);
-                overflow: hidden;
-                white-space: nowrap;
-                color: #fbbf24;
-                transition: width 0.15s ease-out;
-                pointer-events: none;
-                z-index: 2;
-            }
-            .star-svg {
-                width: 32px;
-                height: 32px;
-                fill: currentColor;
-                flex-shrink: 0;
-            }
-            
-            /* Pop & Glow Animation */
-            @keyframes star-pop {
-                0% { transform: scale(1); }
-                50% { transform: scale(1.1); filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.5)); }
-                100% { transform: scale(1); }
-            }
-            .star-pop-anim {
-                animation: star-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            }
-
-            /* Interact Layer */
-            .stars-interact {
-                position: absolute;
-                top: 0;
-                left: 0;
+            .star-engine-svg {
                 width: 100%;
                 height: 100%;
-                display: flex;
-                z-index: 5;
+                filter: drop-shadow(0 0 0px transparent);
+                transition: filter 0.3s ease;
             }
-            .star-hitbox {
-                flex: 1;
-                background: none;
-                border: none;
-                padding: 0;
-                cursor: pointer;
+            
+            .star-pop-anim .star-engine-svg {
+                animation: star-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.4));
             }
 
+            @keyframes star-pop {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
+            }
+
+            .star-path {
+                fill: url(#starGradient);
+                stroke: rgba(255,255,255,0.05);
+                stroke-width: 0.5;
+            }
+            .star-svg { width: 38px; height: 38px; fill: currentColor; flex-shrink: 0; }
+            
+            /* Trust Score Preview Box */
+            .trust-preview-box {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 0.5rem;
+                background: rgba(76, 175, 120, 0.08);
+                border: 1px solid rgba(76, 175, 120, 0.2);
+                border-radius: 12px;
+                min-width: 90px;
+                transition: all 0.3s ease;
+            }
+            .trust-preview-box.highlight {
+                background: var(--primary-10);
+                border-color: var(--primary-action);
+                transform: translateY(-2px);
+            }
+            .trust-input {
+                background: transparent;
+                border: none;
+                font-size: 1.25rem;
+                font-weight: 800;
+                color: var(--primary-action);
+                width: 50px;
+                text-align: center;
+                outline: none;
+                margin-bottom: -2px;
+            }
+            /* Remove arrows from number input */
+            .trust-input::-webkit-outer-spin-button,
+            .trust-input::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+            .trust-input {
+                -moz-appearance: textfield;
+            }
+            .trust-label {
+                font-size: 0.65rem;
+                font-weight: 700;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                margin-top: 2px;
+            }
+
+            /* Textarea & Char Count */
+            .comment-container {
+                position: relative;
+                margin-bottom: 1rem;
+            }
             .premium-textarea {
                 width: 100%;
-                background: rgba(0, 0, 0, 0.2);
+                background: rgba(0, 0, 0, 0.25);
                 border: 1px solid var(--border-color);
-                border-radius: 12px;
+                border-radius: 14px;
                 padding: 1rem;
                 color: var(--text-main);
                 font-family: inherit;
                 font-size: 0.9rem;
                 resize: none;
-                margin-bottom: 1.25rem;
-                transition: all 0.2s;
+                transition: all 0.3s ease;
+                min-height: 100px;
             }
             .premium-textarea:focus {
                 outline: none;
                 border-color: var(--primary-action);
-                background: rgba(0, 0, 0, 0.3);
-                box-shadow: 0 0 0 3px var(--primary-10);
+                background: rgba(0, 0, 0, 0.4);
+                box-shadow: 0 0 0 4px var(--primary-10);
+            }
+            .char-counter {
+                position: absolute;
+                bottom: 10px; right: 10px;
+                font-size: 0.65rem;
+                font-weight: 600;
+                color: var(--text-subtle);
+                background: rgba(0,0,0,0.3);
+                padding: 1px 6px;
+                border-radius: 4px;
+                pointer-events: none;
             }
 
             .review-tags-container {
                 display: flex;
                 flex-wrap: wrap;
-                gap: 0.65rem;
-                margin-bottom: 2rem;
+                gap: 0.5rem;
+                margin-bottom: 1.5rem;
             }
             .review-tag {
                 display: inline-flex;
                 align-items: center;
-                gap: 0.5rem;
-                padding: 0.55rem 0.95rem;
-                background: transparent;
+                gap: 0.4rem;
+                padding: 0.4rem 0.8rem;
+                background: rgba(255, 255, 255, 0.03);
                 border: 1px solid var(--border-color);
                 border-radius: 100px;
                 color: var(--text-muted);
-                font-size: 0.78rem;
+                font-size: 0.72rem;
                 font-weight: 600;
                 cursor: pointer;
-                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             }
+            .review-tag svg { width: 14px; height: 14px; opacity: 0.6; transition: opacity 0.2s; }
             .review-tag:hover {
-                background: rgba(255, 255, 255, 0.05);
+                background: rgba(255, 255, 255, 0.07);
                 border-color: var(--text-subtle);
                 color: var(--text-main);
                 transform: translateY(-1px);
@@ -720,74 +780,114 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                 background: var(--primary-10);
                 border-color: var(--primary-action);
                 color: var(--text-main);
-                box-shadow: 0 4px 12px rgba(76, 175, 120, 0.15);
+                box-shadow: 0 4px 12px -4px rgba(76, 175, 120, 0.3);
             }
+            .review-tag.active svg { opacity: 1; color: var(--primary-action); }
 
             .modal-footer-premium {
                 display: flex;
                 gap: 1rem;
                 justify-content: flex-end;
+                padding-top: 0.75rem;
+                border-top: 1px solid var(--border-color);
             }
             .premium-btn-primary {
                 background: var(--primary-action);
                 color: white;
                 border: none;
-                padding: 0.75rem 1.75rem;
+                padding: 0.7rem 1.5rem;
                 border-radius: 12px;
                 font-weight: 700;
                 cursor: pointer;
-                transition: all 0.2s;
-                box-shadow: 0 4px 12px rgba(76, 175, 120, 0.25);
+                transition: all 0.3s ease;
+                box-shadow: 0 6px 15px -5px rgba(76, 175, 120, 0.4);
+                font-size: 0.9rem;
             }
             .premium-btn-primary:hover { 
                 filter: brightness(1.1);
-                transform: translateY(-2px);
-                box-shadow: 0 6px 20px rgba(76, 175, 120, 0.35);
+                transform: translateY(-1px);
+                box-shadow: 0 10px 20px -5px rgba(76, 175, 120, 0.5);
             }
             .premium-btn-secondary {
                 background: transparent;
                 color: var(--text-muted);
                 border: 1px solid var(--border-color);
-                padding: 0.75rem 1.5rem;
+                padding: 0.7rem 1.25rem;
                 border-radius: 12px;
                 font-weight: 600;
                 cursor: pointer;
                 transition: all 0.2s;
+                font-size: 0.9rem;
             }
             .premium-btn-secondary:hover {
                 background: rgba(255, 255, 255, 0.05);
                 color: var(--text-main);
+                border-color: var(--text-subtle);
+            }
+                border-color: var(--text-subtle);
             }
         </style>
 
-        <div class="liquid-stars-wrapper" id="liquid-stars-container">
-            <div class="stars-background">
-                <?php for($i=0;$i<5;$i++): ?>
-                <svg class="star-svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
-                <?php endfor; ?>
+        <div class="rating-overview-row">
+            <div class="liquid-stars-wrapper" id="liquid-stars-container">
+                <svg class="star-engine-svg" viewBox="0 0 200 40" preserveAspectRatio="xMidYMid meet">
+                    <defs>
+                        <linearGradient id="starGradient" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="200" y2="0">
+                            <stop id="grad-stop-active" offset="0" stop-color="#fbbf24" />
+                            <stop id="grad-stop-ghost" offset="0" stop-color="rgba(255,255,255,0.1)" />
+                        </linearGradient>
+                    </defs>
+                    <!-- 5 Perfectly Spaced Stars (Width 40 each, 0 to 200) -->
+                    <path class="star-path" d="M20 28.78l10.3 6.22-2.73-11.72L36.67 15.4l-11.98-1.02L20 3.37l-4.69 11.01-11.98 1.02 9.1 7.88-2.73 11.72z" />
+                    <path class="star-path" d="M60 28.78l10.3 6.22-2.73-11.72L76.67 15.4l-11.98-1.02L60 3.37l-4.69 11.01-11.98 1.02 9.1 7.88-2.73 11.72z" />
+                    <path class="star-path" d="M100 28.78l10.3 6.22-2.73-11.72L116.67 15.4l-11.98-1.02L100 3.37l-4.69 11.01-11.98 1.02 9.1 7.88-2.73 11.72z" />
+                    <path class="star-path" d="M140 28.78l10.3 6.22-2.73-11.72L156.67 15.4l-11.98-1.02L140 3.37l-4.69 11.01-11.98 1.02 9.1 7.88-2.73 11.72z" />
+                    <path class="star-path" d="M180 28.78l10.3 6.22-2.73-11.72L196.67 15.4l-11.98-1.02L180 3.37l-4.69 11.01-11.98 1.02 9.1 7.88-2.73 11.72z" />
+                </svg>
+                <input type="hidden" id="review-rating" value="0">
             </div>
-            <div class="stars-active" id="stars-fill-layer">
-                <?php for($i=0;$i<5;$i++): ?>
-                <svg class="star-svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
-                <?php endfor; ?>
+
+            <div class="trust-preview-box" id="trust-preview">
+                <input type="number" id="manual-rating-input" class="trust-input" min="0" max="5" step="0.1" placeholder="0.0">
+                <span class="trust-label" id="trust-text-display">Rate It</span>
             </div>
-            <input type="hidden" id="selected-rating" value="0">
         </div>
 
-        <textarea id="review-comment" rows="4" class="premium-textarea" placeholder="Tell us about the equipment quality, owner support, and overall experience..."></textarea>
+        <div class="comment-container">
+            <textarea id="review-comment" rows="4" class="premium-textarea" 
+                      placeholder="How was the equipment condition? Was the owner helpful?"
+                      maxlength="500"></textarea>
+            <div class="char-counter"><span id="char-count">0</span>/500</div>
+        </div>
         
         <div class="review-tags-container">
             <button type="button" class="review-tag">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
                 Great Condition
             </button>
             <button type="button" class="review-tag">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                 On Time
             </button>
             <button type="button" class="review-tag">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                 Good Support
+            </button>
+            <button type="button" class="review-tag">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                Fair Pricing
+            </button>
+            <button type="button" class="review-tag">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                Highly Recommended
+            </button>
+            <button type="button" class="review-tag">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>
+                Helpful Owner
+            </button>
+            <button type="button" class="review-tag">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="M20 12h2"></path><path d="m19.07 19.07 1.41 1.41"></path><path d="M12 20v2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="M2 12h2"></path><path d="m7.76 7.76-1.41 1.41"></path><circle cx="12" cy="12" r="4"></circle></svg>
+                Clean Equipment
             </button>
         </div>
 
