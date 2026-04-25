@@ -87,14 +87,16 @@ function getRentalsForUser(mysqli $conn, int $userId): array
 {
     autoPromoteBookings($conn, $userId);
     
-    $sql = "SELECT b.*, e.title as equipment_title, u.full_name as owner_name, u.phone as owner_phone
+    $sql = "SELECT b.*, e.title as equipment_title, u.full_name as owner_name, u.phone as owner_phone,
+                   r.id AS review_id
             FROM bookings b
             JOIN equipment e ON b.equipment_id = e.id
             JOIN users u ON b.owner_id = u.id
+            LEFT JOIN reviews r ON r.booking_id = b.id AND r.reviewer_id = ?
             WHERE b.renter_id = ?
             ORDER BY b.created_at DESC";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', $userId);
+    $stmt->bind_param('ii', $userId, $userId);
     $stmt->execute();
     return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 }
@@ -109,14 +111,16 @@ function getRequestsForOwner(mysqli $conn, int $userId): array
     $sql = "SELECT b.*, e.title as equipment_title, 
                    u.full_name as renter_name, u.phone as renter_phone, u.email as renter_email,
                    u.village as renter_village, u.district as renter_district,
-                   u.trust_score as renter_trust, u.is_verified as renter_verified
+                   u.trust_score as renter_trust, u.is_verified as renter_verified,
+                   r.id AS review_id
             FROM bookings b
             JOIN equipment e ON b.equipment_id = e.id
             JOIN users u ON b.renter_id = u.id
+            LEFT JOIN reviews r ON r.booking_id = b.id AND r.reviewer_id = ?
             WHERE b.owner_id = ?
             ORDER BY b.created_at DESC";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', $userId);
+    $stmt->bind_param('ii', $userId, $userId);
     $stmt->execute();
     return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 }

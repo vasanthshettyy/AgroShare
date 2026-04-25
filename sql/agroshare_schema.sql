@@ -124,7 +124,7 @@ CREATE TABLE reviews (
     booking_id      INT UNSIGNED        NOT NULL,
     reviewer_id     INT UNSIGNED        NOT NULL,
     reviewee_id     INT UNSIGNED        NOT NULL,
-    rating          TINYINT UNSIGNED    NOT NULL COMMENT '1-5 star rating',
+    rating          DECIMAL(2,1)        NOT NULL COMMENT '1-5 star rating (supports .5)',
     comment         TEXT                NULL DEFAULT NULL,
     review_type     ENUM('renter_to_owner','owner_to_renter') NOT NULL,
     created_at      TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
