@@ -73,18 +73,25 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
         }
         .booking-grid.active { display: flex; }
 
+        @keyframes fadeSlideIn { 
+            from { opacity: 0; transform: translateY(12px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
         .booking-card {
             background: var(--surface-color);
             border: 1px solid var(--border-color);
             border-radius: 14px;
-            padding: 2rem;
+            padding: 1.25rem;
             display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
+            flex-direction: row;
+            align-items: center;
+            gap: 1.5rem;
             transition: all 0.3s ease;
             position: relative;
-            overflow: hidden;
+            overflow: visible; /* Changed to visible for dots menu */
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            animation: fadeSlideIn 0.35s ease-out;
         }
         .booking-card:hover {
             transform: translateY(-4px);
@@ -92,21 +99,97 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             box-shadow: 0 8px 25px rgba(0,0,0,0.2);
         }
 
+        .card-thumb {
+            width: 130px;
+            height: 100px;
+            flex-shrink: 0;
+            overflow: hidden;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.03);
+        }
+        .card-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .booking-card:hover .card-thumb img {
+            transform: scale(1.1);
+        }
+
+        .card-details {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .card-person {
+            min-width: 160px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            font-size: 0.82rem;
+            padding: 0 1.25rem;
+            border-left: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+        }
+        .person-avatar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 2px;
+        }
+        .person-avatar {
+            width: 24px;
+            height: 24px;
+            background: var(--primary-10);
+            color: var(--primary-action);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        .person-name {
+            font-weight: 700;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .person-trust {
+            color: #fbbf24;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .person-phone {
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
         .card-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 0.75rem;
+            align-items: baseline;
+            border: none;
+            padding: 0;
         }
         .eq-title {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 700;
             color: var(--text-main);
             margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .price-tag {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             font-weight: 800;
             color: var(--primary-action);
         }
@@ -114,29 +197,104 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
         .card-body {
             display: flex;
             flex-direction: column;
-            gap: 0.6rem;
+            gap: 0.3rem;
         }
         .info-row {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            font-size: 0.88rem;
+            gap: 0.6rem;
+            font-size: 0.82rem;
             color: var(--text-subtle);
         }
-        .info-row svg { opacity: 0.7; }
-        .info-label { font-weight: 600; color: var(--text-muted); min-width: 60px; }
+        .info-row svg { opacity: 0.6; flex-shrink: 0; }
+        .info-label { font-weight: 600; color: var(--text-muted); min-width: 50px; }
 
         .card-footer {
-            margin-top: auto;
+            margin-top: 0;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 1rem;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 0;
+            gap: 12px;
+            min-width: 160px; /* Slightly wider for new layout */
+            position: relative;
         }
 
         .actions-wrap {
             display: flex;
             gap: 0.5rem;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        /* 3-Dot Menu Styles */
+        .dots-container {
+            position: relative;
+            display: inline-block;
+        }
+        .dots-trigger {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: var(--primary-10);
+            color: var(--primary-action);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.2rem;
+            padding: 0;
+            line-height: 1;
+        }
+        .dots-trigger:hover {
+            background: var(--primary-20);
+            border-color: var(--primary-action);
+        }
+        .dots-menu {
+            position: absolute;
+            right: 0;
+            top: 2.5rem;
+            z-index: 100;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.5rem;
+            min-width: 160px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+            pointer-events: none;
+            transition: opacity 0.25s, transform 0.25s;
+        }
+        .dots-menu.is-open {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+        .dots-menu .btn-sm {
+            width: 100%;
+            text-align: left;
+            justify-content: flex-start;
+            padding: 0.6rem 0.8rem;
+            background: transparent;
+            color: var(--text-main);
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+        .dots-menu .btn-sm:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--primary-action);
+        }
+        .dots-menu .btn-danger:hover {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
         }
 
         /* -- Badges -- */
@@ -162,7 +320,15 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             font-weight: 600;
             transition: all 0.2s;
         }
-        .btn-primary.btn-sm { background: var(--primary-action); color: #fff; }
+        .btn-primary.btn-sm { 
+            background: var(--primary-action); 
+            color: #fff; 
+            transition: transform 0.2s, filter 0.2s; 
+        }
+        .btn-primary.btn-sm:hover { 
+            transform: translateY(-2px); 
+            filter: brightness(1.15); 
+        }
         .btn-danger.btn-sm { background: var(--danger); color: #fff; }
         .btn-secondary.btn-sm { background: var(--border-color); color: var(--text-main); }
         .btn-sm:hover { filter: brightness(1.2); transform: translateY(-1px); }
@@ -172,6 +338,51 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             padding: 4rem 2rem;
             color: var(--text-muted);
             grid-column: 1 / -1;
+        }
+
+        /* -- Status Capsules -- */
+        .status-capsules {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .capsule-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .capsule-btn:hover {
+            border-color: var(--primary-action);
+            color: var(--text-main);
+        }
+        .capsule-btn.active {
+            background: var(--primary-10);
+            border-color: var(--primary-action);
+            color: var(--primary-action);
+            box-shadow: 0 4px 12px rgba(76, 175, 120, 0.15);
+        }
+        .cap-count {
+            background: var(--surface-color);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-subtle);
+        }
+        .capsule-btn.active .cap-count {
+            background: var(--primary-action);
+            color: #fff;
         }
 
         /* -- Renter Profile Info -- */
@@ -396,6 +607,15 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                 <button class="tab-btn" data-tab="requests">Requests for My Equipment</button>
             </div>
 
+            <!-- Status Capsules -->
+            <div class="status-capsules" id="statusCapsules">
+                <button class="capsule-btn active" data-filter="all">All <span class="cap-count" id="count-all">0</span></button>
+                <button class="capsule-btn" data-filter="upcoming">Upcoming <span class="cap-count" id="count-upcoming">0</span></button>
+                <button class="capsule-btn" data-filter="active">Ongoing <span class="cap-count" id="count-active">0</span></button>
+                <button class="capsule-btn" data-filter="completed">Completed <span class="cap-count" id="count-completed">0</span></button>
+                <button class="capsule-btn" data-filter="cancelled">Cancelled <span class="cap-count" id="count-cancelled">0</span></button>
+            </div>
+
             <!-- Rentals Grid -->
             <div class="booking-grid active" id="rentals">
                 <?php if (empty($rentals)): ?>
@@ -404,51 +624,79 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                         <p>You haven't rented any equipment yet.</p>
                         <a href="equipment-browse.php" class="btn-primary" style="margin-top:1rem; display:inline-block;">Browse Equipment</a>
                     </div>
-                <?php else: foreach ($rentals as $b): ?>
-                    <div class="booking-card" id="booking-<?= $b['id'] ?>">
-                        <div class="card-header">
-                            <h3 class="eq-title"><?= e($b['equipment_title']) ?></h3>
-                            <div style="text-align: right;">
-                                <span class="price-tag">₹<?= number_format($b['total_price'] + $b['deposit_amount'], 0) ?></span>
-                                <?php if ($b['deposit_amount'] > 0): ?>
-                                    <div style="font-size: 0.65rem; color: var(--text-subtle); margin-top: 2px;">
-                                        (includes ₹<?= number_format($b['deposit_amount'], 0) ?> Deposit)
-                                    </div>
-                                <?php endif; ?>
-                            </div>
+                <?php else: foreach ($rentals as $b): 
+                    $images = !empty($b['equipment_images']) ? json_decode($b['equipment_images'], true) : [];
+                    $thumb = !empty($images) ? e($images[0]) : 'assets/img/placeholder.png';
+                ?>
+                    <div class="booking-card" id="booking-<?= $b['id'] ?>" data-status="<?= $b['status'] ?>">
+                        <div class="card-thumb">
+                            <img src="<?= $thumb ?>" alt="<?= e($b['equipment_title']) ?>" onerror="this.src='assets/img/placeholder.png'">
                         </div>
-                        <div class="card-body">
-                            <div class="info-row">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                <span class="info-label">Owner:</span> 
-                                <button type="button" class="btn-text-link" onclick="showUserReviews(<?= (int)$b['owner_id'] ?>)"><?= e($b['owner_name']) ?></button>
-                            </div>
-                            <div class="info-row">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                                <span class="info-label">Dates:</span> <span><?= date('d M', strtotime($b['start_datetime'])) ?> - <?= date('d M', strtotime($b['end_datetime'])) ?></span>
-                            </div>
-                        </div>
-                        <div class="card-footer" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-                            <div style="display: flex; flex-direction: column; gap: 6px;">
-                                <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
-                            </div>
-                            <div class="actions-wrap" style="margin-left: auto;">
-                                <?php if (in_array($b['status'], ['pending', 'confirmed'])): ?>
-                                    <button class="btn-secondary btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="cancelled">Cancel</button>
-                                <?php endif; ?>
-                                <?php if ($b['status'] === 'active'): ?>
-                                    <button class="btn-primary btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="completed">Mark Completed</button>
-                                <?php endif; ?>
-                                <?php if ($b['status'] === 'completed'): ?>
-                                    <button class="btn-danger btn-sm btn-dispute" data-id="<?= $b['id'] ?>" style="background: var(--danger, #dc3545);">Raise Dispute</button>
-                                    <?php if (empty($b['review_id'])): ?>
-                                        <button class="btn-secondary btn-sm" 
-                                                data-review-booking="<?= (int)$b['id'] ?>"
-                                                data-review-reviewee="<?= (int)($b['owner_id'] ?? 0) ?>">
-                                            ⭐ Leave a Review
-                                        </button>
+
+                        <div class="card-details">
+                            <div class="card-header">
+                                <h3 class="eq-title"><?= e($b['equipment_title']) ?></h3>
+                                <div style="text-align: right;">
+                                    <span class="price-tag">₹<?= number_format($b['total_price'] + $b['deposit_amount'], 0) ?></span>
+                                    <?php if ($b['deposit_amount'] > 0): ?>
+                                        <div style="font-size: 0.6rem; color: var(--text-subtle); margin-top: 2px;">
+                                            (includes ₹<?= number_format($b['deposit_amount'], 0) ?> Deposit)
+                                        </div>
                                     <?php endif; ?>
-                                <?php endif; ?>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="info-row">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                                    <span class="info-label">Dates:</span> <span><?= date('d M', strtotime($b['start_datetime'])) ?> - <?= date('d M', strtotime($b['end_datetime'])) ?></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-person">
+                            <div class="person-avatar-wrap">
+                                <div class="person-avatar"><?= strtoupper(substr($b['owner_name'], 0, 1)) ?></div>
+                                <button type="button" class="person-name btn-text-link" onclick="showUserReviews(<?= (int)$b['owner_id'] ?>)"><?= e($b['owner_name']) ?></button>
+                            </div>
+                            <div class="person-trust">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                                <span><?= !empty($b['owner_trust']) ? number_format($b['owner_trust'], 1) : '-' ?></span>
+                                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">Trust</span>
+                            </div>
+                            <div class="person-phone">
+                                <?= e($b['owner_phone']) ?>
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                            <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
+                            <div class="actions-wrap">
+                                <a href="equipment-detail.php?id=<?= $b['equipment_id'] ?>" class="btn-sm btn-secondary">View Details</a>
+                                <button class="btn-sm btn-primary contact-btn" data-phone="<?= e($b['owner_phone'] ?? '') ?>">Contact</button>
+                                
+                                <div class="dots-container">
+                                    <button class="btn-sm btn-icon dots-trigger" aria-label="More actions">⋮</button>
+                                    <div class="dots-menu">
+                                        <?php if (in_array($b['status'], ['pending', 'confirmed'])): ?>
+                                            <button class="btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="cancelled" style="color: var(--danger);">Cancel Booking</button>
+                                        <?php endif; ?>
+                                        
+                                        <?php if ($b['status'] === 'active'): ?>
+                                            <button class="btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="completed">Mark Completed</button>
+                                        <?php endif; ?>
+                                        
+                                        <?php if ($b['status'] === 'completed'): ?>
+                                            <?php if (empty($b['review_id'])): ?>
+                                                <button class="btn-sm" 
+                                                        data-review-booking="<?= (int)$b['id'] ?>"
+                                                        data-review-reviewee="<?= (int)($b['owner_id'] ?? 0) ?>">
+                                                    ⭐ Leave a Review
+                                                </button>
+                                            <?php endif; ?>
+                                            <button class="btn-sm btn-danger btn-dispute" data-id="<?= $b['id'] ?>">Raise Dispute</button>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -462,88 +710,81 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--border-color)" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                         <p>No incoming booking requests yet.</p>
                     </div>
-                <?php else: foreach ($requests as $b): ?>
-                    <div class="booking-card" id="booking-<?= $b['id'] ?>">
-                        <div class="card-header">
-                            <h3 class="eq-title"><?= e($b['equipment_title']) ?></h3>
-                            <div style="text-align: right;">
-                                <span class="price-tag">₹<?= number_format($b['total_price'] + $b['deposit_amount'], 0) ?></span>
-                                <?php if ($b['deposit_amount'] > 0): ?>
-                                    <div style="font-size: 0.65rem; color: var(--text-subtle); margin-top: 2px;">
-                                        (includes ₹<?= number_format($b['deposit_amount'], 0) ?> Deposit)
-                                    </div>
-                                <?php endif; ?>
+                <?php else: foreach ($requests as $b): 
+                    $images = !empty($b['equipment_images']) ? json_decode($b['equipment_images'], true) : [];
+                    $thumb = !empty($images) ? e($images[0]) : 'assets/img/placeholder.png';
+                ?>
+                    <div class="booking-card" id="booking-<?= $b['id'] ?>" data-status="<?= $b['status'] ?>">
+                        <div class="card-thumb">
+                            <img src="<?= $thumb ?>" alt="<?= e($b['equipment_title']) ?>" onerror="this.src='assets/img/placeholder.png'">
+                        </div>
+
+                        <div class="card-details">
+                            <div class="card-header">
+                                <h3 class="eq-title"><?= e($b['equipment_title']) ?></h3>
+                                <div style="text-align: right;">
+                                    <span class="price-tag">₹<?= number_format($b['total_price'] + $b['deposit_amount'], 0) ?></span>
+                                    <?php if ($b['deposit_amount'] > 0): ?>
+                                        <div style="font-size: 0.6rem; color: var(--text-subtle); margin-top: 2px;">
+                                            (includes ₹<?= number_format($b['deposit_amount'], 0) ?> Deposit)
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="info-row">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                                    <span class="info-label">Dates:</span> <span><?= date('d M', strtotime($b['start_datetime'])) ?> - <?= date('d M', strtotime($b['end_datetime'])) ?></span>
+                                </div>
                             </div>
                         </div>
-                        <div class="card-body">
-                            <div class="info-row">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                <span class="info-label">Renter:</span> 
-                                <button type="button" class="btn-text-link" onclick="showUserReviews(<?= (int)$b['renter_id'] ?>)"><?= e($b['renter_name']) ?></button>
-                            </div>
-                            <div class="info-row">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                                <span class="info-label">Dates:</span> <span><?= date('d M', strtotime($b['start_datetime'])) ?> - <?= date('d M', strtotime($b['end_datetime'])) ?></span>
-                            </div>
 
-                            <?php if (in_array($b['status'], ['confirmed', 'active', 'completed'])): ?>
-                                <div class="renter-profile-card">
-                                    <div class="renter-info-header">
-                                        <div class="renter-avatar-sm">
-                                            <?= strtoupper(substr(trim($b['renter_name'] ?? ''), 0, 1)) ?: '?' ?>
-                                        </div>
-                                        <div class="renter-meta">
-                                            <button type="button" class="renter-name-link btn-text-link" onclick="showUserReviews(<?= (int)$b['renter_id'] ?>)"><?= e($b['renter_name']) ?></button>
-                                            <div class="renter-sub-meta">
-                                                <span>📍 <?= e($b['renter_village']) ?>, <?= e($b['renter_district']) ?></span>
-                                                <span>•</span>
-                                                <span style="color:var(--amber);">⭐ <?= number_format($b['renter_trust'], 1) ?></span>
-                                                <?php if ($b['renter_verified']): ?>
-                                                    <span style="color:var(--secondary-action);">✔ Verified</span>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="renter-contact-grid">
-                                        <a href="tel:<?= e($b['renter_phone']) ?>" class="contact-item">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                                            <?= e($b['renter_phone']) ?>
-                                        </a>
-                                        <?php if ($b['renter_email']): ?>
-                                            <a href="mailto:<?= e($b['renter_email']) ?>" class="contact-item">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                                                Email Renter
-                                            </a>
+                        <div class="card-person">
+                            <div class="person-avatar-wrap">
+                                <div class="person-avatar"><?= strtoupper(substr($b['renter_name'], 0, 1)) ?></div>
+                                <button type="button" class="person-name btn-text-link" onclick="showUserReviews(<?= (int)$b['renter_id'] ?>)"><?= e($b['renter_name']) ?></button>
+                            </div>
+                            <div class="person-trust">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                                <span><?= !empty($b['renter_trust']) ? number_format($b['renter_trust'], 1) : '-' ?></span>
+                                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">Trust</span>
+                            </div>
+                            <div class="person-phone">
+                                <?= e($b['renter_phone']) ?>
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                            <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
+                            <div class="actions-wrap">
+                                <a href="equipment-detail.php?id=<?= $b['equipment_id'] ?>" class="btn-sm btn-secondary">View Details</a>
+                                <button class="btn-sm btn-primary contact-btn" data-phone="<?= e($b['renter_phone'] ?? '') ?>">Contact</button>
+
+                                <div class="dots-container">
+                                    <button class="btn-sm btn-icon dots-trigger" aria-label="More actions">⋮</button>
+                                    <div class="dots-menu">
+                                        <?php
+                                            $btnData = 'data-id="' . $b['id'] . '"'
+                                                     . ' data-renter="' . e($b['renter_name']) . '"'
+                                                     . ' data-dates="' . date('d M Y', strtotime($b['start_datetime'])) . ' — ' . date('d M Y', strtotime($b['end_datetime'])) . '"'
+                                                     . ' data-price="₹' . number_format($b['total_price'], 0) . '"'
+                                                     . ' data-equipment="' . e($b['equipment_title']) . '"';
+                                        ?>
+                                        <?php if ($b['status'] === 'pending'): ?>
+                                            <button class="btn-sm status-action" <?= $btnData ?> data-status="confirmed">Accept Request</button>
+                                            <button class="btn-sm status-action" <?= $btnData ?> data-status="cancelled" style="color: var(--danger);">Decline Request</button>
+                                        <?php elseif ($b['status'] === 'confirmed'): ?>
+                                            <button class="btn-sm status-action" <?= $btnData ?> data-status="completed">Mark Completed</button>
+                                            <button class="btn-sm status-action" <?= $btnData ?> data-status="cancelled" style="color: var(--danger);">Cancel Booking</button>
+                                        <?php elseif ($b['status'] === 'completed' && empty($b['review_id'])): ?>
+                                            <button class="btn-sm" 
+                                                    data-review-booking="<?= (int)$b['id'] ?>"
+                                                    data-review-reviewee="<?= (int)($b['renter_id'] ?? 0) ?>">
+                                                ⭐ Leave a Review
+                                            </button>
                                         <?php endif; ?>
                                     </div>
                                 </div>
-                            <?php endif; ?>
-                        </div>
-                        <div class="card-footer" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-                            <div style="display: flex; flex-direction: column; gap: 6px;">
-                                <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
-                            </div>
-                            <div class="actions-wrap" style="margin-left: auto;">
-                                <?php
-                                    $btnData = 'data-id="' . $b['id'] . '"'
-                                             . ' data-renter="' . e($b['renter_name']) . '"'
-                                             . ' data-dates="' . date('d M Y', strtotime($b['start_datetime'])) . ' — ' . date('d M Y', strtotime($b['end_datetime'])) . '"'
-                                             . ' data-price="₹' . number_format($b['total_price'], 0) . '"'
-                                             . ' data-equipment="' . e($b['equipment_title']) . '"';
-                                ?>
-                                <?php if ($b['status'] === 'pending'): ?>
-                                    <button class="btn-primary btn-sm status-action" <?= $btnData ?> data-status="confirmed">Accept</button>
-                                    <button class="btn-secondary btn-sm status-action" <?= $btnData ?> data-status="cancelled">Decline</button>
-                                <?php elseif ($b['status'] === 'confirmed'): ?>
-                                    <button class="btn-primary btn-sm status-action" <?= $btnData ?> data-status="completed">Mark Completed</button>
-                                    <button class="btn-secondary btn-sm status-action" <?= $btnData ?> data-status="cancelled">Cancel</button>
-                                <?php elseif ($b['status'] === 'completed' && empty($b['review_id'])): ?>
-                                    <button class="btn-secondary btn-sm" 
-                                            data-review-booking="<?= (int)$b['id'] ?>"
-                                            data-review-reviewee="<?= (int)($b['renter_id'] ?? 0) ?>">
-                                        ⭐ Leave a Review
-                                    </button>
-                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -905,13 +1146,99 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 <script src="assets/js/dashboard.js" defer></script>
 <script src="assets/js/reviews.js" defer></script>
 <script>
-    // Tab Switching Logic
+    // --- Dynamic Statistics & Filtering ---
+    function updateCapsuleCounts(activeTabId) {
+        const activeGrid = document.getElementById(activeTabId);
+        if (!activeGrid) return;
+
+        const cards = activeGrid.querySelectorAll('.booking-card');
+        
+        let counts = {
+            all: 0,
+            upcoming: 0,
+            active: 0,
+            completed: 0,
+            cancelled: 0
+        };
+
+        cards.forEach(card => {
+            const status = card.dataset.status;
+            counts.all++;
+            
+            if (status === 'pending' || status === 'confirmed') counts.upcoming++;
+            else if (status === 'active') counts.active++;
+            else if (status === 'completed') counts.completed++;
+            else if (status === 'cancelled') counts.cancelled++;
+        });
+
+        // Update Capsule UI
+        document.getElementById('count-all').innerText = counts.all;
+        document.getElementById('count-upcoming').innerText = counts.upcoming;
+        document.getElementById('count-active').innerText = counts.active;
+        document.getElementById('count-completed').innerText = counts.completed;
+        document.getElementById('count-cancelled').innerText = counts.cancelled;
+    }
+
+    function applyCapsuleFilter() {
+        const activeTabId = document.querySelector('.tab-btn.active').dataset.tab;
+        const activeGrid = document.getElementById(activeTabId);
+        const activeFilter = document.querySelector('.capsule-btn.active').dataset.filter;
+
+        if (!activeGrid) return;
+
+        const cards = activeGrid.querySelectorAll('.booking-card');
+        cards.forEach(card => {
+            const status = card.dataset.status;
+            let show = false;
+
+            if (activeFilter === 'all') {
+                show = true;
+            } else if (activeFilter === 'upcoming') {
+                show = (status === 'pending' || status === 'confirmed');
+            } else {
+                show = (status === activeFilter);
+            }
+
+            card.style.display = show ? 'flex' : 'none';
+        });
+
+        // Update numbers whenever filter changes (optional, but keeps view consistent)
+        updateCapsuleCounts(activeTabId);
+    }
+
+    // Main Tab Switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.tab-btn, .booking-grid').forEach(el => el.classList.remove('active'));
             btn.classList.add('active');
-            document.getElementById(btn.dataset.tab).classList.add('active');
+            
+            const targetId = btn.dataset.tab;
+            const targetGrid = document.getElementById(targetId);
+            if (targetGrid) targetGrid.classList.add('active');
+            
+            // Reset to 'All' filter when switching main tabs
+            document.querySelectorAll('.capsule-btn').forEach(p => p.classList.remove('active'));
+            const allCapsule = document.querySelector('.capsule-btn[data-filter="all"]');
+            if (allCapsule) allCapsule.classList.add('active');
+            
+            applyCapsuleFilter();
         });
+    });
+
+    // Status Capsule Click Listeners
+    document.querySelectorAll('.capsule-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.capsule-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            applyCapsuleFilter();
+        });
+    });
+
+    // Initialization
+    window.addEventListener('load', () => {
+        const initialTabId = document.querySelector('.tab-btn.active').dataset.tab;
+        updateCapsuleCounts(initialTabId);
+        applyCapsuleFilter();
     });
 
     function showInlineToast(type, message) {
@@ -937,26 +1264,36 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
         setTimeout(() => toast.remove(), 3000);
     }
 
-    // Reveal Contact Info Logic
-    document.querySelectorAll('.btn-reveal-contact').forEach(btn => {
+    // 3-Dot Menu Logic
+    document.addEventListener('click', (e) => {
+        const trigger = e.target.closest('.dots-trigger');
+        const allMenus = document.querySelectorAll('.dots-menu');
+
+        if (trigger) {
+            const menu = trigger.nextElementSibling;
+            const isShowing = menu.classList.contains('is-open');
+            
+            // Close all others
+            allMenus.forEach(m => m.classList.remove('is-open'));
+            
+            // Toggle current
+            if (!isShowing) menu.classList.add('is-open');
+            e.stopPropagation();
+        } else {
+            // Clicked outside, close all
+            allMenus.forEach(m => m.classList.remove('is-open'));
+        }
+    });
+
+    // Contact Button Logic
+    document.querySelectorAll('.contact-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const phone = this.dataset.phone;
-            const container = this.parentElement;
-            
-            // Create the tel link dynamically
-            const link = document.createElement('a');
-            link.href = `tel:${phone}`;
-            link.style.color = 'var(--secondary-action)';
-            link.style.fontWeight = 'bold';
-            link.style.fontSize = '0.9rem';
-            link.style.textDecoration = 'none';
-            link.style.display = 'inline-flex';
-            link.style.alignItems = 'center';
-            link.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> ${phone}`;
-            
-            // Replace button with link
-            container.innerHTML = '';
-            container.appendChild(link);
+            if (phone) {
+                window.location.href = `tel:${phone}`;
+            } else {
+                showInlineToast('error', 'Contact info not available');
+            }
         });
     });
 
