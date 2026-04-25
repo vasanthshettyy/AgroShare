@@ -450,6 +450,13 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                 <?php endif; ?>
                                 <?php if ($b['status'] === 'completed'): ?>
                                     <button class="btn-danger btn-sm btn-dispute" data-id="<?= $b['id'] ?>" style="background: var(--danger, #dc3545);">Raise Dispute</button>
+                                    <?php if (empty($b['review_id'])): ?>
+                                        <button class="btn-secondary btn-sm" 
+                                                data-review-booking="<?= (int)$b['id'] ?>"
+                                                data-review-reviewee="<?= (int)($b['owner_id'] ?? 0) ?>">
+                                            ⭐ Leave a Review
+                                        </button>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -539,6 +546,12 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                 <?php elseif ($b['status'] === 'confirmed'): ?>
                                     <button class="btn-primary btn-sm status-action" <?= $btnData ?> data-status="completed">Mark Completed</button>
                                     <button class="btn-secondary btn-sm status-action" <?= $btnData ?> data-status="cancelled">Cancel</button>
+                                <?php elseif ($b['status'] === 'completed' && empty($b['review_id'])): ?>
+                                    <button class="btn-secondary btn-sm" 
+                                            data-review-booking="<?= (int)$b['id'] ?>"
+                                            data-review-reviewee="<?= (int)($b['renter_id'] ?? 0) ?>">
+                                        ⭐ Leave a Review
+                                    </button>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -549,10 +562,256 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
     </main>
 </div>
 
+<div id="reviewModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content profile-modal-content review-premium-modal" style="max-width:480px; width:90%; padding:2.5rem;">
+        <button id="reviewModalCloseBtn" class="modal-close-x" aria-label="Close">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        
+        <div class="modal-header-section">
+            <h2 class="premium-title">Leave a Review</h2>
+            <p class="premium-subtitle">Share your experience to help others make better decisions.</p>
+        </div>
+
+        <input type="hidden" id="review-booking-id" value="">
+        
+        <style>
+            .review-premium-modal {
+                background: var(--glass-bg-heavy) !important;
+                border: 1px solid var(--glass-border) !important;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+                position: relative;
+            }
+            .modal-close-x {
+                position: absolute;
+                top: 1.5rem;
+                right: 1.5rem;
+                background: none;
+                border: none;
+                color: var(--text-muted);
+                cursor: pointer;
+                padding: 0.5rem;
+                transition: color 0.2s;
+                z-index: 10;
+            }
+            .modal-close-x:hover { color: var(--text-main); }
+            
+            .premium-title {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: var(--text-main);
+                margin-bottom: 0.5rem;
+            }
+            .premium-subtitle {
+                font-size: 0.875rem;
+                color: var(--text-muted);
+                margin-bottom: 1.5rem;
+            }
+
+            /* Liquid Fill Star Animation */
+            .liquid-stars-wrapper {
+                position: relative;
+                display: inline-flex;
+                gap: 0.4rem;
+                cursor: pointer;
+                user-select: none;
+                --star-fill-width: 0%;
+                margin-bottom: 1.75rem;
+                padding: 5px;
+                border-radius: 12px;
+                transition: background 0.2s;
+            }
+            .liquid-stars-wrapper:hover {
+                background: rgba(255, 255, 255, 0.03);
+            }
+            
+            .stars-background, .stars-active {
+                display: flex;
+                gap: 0.4rem;
+            }
+            .stars-background {
+                color: rgba(255, 255, 255, 0.1);
+            }
+            .stars-active {
+                position: absolute;
+                top: 5px;
+                left: 5px;
+                width: var(--star-fill-width);
+                overflow: hidden;
+                white-space: nowrap;
+                color: #fbbf24;
+                transition: width 0.15s ease-out;
+                pointer-events: none;
+                z-index: 2;
+            }
+            .star-svg {
+                width: 32px;
+                height: 32px;
+                fill: currentColor;
+                flex-shrink: 0;
+            }
+            
+            /* Pop & Glow Animation */
+            @keyframes star-pop {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.5)); }
+                100% { transform: scale(1); }
+            }
+            .star-pop-anim {
+                animation: star-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+
+            /* Interact Layer */
+            .stars-interact {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                z-index: 5;
+            }
+            .star-hitbox {
+                flex: 1;
+                background: none;
+                border: none;
+                padding: 0;
+                cursor: pointer;
+            }
+
+            .premium-textarea {
+                width: 100%;
+                background: rgba(0, 0, 0, 0.2);
+                border: 1px solid var(--border-color);
+                border-radius: 12px;
+                padding: 1rem;
+                color: var(--text-main);
+                font-family: inherit;
+                font-size: 0.9rem;
+                resize: none;
+                margin-bottom: 1.25rem;
+                transition: all 0.2s;
+            }
+            .premium-textarea:focus {
+                outline: none;
+                border-color: var(--primary-action);
+                background: rgba(0, 0, 0, 0.3);
+                box-shadow: 0 0 0 3px var(--primary-10);
+            }
+
+            .review-tags-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.65rem;
+                margin-bottom: 2rem;
+            }
+            .review-tag {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.55rem 0.95rem;
+                background: transparent;
+                border: 1px solid var(--border-color);
+                border-radius: 100px;
+                color: var(--text-muted);
+                font-size: 0.78rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .review-tag:hover {
+                background: rgba(255, 255, 255, 0.05);
+                border-color: var(--text-subtle);
+                color: var(--text-main);
+                transform: translateY(-1px);
+            }
+            .review-tag.active {
+                background: var(--primary-10);
+                border-color: var(--primary-action);
+                color: var(--text-main);
+                box-shadow: 0 4px 12px rgba(76, 175, 120, 0.15);
+            }
+
+            .modal-footer-premium {
+                display: flex;
+                gap: 1rem;
+                justify-content: flex-end;
+            }
+            .premium-btn-primary {
+                background: var(--primary-action);
+                color: white;
+                border: none;
+                padding: 0.75rem 1.75rem;
+                border-radius: 12px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: all 0.2s;
+                box-shadow: 0 4px 12px rgba(76, 175, 120, 0.25);
+            }
+            .premium-btn-primary:hover { 
+                filter: brightness(1.1);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(76, 175, 120, 0.35);
+            }
+            .premium-btn-secondary {
+                background: transparent;
+                color: var(--text-muted);
+                border: 1px solid var(--border-color);
+                padding: 0.75rem 1.5rem;
+                border-radius: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .premium-btn-secondary:hover {
+                background: rgba(255, 255, 255, 0.05);
+                color: var(--text-main);
+            }
+        </style>
+
+        <div class="liquid-stars-wrapper" id="liquid-stars-container">
+            <div class="stars-background">
+                <?php for($i=0;$i<5;$i++): ?>
+                <svg class="star-svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                <?php endfor; ?>
+            </div>
+            <div class="stars-active" id="stars-fill-layer">
+                <?php for($i=0;$i<5;$i++): ?>
+                <svg class="star-svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                <?php endfor; ?>
+            </div>
+            <input type="hidden" id="selected-rating" value="0">
+        </div>
+
+        <textarea id="review-comment" rows="4" class="premium-textarea" placeholder="Tell us about the equipment quality, owner support, and overall experience..."></textarea>
+        
+        <div class="review-tags-container">
+            <button type="button" class="review-tag">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                Great Condition
+            </button>
+            <button type="button" class="review-tag">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                On Time
+            </button>
+            <button type="button" class="review-tag">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                Good Support
+            </button>
+        </div>
+
+        <div class="modal-footer-premium">
+            <button id="reviewCancelBtn" class="premium-btn-secondary">Cancel</button>
+            <button id="reviewSubmitBtn" class="premium-btn-primary">Submit Review</button>
+        </div>
+    </div>
+</div>
+
 <input type="hidden" id="csrf_token" value="<?= generateCsrfToken() ?>">
 
 <?php require_once __DIR__ . '/includes/profile-modal.php'; ?>
 <script src="assets/js/dashboard.js" defer></script>
+<script src="assets/js/reviews.js" defer></script>
 <script>
     // Tab Switching Logic
     document.querySelectorAll('.tab-btn').forEach(btn => {
