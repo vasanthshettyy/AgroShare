@@ -89,14 +89,15 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             gap: 1.5rem;
             transition: all 0.3s ease;
             position: relative;
-            overflow: visible; /* Changed to visible for dots menu */
+            overflow: visible; /* Prevent clipping of dropdown menus */
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             animation: fadeSlideIn 0.35s ease-out;
         }
-        .booking-card:hover {
+        .booking-card:hover, .booking-card:focus-within {
             transform: translateY(-4px);
             border-color: var(--primary-action);
             box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            z-index: 10; /* Stack above other cards when menu is open */
         }
 
         .card-thumb {
@@ -263,7 +264,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             border-radius: 10px;
             padding: 0.5rem;
             min-width: 160px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
             gap: 4px;
@@ -672,7 +673,21 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                             <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
                             <div class="actions-wrap">
                                 <a href="equipment-detail.php?id=<?= $b['equipment_id'] ?>" class="btn-sm btn-secondary">View Details</a>
-                                <button class="btn-sm btn-primary contact-btn" data-phone="<?= e($b['owner_phone'] ?? '') ?>">Contact</button>
+                                
+                                <?php if ($b['status'] === 'completed' && empty($b['review_id'])): ?>
+                                    <!-- Dedicated Review Button (Replaces Contact) -->
+                                    <button class="btn-primary btn-sm" 
+                                            style="background: var(--primary-action); gap: 5px; display: inline-flex; align-items: center;"
+                                            data-review-booking="<?= (int)$b['id'] ?>"
+                                            data-review-reviewee="<?= (int)($b['owner_id'] ?? 0) ?>">
+                                        ⭐ Leave a Review
+                                    </button>
+                                <?php else: ?>
+                                    <!-- Default Contact Button -->
+                                    <button class="btn-primary btn-sm contact-btn" data-phone="<?= e($b['owner_phone'] ?? '') ?>">
+                                        Contact
+                                    </button>
+                                <?php endif; ?>
                                 
                                 <div class="dots-container">
                                     <button class="btn-sm btn-icon dots-trigger" aria-label="More actions">⋮</button>
@@ -686,13 +701,6 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                         <?php endif; ?>
                                         
                                         <?php if ($b['status'] === 'completed'): ?>
-                                            <?php if (empty($b['review_id'])): ?>
-                                                <button class="btn-sm" 
-                                                        data-review-booking="<?= (int)$b['id'] ?>"
-                                                        data-review-reviewee="<?= (int)($b['owner_id'] ?? 0) ?>">
-                                                    ⭐ Leave a Review
-                                                </button>
-                                            <?php endif; ?>
                                             <button class="btn-sm btn-danger btn-dispute" data-id="<?= $b['id'] ?>">Raise Dispute</button>
                                         <?php endif; ?>
                                     </div>
@@ -758,7 +766,21 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                             <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
                             <div class="actions-wrap">
                                 <a href="equipment-detail.php?id=<?= $b['equipment_id'] ?>" class="btn-sm btn-secondary">View Details</a>
-                                <button class="btn-sm btn-primary contact-btn" data-phone="<?= e($b['renter_phone'] ?? '') ?>">Contact</button>
+                                
+                                <?php if ($b['status'] === 'completed' && empty($b['review_id'])): ?>
+                                    <!-- Dedicated Review Button (Replaces Contact) -->
+                                    <button class="btn-primary btn-sm" 
+                                            style="background: var(--primary-action); gap: 5px; display: inline-flex; align-items: center;"
+                                            data-review-booking="<?= (int)$b['id'] ?>"
+                                            data-review-reviewee="<?= (int)($b['renter_id'] ?? 0) ?>">
+                                        ⭐ Leave a Review
+                                    </button>
+                                <?php else: ?>
+                                    <!-- Default Contact Button -->
+                                    <button class="btn-primary btn-sm contact-btn" data-phone="<?= e($b['renter_phone'] ?? '') ?>">
+                                        Contact
+                                    </button>
+                                <?php endif; ?>
 
                                 <div class="dots-container">
                                     <button class="btn-sm btn-icon dots-trigger" aria-label="More actions">⋮</button>
@@ -776,12 +798,6 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                         <?php elseif ($b['status'] === 'confirmed'): ?>
                                             <button class="btn-sm status-action" <?= $btnData ?> data-status="completed">Mark Completed</button>
                                             <button class="btn-sm status-action" <?= $btnData ?> data-status="cancelled" style="color: var(--danger);">Cancel Booking</button>
-                                        <?php elseif ($b['status'] === 'completed' && empty($b['review_id'])): ?>
-                                            <button class="btn-sm" 
-                                                    data-review-booking="<?= (int)$b['id'] ?>"
-                                                    data-review-reviewee="<?= (int)($b['renter_id'] ?? 0) ?>">
-                                                ⭐ Leave a Review
-                                            </button>
                                         <?php endif; ?>
                                     </div>
                                 </div>
@@ -1063,8 +1079,6 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             .premium-btn-secondary:hover {
                 background: rgba(255, 255, 255, 0.05);
                 color: var(--text-main);
-                border-color: var(--text-subtle);
-            }
                 border-color: var(--text-subtle);
             }
         </style>
