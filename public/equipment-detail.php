@@ -180,6 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
             <span class="nav-section-label">Account</span>
 
+            <?php if ($isLoggedIn): ?>
             <a href="javascript:void(0)" class="nav-link" id="profile-btn">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -339,7 +340,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         </div>
                         <div class="pd-owner-meta">
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <span class="owner-name"><?= e($eq['owner_name']) ?></span>
+                                <button type="button" class="owner-name btn-text-link" onclick="showUserReviews(<?= (int)$eq['owner_id'] ?>)"><?= e($eq['owner_name']) ?></button>
                                 <?php if ($eq['owner_verified']): ?>
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--secondary-action)" stroke="none" title="Verified Farmer"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 <?php endif; ?>
