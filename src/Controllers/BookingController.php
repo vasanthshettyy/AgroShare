@@ -87,7 +87,7 @@ function getRentalsForUser(mysqli $conn, int $userId): array
 {
     autoPromoteBookings($conn, $userId);
     
-    $sql = "SELECT b.*, e.title as equipment_title, u.full_name as owner_name, u.phone as owner_phone,
+    $sql = "SELECT b.*, e.title as equipment_title, e.images as equipment_images, u.full_name as owner_name, u.phone as owner_phone,
                    r.id AS review_id
             FROM bookings b
             JOIN equipment e ON b.equipment_id = e.id
@@ -108,7 +108,7 @@ function getRequestsForOwner(mysqli $conn, int $userId): array
 {
     autoPromoteBookings($conn, $userId);
     
-    $sql = "SELECT b.*, e.title as equipment_title, 
+    $sql = "SELECT b.*, e.title as equipment_title, e.images as equipment_images,
                    u.full_name as renter_name, u.phone as renter_phone, u.email as renter_email,
                    u.village as renter_village, u.district as renter_district,
                    u.trust_score as renter_trust, u.is_verified as renter_verified,
