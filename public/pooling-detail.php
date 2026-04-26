@@ -470,15 +470,15 @@ $is_creator = ($campaign['creator_id'] === $userId);
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem;">
                             <div style="background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; text-align: center;">
                                 <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">1. Target Needed</div>
-                                <div style="color: white; font-size: 1.5rem; font-weight: 800; margin-top: 0.25rem;"><?= htmlspecialchars($campaign['target_quantity'] . ' ' . $campaign['unit']) ?></div>
+                                <div style="color: white; font-size: 1.5rem; font-weight: 800; margin-top: 0.25rem;"><?= number_format($campaign['target_quantity']) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($campaign['unit']) ?></span></div>
                             </div>
                             <div style="background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; text-align: center;">
                                 <div style="color: var(--primary-action); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">2. Already Filled</div>
-                                <div style="color: var(--primary-action); font-size: 1.5rem; font-weight: 800; margin-top: 0.25rem;"><?= htmlspecialchars($campaign['current_quantity'] . ' ' . $campaign['unit']) ?></div>
+                                <div style="color: var(--primary-action); font-size: 1.5rem; font-weight: 800; margin-top: 0.25rem;"><?= number_format($campaign['current_quantity']) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($campaign['unit']) ?></span></div>
                             </div>
                             <div style="background: rgba(255, 152, 0, 0.1); border: 1px solid rgba(255, 152, 0, 0.3); border-radius: 12px; padding: 1.25rem; text-align: center;">
                                 <div style="color: #ff9800; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">3. Still Short By</div>
-                                <div style="color: #ff9800; font-size: 1.5rem; font-weight: 800; margin-top: 0.25rem;"><?= htmlspecialchars(max(0, $campaign['target_quantity'] - $campaign['current_quantity']) . ' ' . $campaign['unit']) ?></div>
+                                <div style="color: #ff9800; font-size: 1.5rem; font-weight: 800; margin-top: 0.25rem;"><?= number_format(max(0, $campaign['target_quantity'] - $campaign['current_quantity'])) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($campaign['unit']) ?></span></div>
                             </div>
                         </div>
                     </div>
@@ -593,7 +593,7 @@ $is_creator = ($campaign['creator_id'] === $userId);
                                 </div>
                                 <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 0.25rem;">You're in!</h3>
                                 <p style="font-size: 0.9rem; color: var(--primary-action); font-weight: 700; margin-bottom: 1.5rem;">
-                                    You contributed <?= number_format($userPledge['quantity_pledged']) ?> <?= e($campaign['unit']) ?>
+                                    You contributed <strong style="font-size: 1.2em; margin: 0 4px;"><?= number_format($userPledge['quantity_pledged']) ?></strong> <span style="opacity: 0.7; text-transform: lowercase;"><?= htmlspecialchars($campaign['unit']) ?> units</span>
                                 </p>
                                 <button type="button" class="btn-secondary" id="cancelPledgeBtn" style="width: 100%; height: 48px; border-radius: 12px;">
                                     Cancel Contribution

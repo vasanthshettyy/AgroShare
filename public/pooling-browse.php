@@ -421,11 +421,11 @@ $campaigns = getCampaigns($conn, $filters);
                             <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; padding: 0.75rem 1rem; margin-top: 1rem;">
                                 <div>
                                     <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Target Needed</div>
-                                    <div style="font-size: 1.15rem; font-weight: 800; color: white;"><?= htmlspecialchars($camp['target_quantity'] . ' ' . $camp['unit']) ?></div>
+                                    <div style="font-size: 1.15rem; font-weight: 800; color: white;"><?= number_format($camp['target_quantity']) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($camp['unit']) ?></span></div>
                                 </div>
                                 <div style="text-align: right;">
                                     <div style="font-size: 0.75rem; color: var(--primary-action); text-transform: uppercase; letter-spacing: 0.5px;">Already Filled</div>
-                                    <div style="font-size: 1.15rem; font-weight: 800; color: var(--primary-action);"><?= htmlspecialchars($camp['current_quantity'] . ' ' . $camp['unit']) ?></div>
+                                    <div style="font-size: 1.15rem; font-weight: 800; color: var(--primary-action);"><?= number_format($camp['current_quantity']) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($camp['unit']) ?></span></div>
                                 </div>
                             </div>
                         </div>
