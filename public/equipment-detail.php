@@ -233,7 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         <span class="toggle-dot"></span>
                         <span class="toggle-label"><?= $eq['is_available'] ? 'Available for Booking' : 'Unavailable' ?></span>
                     </button>
-                    <button type="button" class="btn-secondary" id="editEquipmentBtn">
+                    <button type="button" class="btn-manage-secondary" id="editEquipmentBtn">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                         Edit
                     </button>
@@ -566,8 +566,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             </div>
 
             <div class="form-actions" style="margin-top: 2rem; border: none; padding: 0; justify-content: flex-end; gap: 1rem;">
-                <button type="button" class="btn-secondary" id="editCancelBtn" style="min-height: auto; padding: 0.7rem 1.5rem; font-size: 0.85rem; border-radius: 40px;">Cancel</button>
-                <button type="submit" class="btn-primary" id="editSubmitBtn" style="min-height: auto; padding: 0.7rem 1.5rem; font-size: 0.85rem; border-radius: 40px;">Save Changes</button>
+                <button type="button" class="btn-secondary" id="editCancelBtn">Cancel</button>
+                <button type="submit" class="btn-primary" id="editSubmitBtn">Save Changes</button>
             </div>
         </form>
     </div>

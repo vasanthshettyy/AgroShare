@@ -721,7 +721,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             <button type="button" class="btn-primary" id="confirmDeleteBtn" style="background: var(--danger); border-color: var(--danger);">Delete Permanently</button>
         </div>
         <div style="margin-top: 1.5rem;">
-            <button type="button" class="btn-secondary" id="cancelDeleteBtn" style="width: 100%; max-width: 200px;">Nevermind, go back</button>
+            <button type="button" class="btn-secondary" id="cancelDeleteBtn">Nevermind, go back</button>
         </div>
     </div>
 </div>

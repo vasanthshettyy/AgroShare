@@ -47,11 +47,12 @@
 /* ══════════════════════════════════════════════════════════
    2. BUTTONS
    ══════════════════════════════════════════════════════════ */
-.btn-secondary {
+.btn-manage-secondary {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.6rem;
-    padding: 1.25rem 2rem;
+    padding: 0 2rem;
     background: var(--surface-color);
     border: 1.5px solid var(--border-color);
     border-radius: 12px;
@@ -61,12 +62,15 @@
     cursor: pointer;
     text-decoration: none;
     transition: all 0.3s ease-out;
+    height: 70px;
     min-height: 70px;
+    box-sizing: border-box;
 }
 
-.btn-secondary#editEquipmentBtn {
-    padding: 1.5rem 2.5rem;
+.btn-manage-secondary#editEquipmentBtn {
+    padding: 0 2.5rem;
     font-size: 1.2rem;
+    height: 85px;
     min-height: 85px;
     border-radius: 16px;
 }
@@ -82,8 +86,9 @@
 .btn-toggle-avail {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.8rem;
-    padding: 1.5rem 2.5rem;
+    padding: 0 2.5rem;
     border-radius: 16px;
     font-size: 1.2rem;
     font-weight: 800;
@@ -92,7 +97,9 @@
     border: 2px solid transparent;
     user-select: none;
     white-space: nowrap;
+    height: 85px;
     min-height: 85px;
+    box-sizing: border-box;
 }
 
 .btn-toggle-avail .toggle-dot {
