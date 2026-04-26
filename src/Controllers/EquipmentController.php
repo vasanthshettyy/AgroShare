@@ -10,7 +10,7 @@
 
 // ── Configuration ──────────────────────────────────────────
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_IMAGE_SIZE     = 2 * 1024 * 1024; // 2MB
+const MAX_IMAGE_SIZE     = 10 * 1024 * 1024; // 10MB (Maximum Quality)
 const MAX_IMAGES         = 5;
 const UPLOAD_DIR         = __DIR__ . '/../../public/uploads/equipment/';
 const UPLOAD_URL_PREFIX  = 'uploads/equipment/';

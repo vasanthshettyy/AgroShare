@@ -581,7 +581,11 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         <label for="eq-price-day" class="form-label">Price per Day (₹)</label>
                         <input type="number" name="price_per_day" id="eq-price-day" class="form-input" placeholder="3000" min="0" step="100" required>
                     </div>
-                    <div class="form-group" style="justify-content: flex-end; padding-bottom: 0.8rem;">
+                    <div class="form-group">
+                        <label for="eq-safety-deposit" class="form-label">Safety Deposit (₹)</label>
+                        <input type="number" name="safety_deposit" id="eq-safety-deposit" class="form-input" placeholder="5000" min="0" step="100">
+                    </div>
+                    <div class="form-group full-width" style="padding-bottom: 0.8rem;">
                         <label class="form-checkbox-label" style="display: flex; align-items: center; gap: 0.75rem;">
                             <input type="checkbox" name="includes_operator" value="1" class="form-checkbox" style="display: none;">
                             <span class="checkbox-visual" style="margin: 0;"></span>
@@ -632,8 +636,8 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
             </div>
             
             <div class="form-actions" style="margin-top: 2rem; border: none; padding: 0; justify-content: flex-end; gap: 1rem;">
-                <button type="button" class="btn-secondary" id="cancelBtn" style="min-height: auto; padding: 0.7rem 1.5rem; font-size: 0.85rem; border-radius: 40px;">Cancel</button>
-                <button type="submit" class="btn-primary" id="submitBtn" style="min-height: auto; padding: 0.7rem 1.5rem; font-size: 0.85rem; border-radius: 40px;">
+                <button type="button" class="btn-secondary" id="cancelBtn">Cancel</button>
+                <button type="submit" class="btn-primary" id="submitBtn">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="margin-right: 4px;">
                         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>

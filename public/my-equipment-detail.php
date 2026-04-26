@@ -127,23 +127,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             display: flex;
             gap: 0.75rem;
             margin-bottom: 2rem;
+            width: 100%;
         }
         .btn-pill {
             flex: 1;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 0.75rem;
+            padding: 0 1rem;
+            height: 48px;
+            min-height: 48px;
             border-radius: 50px;
             font-size: 0.82rem;
-            font-weight: 600;
-            border: 1px solid var(--border-color);
+            font-weight: 700;
+            border: 1.5px solid var(--border-color);
             background: rgba(255,255,255,0.03);
             color: var(--text-muted);
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             white-space: nowrap;
+            box-sizing: border-box;
         }
         .btn-pill svg { width: 16px; height: 16px; opacity: 0.7; }
         .btn-pill:hover {
@@ -696,8 +700,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             </div>
 
             <div class="form-actions" style="margin-top: 2rem; border: none; padding: 0; justify-content: flex-end; gap: 1rem;">
-                <button type="button" class="btn-secondary" id="editCancelBtn" style="min-height: auto; padding: 0.7rem 1.5rem; font-size: 0.85rem; border-radius: 40px;">Cancel</button>
-                <button type="submit" class="btn-primary" id="editSubmitBtn" style="min-height: auto; padding: 0.7rem 1.5rem; font-size: 0.85rem; border-radius: 40px;">Save Changes</button>
+                <button type="button" class="btn-secondary" id="editCancelBtn">Cancel</button>
+                <button type="submit" class="btn-primary" id="editSubmitBtn">Save Changes</button>
             </div>
         </form>
     </div>
@@ -713,11 +717,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         <p style="color: var(--text-muted); margin-bottom: 2rem; line-height: 1.5;">Are you sure you want to permanently delete this equipment? You might want to <strong>Edit</strong> it instead if some details have changed.</p>
         
         <div class="form-actions" style="margin-top: 1.5rem; border: none; padding: 0; justify-content: center; gap: 1rem;">
-            <button type="button" class="btn-secondary" id="switchToDeleteEditBtn" style="min-height: auto; padding: 0.7rem 1.5rem; font-size: 0.85rem; border-radius: 40px;">Edit Listing</button>
-            <button type="button" class="btn-primary" id="confirmDeleteBtn" style="background: var(--danger); border-color: var(--danger); min-height: auto; padding: 0.7rem 1.5rem; font-size: 0.85rem; border-radius: 40px;">Delete Permanently</button>
+            <button type="button" class="btn-secondary" id="switchToDeleteEditBtn">Edit Listing</button>
+            <button type="button" class="btn-primary" id="confirmDeleteBtn" style="background: var(--danger); border-color: var(--danger);">Delete Permanently</button>
         </div>
         <div style="margin-top: 1.5rem;">
-            <button type="button" class="btn-clear-filters" id="cancelDeleteBtn" style="font-size: 0.85rem; background: none; border: none; cursor: pointer;">Nevermind, go back</button>
+            <button type="button" class="btn-secondary" id="cancelDeleteBtn" style="width: 100%; max-width: 200px;">Nevermind, go back</button>
         </div>
     </div>
 </div>

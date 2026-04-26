@@ -536,8 +536,8 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
             
             <!-- Form Actions -->
             <div class="form-actions" style="margin-top: 2rem; border: none; padding: 0; justify-content: flex-end; gap: 1rem;">
-                <button type="button" class="btn-secondary" id="cancelBtn" style="min-height: auto; padding: 0.7rem 1.5rem; font-size: 0.85rem; border-radius: 40px;">Cancel</button>
-                <button type="submit" class="btn-primary" id="submitBtn" style="min-height: auto; padding: 0.7rem 1.5rem; font-size: 0.85rem; border-radius: 40px;">
+                <button type="button" class="btn-secondary" id="cancelBtn">Cancel</button>
+                <button type="submit" class="btn-primary" id="submitBtn">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="margin-right: 4px;">
                         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
