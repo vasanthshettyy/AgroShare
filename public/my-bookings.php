@@ -549,7 +549,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 
             <span class="nav-section-label">Community</span>
 
-            <span class="nav-link is-disabled" title="Coming soon" aria-disabled="true">
+            <a href="pooling-browse.php" class="nav-link">
                 <!-- users icon -->
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -558,7 +558,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
                 </svg>
                 <span>Pooling</span>
-            </span>
+            </a>
 
             <a href="equipment-browse.php" class="nav-link">
                 <!-- search icon -->
