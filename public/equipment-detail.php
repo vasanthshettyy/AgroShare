@@ -577,6 +577,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 <?php if ($isLoggedIn): ?>
     <?php require_once __DIR__ . '/includes/profile-modal.php'; ?>
     <?php require_once __DIR__ . '/includes/viewer-reviews-modal.php'; ?>
+    <?php require_once __DIR__ . '/includes/user-public-profile-modal.php'; ?>
 <?php endif; ?>
 <script src="assets/js/dashboard.js" defer></script>
 <script src="assets/js/equipment.js?v=<?= time() ?>" defer></script>

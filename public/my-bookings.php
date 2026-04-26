@@ -672,7 +672,25 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                         <div class="card-footer">
                             <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
                             <div class="actions-wrap">
-                                <a href="equipment-detail.php?id=<?= $b['equipment_id'] ?>" class="btn-sm btn-secondary">View Details</a>
+                                <?php
+                                    $bData = [
+                                        'id' => $b['id'],
+                                        'title' => $b['equipment_title'],
+                                        'status' => $b['status'],
+                                        'start' => date('d M Y', strtotime($b['start_datetime'])),
+                                        'end' => date('d M Y', strtotime($b['end_datetime'])),
+                                        'rental_fee' => $b['total_price'],
+                                        'deposit' => $b['deposit_amount'],
+                                        'total' => $b['total_price'] + $b['deposit_amount'],
+                                        'image' => $thumb,
+                                        'party_name' => $b['owner_name'] ?? $b['renter_name'],
+                                        'party_id' => $b['owner_id'] ?? $b['renter_id'],
+                                        'party_trust' => $b['owner_trust'] ?? $b['renter_trust'] ?? 0.0,
+                                        'party_phone' => $b['owner_phone'] ?? $b['renter_phone'],
+                                        'party_type' => isset($b['owner_id']) ? 'Owner' : 'Renter'
+                                    ];
+                                ?>
+                                <button type="button" class="btn-sm btn-secondary view-booking-details" data-booking='<?= json_encode($bData) ?>'>View Details</button>
                                 
                                 <?php if ($b['status'] === 'completed' && empty($b['review_id'])): ?>
                                     <!-- Dedicated Review Button (Replaces Contact) -->
@@ -765,7 +783,25 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                         <div class="card-footer">
                             <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
                             <div class="actions-wrap">
-                                <a href="equipment-detail.php?id=<?= $b['equipment_id'] ?>" class="btn-sm btn-secondary">View Details</a>
+                                <?php
+                                    $bData = [
+                                        'id' => $b['id'],
+                                        'title' => $b['equipment_title'],
+                                        'status' => $b['status'],
+                                        'start' => date('d M Y', strtotime($b['start_datetime'])),
+                                        'end' => date('d M Y', strtotime($b['end_datetime'])),
+                                        'rental_fee' => $b['total_price'],
+                                        'deposit' => $b['deposit_amount'],
+                                        'total' => $b['total_price'] + $b['deposit_amount'],
+                                        'image' => $thumb,
+                                        'party_name' => $b['owner_name'] ?? $b['renter_name'],
+                                        'party_id' => $b['owner_id'] ?? $b['renter_id'],
+                                        'party_trust' => $b['owner_trust'] ?? $b['renter_trust'] ?? 0.0,
+                                        'party_phone' => $b['owner_phone'] ?? $b['renter_phone'],
+                                        'party_type' => isset($b['owner_id']) ? 'Owner' : 'Renter'
+                                    ];
+                                ?>
+                                <button type="button" class="btn-sm btn-secondary view-booking-details" data-booking='<?= json_encode($bData) ?>'>View Details</button>
                                 
                                 <?php if ($b['status'] === 'completed' && empty($b['review_id'])): ?>
                                     <!-- Dedicated Review Button (Replaces Contact) -->
@@ -1157,6 +1193,8 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 
 <?php require_once __DIR__ . '/includes/profile-modal.php'; ?>
 <?php require_once __DIR__ . '/includes/viewer-reviews-modal.php'; ?>
+<?php require_once __DIR__ . '/includes/booking-detail-modal.php'; ?>
+<?php require_once __DIR__ . '/includes/user-public-profile-modal.php'; ?>
 <script src="assets/js/dashboard.js" defer></script>
 <script src="assets/js/reviews.js" defer></script>
 <script>

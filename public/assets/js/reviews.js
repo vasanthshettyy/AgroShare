@@ -29,10 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Liquid Vector Fill Engine ---
-    /**
-     * updateFill — Updates the SVG gradient offsets using percentages.
-     * Even with userSpaceOnUse, 'offset' must be 0-1 or 0-100%.
-     */
     function updateFill(rating) {
         if (!activeStop || !ghostStop) return;
         const percent = (rating / 5) * 100;
@@ -65,14 +61,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     starsWrapper.addEventListener('mousemove', (e) => {
         if (isLocked) return;
-
         const rect = starsWrapper.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const width = rect.width;
-        
         let rating = (x / width) * 5;
         rating = Math.max(0, Math.min(5, rating));
-        
         updateFill(rating);
         updateTrustPreview(rating);
     });
@@ -80,7 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
     starsWrapper.addEventListener('mouseleave', () => {
         isLocked = false;
         if (lockTimeout) clearTimeout(lockTimeout);
-        
         const savedRating = parseFloat(ratingInput.value || 0);
         updateFill(savedRating);
         updateTrustPreview(savedRating);
@@ -91,32 +83,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const x = e.clientX - rect.left;
         const width = rect.width;
         let rating = (x / width) * 5;
-        
-        // Round to nearest 0.5
         rating = Math.round(rating * 2) / 2;
         rating = Math.max(0.5, Math.min(5, rating));
-        
         ratingInput.value = rating;
         updateFill(rating);
         updateTrustPreview(rating);
-        
         isLocked = true;
         if (lockTimeout) clearTimeout(lockTimeout);
         lockTimeout = setTimeout(() => { isLocked = false; }, 800);
-        
         starsWrapper.classList.remove('star-pop-anim');
         void starsWrapper.offsetWidth; 
         starsWrapper.classList.add('star-pop-anim');
     });
 
-    // --- Manual Input Sync Logic ---
     manualRatingInput.addEventListener('input', () => {
         let val = parseFloat(manualRatingInput.value);
         if (isNaN(val)) val = 0;
-        
         if (val > 5) { val = 5; manualRatingInput.value = 5; }
         if (val < 0) { val = 0; manualRatingInput.value = 0; }
-
         updateFill(val);
         updateTrustPreview(val, false);
         ratingInput.value = val;
@@ -130,14 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         val = Math.round(val * 2) / 2;
         val = Math.max(0.5, Math.min(5, val));
-        
         manualRatingInput.value = val.toFixed(1);
         ratingInput.value = val;
         updateFill(val);
         updateTrustPreview(val);
     });
 
-    // --- Char Count Logic ---
     if (commentTextarea) {
         commentTextarea.addEventListener('input', () => {
             const len = commentTextarea.value.length;
@@ -146,14 +128,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Tag Selection Logic ---
     tagBtns.forEach(tag => {
         tag.addEventListener('click', () => {
             tag.classList.toggle('active');
-            
             const tagName = tag.textContent.trim();
             let currentComment = commentTextarea.value;
-            
             if (tag.classList.contains('active')) {
                 if (!currentComment.toLowerCase().includes(tagName.toLowerCase())) {
                     const separator = currentComment.length > 0 ? (currentComment.trim().endsWith('.') ? ' ' : '. ') : '';
@@ -167,7 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Modal Control Logic ---
     const resetModalForm = () => {
         if (ratingInput) ratingInput.value = '0';
         if (manualRatingInput) manualRatingInput.value = '';
@@ -187,22 +165,15 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             bookingIdInput.value = btn.dataset.reviewBooking;
             resetModalForm();
-            
             modal.style.display = 'flex';
-            setTimeout(() => {
-                modal.classList.add('show-modal');
-            }, 10);
-            
+            setTimeout(() => modal.classList.add('show-modal'), 10);
             document.body.style.overflow = 'hidden';
         }
     });
 
     const closeModal = () => {
         modal.classList.remove('show-modal');
-        setTimeout(() => {
-            modal.style.display = 'none';
-            resetModalForm();
-        }, 400);
+        setTimeout(() => modal.style.display = 'none', 400);
         document.body.style.overflow = '';
     };
 
@@ -210,120 +181,161 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closeXBtn) closeXBtn.addEventListener('click', closeModal);
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
-    // --- Submit Logic ---
     if (submitBtn) {
         submitBtn.addEventListener('click', async () => {
             const rating = parseFloat(ratingInput.value);
             const comment = commentTextarea.value.trim();
             const bookingId = bookingIdInput.value;
-
-            if (rating <= 0) { 
-                alert('Please select a star rating.'); 
-                return; 
-            }
-
+            if (rating <= 0) { alert('Please select a star rating.'); return; }
             submitBtn.disabled = true;
             const originalText = submitBtn.textContent;
             submitBtn.textContent = 'Submitting...';
-
             const formData = new FormData();
             formData.append('booking_id', bookingId);
             formData.append('rating', rating);
             formData.append('comment', comment);
-
             const csrfEl = document.getElementById('csrf_token') || document.querySelector('input[name="csrf_token"]');
             if (csrfEl) formData.append('csrf_token', csrfEl.value);
-
             try {
                 const res = await fetch('api/submit-review.php', { method: 'POST', body: formData });
                 const data = await res.json();
-                
                 if (data.success) {
                     closeModal();
                     alert(data.message || 'Review submitted successfully!');
                     window.location.reload();
-                } else {
-                    alert(data.message || 'Error submitting review.');
-                }
-            } catch (err) {
-                console.error('Submission error:', err);
-                alert('Network error. Please try again.');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
-            }
+                } else { alert(data.message || 'Error submitting review.'); }
+            } catch (err) { console.error('Submission error:', err); alert('Network error.'); }
+            finally { submitBtn.disabled = false; submitBtn.textContent = originalText; }
         });
     }
 });
 
-/* ── Review Viewer Modal Logic ───────────────────────────── */
+/* ── Public Profile Modal Logic ───────────────────────────── */
 
+/**
+ * showUserReviews — Now acts as the Public Profile trigger.
+ */
 async function showUserReviews(userId) {
-    const modal = document.getElementById('userReviewsModal');
-    const container = document.getElementById('reviewsListContainer');
-    const trustScoreVal = document.getElementById('modalTrustScoreValue');
-    const modalTitle = document.getElementById('reviewsModalTitle');
-    const closeBtn = document.getElementById('closeReviewsModal');
+    const modal = document.getElementById('userPublicProfileModal');
+    if (!modal) return;
 
-    if (!modal || !container) return;
+    // Reset/Loading state
+    const reviewsContainer = document.getElementById('pub-reviews-container');
+    reviewsContainer.innerHTML = '<div class="notif-empty"><div class="loading-spinner" style="border-top-color:var(--primary-action);"></div><p style="margin-top:10px;">Loading profile...</p></div>';
+    document.getElementById('pub-verified-badge').style.display = 'none';
 
+    // Show modal
     modal.style.display = 'flex';
     setTimeout(() => modal.classList.add('show-modal'), 10);
     document.body.style.overflow = 'hidden';
-    container.innerHTML = '<div class="notif-empty"><div class="loading-spinner" style="border-top-color: var(--primary-action);"></div><p style="margin-top:10px;">Fetching reviews...</p></div>';
-
-    const closeModal = () => {
-        modal.classList.remove('show-modal');
-        setTimeout(() => modal.style.display = 'none', 400);
-        document.body.style.overflow = '';
-    };
-    closeBtn.onclick = closeModal;
-    modal.onclick = (e) => { if (e.target === modal) closeModal(); };
 
     try {
-        const response = await fetch(`api/get_user_reviews.php?user_id=${userId}`);
-        const data = await response.json();
+        const response = await fetch(`api/get_user_public_profile.php?user_id=${userId}`);
+        const result = await response.json();
 
-        if (!data.success) {
-            container.innerHTML = `<div class="notif-empty">${data.message || 'Could not load reviews.'}</div>`;
+        if (!result.success) {
+            reviewsContainer.innerHTML = `<div class="notif-empty">${result.message}</div>`;
             return;
         }
 
-        modalTitle.textContent = `${data.user_name}'s Reviews`;
-        trustScoreVal.textContent = data.trust_score.toFixed(1);
+        const user = result.data;
 
-        if (data.reviews.length === 0) {
-            container.innerHTML = '<div class="notif-empty">No reviews yet for this user.</div>';
-            return;
+        // Populate Static Fields
+        document.getElementById('pub-avatar').textContent = user.initials;
+        document.getElementById('pub-name').textContent = user.name;
+        document.getElementById('pub-location-text').textContent = user.location;
+        document.getElementById('pub-trust-val').textContent = user.trust_score.toFixed(1);
+        document.getElementById('pub-deals-val').textContent = user.total_deals;
+        document.getElementById('pub-joined-val').textContent = user.joined;
+        
+        document.getElementById('pub-phone-text').textContent = user.phone;
+        document.getElementById('pub-call-btn').href = `tel:${user.phone}`;
+        document.getElementById('pub-email-text').textContent = user.email;
+        document.getElementById('pub-email-btn').href = `mailto:${user.email}`;
+
+        if (user.is_verified) {
+            document.getElementById('pub-verified-badge').style.display = 'block';
         }
 
-        let html = '';
-        data.reviews.forEach(rev => {
-            html += `
-                <div class="review-card-item">
-                    <div class="review-card-header">
-                        <div class="reviewer-info">
-                            <div class="reviewer-name">${rev.reviewer_name}</div>
-                            <div class="review-date">${rev.date}</div>
+        // Render Recent Reviews
+        if (user.recent_reviews.length === 0) {
+            reviewsContainer.innerHTML = '<div class="notif-empty">No community feedback yet.</div>';
+        } else {
+            let revHtml = '';
+            user.recent_reviews.forEach(rev => {
+                revHtml += `
+                    <div class="pub-review-mini">
+                        <div class="prm-header">
+                            <span class="prm-name">${rev.name}</span>
+                            <span class="prm-date">${rev.date}</span>
                         </div>
-                        <div class="review-rating-stars">
+                        <div class="prm-stars" style="margin-bottom:8px;">
                             ${renderStarRating(rev.rating)}
                         </div>
+                        <p class="prm-comment">${rev.comment || '<em>No comment provided.</em>'}</p>
                     </div>
-                    <div class="review-comment-text">
-                        ${rev.comment ? rev.comment : '<em style="color:var(--text-subtle);">No comment provided.</em>'}
-                    </div>
-                </div>
-            `;
-        });
-        container.innerHTML = html;
+                `;
+            });
+            reviewsContainer.innerHTML = revHtml;
+        }
 
     } catch (err) {
-        console.error('Error fetching reviews:', err);
-        container.innerHTML = '<div class="notif-empty">Network error. Please try again.</div>';
+        console.error('Profile Load Error:', err);
+        reviewsContainer.innerHTML = '<div class="notif-empty">Error loading profile.</div>';
     }
 }
 
+function closePublicProfile() {
+    const modal = document.getElementById('userPublicProfileModal');
+    if (!modal) return;
+    modal.classList.remove('show-modal');
+    setTimeout(() => modal.style.display = 'none', 400);
+    document.body.style.overflow = '';
+}
+
+document.getElementById('closePublicProfile')?.addEventListener('click', closePublicProfile);
+
+/* ── Booking Detail Modal Logic ───────────────────────────── */
+
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.view-booking-details');
+    if (!btn) return;
+    const modal = document.getElementById('bookingDetailModal');
+    const data = JSON.parse(btn.dataset.booking);
+    if (!modal) return;
+    document.getElementById('bd-title').textContent = data.title;
+    document.getElementById('bd-id-tag').textContent = `Order #AS-${data.id.toString().padStart(5, '0')}`;
+    document.getElementById('bd-hero-img').src = data.image;
+    document.getElementById('bd-start-date').textContent = data.start;
+    document.getElementById('bd-end-date').textContent = data.end;
+    document.getElementById('bd-rental-fee').textContent = `₹${new Intl.NumberFormat('en-IN').format(data.rental_fee)}`;
+    document.getElementById('bd-deposit').textContent = `₹${new Intl.NumberFormat('en-IN').format(data.deposit)}`;
+    document.getElementById('bd-total-price').textContent = `₹${new Intl.NumberFormat('en-IN').format(data.total)}`;
+    document.getElementById('bd-party-type').textContent = `${data.party_type} Info`;
+    document.getElementById('bd-party-name').textContent = data.party_name;
+    document.getElementById('bd-party-avatar').textContent = data.party_name.charAt(0).toUpperCase();
+    document.getElementById('bd-party-trust').textContent = parseFloat(data.party_trust).toFixed(1);
+    document.getElementById('bd-call-btn').href = `tel:${data.party_phone}`;
+    const statusEl = document.getElementById('bd-status-badge');
+    statusEl.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+    statusEl.className = `status-badge status-${data.status}`;
+    modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('show-modal'), 10);
+    document.body.style.overflow = 'hidden';
+});
+
+function closeDetailModal() {
+    const modal = document.getElementById('bookingDetailModal');
+    if (!modal) return;
+    modal.classList.remove('show-modal');
+    setTimeout(() => modal.style.display = 'none', 400);
+    document.body.style.overflow = '';
+}
+document.getElementById('closeBookingModal')?.addEventListener('click', closeDetailModal);
+
+/**
+ * renderStarRating — Helper to generate star HTML based on numeric rating.
+ */
 function renderStarRating(rating) {
     let stars = '';
     for (let i = 1; i <= 5; i++) {
@@ -332,7 +344,7 @@ function renderStarRating(rating) {
         } else if (rating >= i - 0.5) {
             stars += '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4V6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"/></svg>';
         } else {
-            stars += '<svg width="14" height="14" viewBox="0 0 24 24" fill="rgba(255,255,255,0.1)"><path d="M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4V6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"/></svg>';
+            stars += '<svg width="14" height="14" viewBox="0 0 24 24" fill="rgba(255,255,255,0.1)"><path d="M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4V6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z\"/></svg>';
         }
     }
     return stars;
