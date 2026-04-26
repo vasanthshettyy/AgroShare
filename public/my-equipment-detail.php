@@ -95,55 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             position: sticky;
             top: 2rem;
         }
-        .owner-details-main {
-            background: var(--surface-color);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 2.5rem;
-            box-shadow: var(--shadow-sm);
-        }
-        .manage-actions-bar {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2.5rem;
-        }
-        .btn-manage-large {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            padding: 1.5rem;
-            border-radius: 16px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            border: 1px solid var(--border-color);
-            cursor: pointer;
-            background: var(--surface-color-alt);
-            color: var(--text-color);
-        }
-        .btn-manage-large svg { width: 24px; height: 24px; }
-        .btn-manage-large:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-            border-color: var(--primary-action);
-            background: var(--surface-color);
-        }
-        .btn-manage-large.is-active {
-            border-color: var(--secondary-action);
-            color: var(--secondary-action);
-            background: rgba(76, 175, 120, 0.05);
-        }
-        .btn-manage-large.is-offline {
-            border-color: var(--danger);
-            color: var(--danger);
-            background: rgba(225, 29, 72, 0.05);
-        }
-        .btn-manage-large.danger:hover {
-            border-color: var(--danger);
-            color: var(--danger);
-        }
+
         .manage-specs-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -168,6 +120,199 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             font-size: 1.1rem;
             font-weight: 600;
             color: var(--text-color);
+        }
+
+        /* Action Pill Row */
+        .manage-actions-row {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+        .btn-pill {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0.75rem;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.03);
+            color: var(--text-muted);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .btn-pill svg { width: 16px; height: 16px; opacity: 0.7; }
+        .btn-pill:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: var(--text-subtle);
+            color: var(--text-main);
+            transform: translateY(-1px);
+        }
+        .btn-pill.is-active {
+            background: var(--primary-10);
+            border-color: var(--primary-action);
+            color: var(--primary-action);
+        }
+        .btn-pill.is-offline {
+            background: rgba(225, 29, 72, 0.08);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+        /* Right Column Details & Grid */
+        .owner-details-main {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+        
+        .title-section {
+            margin-bottom: 2.5rem;
+        }
+        .title-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--secondary-action);
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        .perk-tags {
+            display: flex;
+            gap: 8px;
+            margin-top: 1.25rem;
+        }
+        .perk-tag {
+            background: var(--primary-10);
+            color: var(--primary-action);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            border: 1px solid rgba(76, 175, 120, 0.2);
+        }
+
+        .details-layout-split {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+            align-items: start;
+        }
+        @media (max-width: 1200px) {
+            .details-layout-split { grid-template-columns: 1fr; }
+        }
+
+        .detail-module-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .module-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .module-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        /* Specifications Grid */
+        .specs-grid-aesthetic {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
+        .spec-aesthetic-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .spec-label-sm {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-subtle);
+            text-transform: uppercase;
+        }
+        .spec-value-md {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* Sidebar Cards */
+        .sidebar-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .side-card {
+            background: var(--surface-color-alt);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+        .side-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .side-card-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        .side-link {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--primary-action);
+            text-decoration: underline;
+        }
+        .status-dot-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--secondary-action);
+        }
+        .dot-ping {
+            width: 8px;
+            height: 8px;
+            background: var(--secondary-action);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--secondary-action);
+        }
+
+        .tip-card {
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            background: rgba(251, 191, 36, 0.03);
+        }
+        .tip-card .side-card-title {
+            color: #fbbf24;
+        }
+        .tip-text {
+            font-size: 0.82rem;
+            line-height: 1.5;
+            color: var(--text-muted);
         }
     </style>
 </head>
@@ -279,8 +424,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             </a>
         </div>
 
-        <div class="owner-view-grid">
-            <!-- Left: E-com style image gallery -->
+        <div class="owner-view-grid" id="ownerViewGrid">
+            <!-- Left: E-com style image gallery & Performance -->
             <div class="owner-image-sidebar">
                 <div class="detail-gallery">
                     <?php if (!empty($images)): ?>
@@ -288,11 +433,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         <img src="<?= e($images[0]) ?>" alt="<?= e($eq['title']) ?>" id="galleryMainImg" class="gallery-main-img" style="aspect-ratio: 4/3; object-fit: cover;">
                     </div>
                     <?php if (count($images) > 1): ?>
-                    <div class="gallery-thumbs" style="margin-top: 1rem; justify-content: center;">
-                        <?php foreach ($images as $i => $img): ?>
+                    <div class="gallery-thumbs" style="margin-top: 1rem; display: flex; gap: 10px; justify-content: flex-start; overflow-x: auto; padding-bottom: 5px;">
+                        <?php 
+                        $thumbCount = count($images);
+                        foreach ($images as $i => $img): 
+                            if ($i >= 4) break; // Limit to 4 visible thumbnails
+                        ?>
                         <button class="gallery-thumb <?= $i === 0 ? 'active' : '' ?>"
-                                data-src="<?= e($img) ?>" aria-label="View photo <?= $i+1 ?>" style="width: 70px; height: 70px;">
-                            <img src="<?= e($img) ?>" alt="Photo <?= $i+1 ?>" loading="lazy">
+                                data-src="<?= e($img) ?>" aria-label="View photo <?= $i+1 ?>" 
+                                style="width: 75px; height: 75px; flex-shrink: 0; border-radius: 8px; overflow: hidden; position: relative;">
+                            <img src="<?= e($img) ?>" alt="Photo <?= $i+1 ?>" style="width:100%; height:100%; object-fit:cover;">
+                            
+                            <?php if ($i === 3 && $thumbCount > 4): ?>
+                            <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1.1rem;">
+                                +<?= $thumbCount - 3 ?>
+                            </div>
+                            <?php endif; ?>
                         </button>
                         <?php endforeach; ?>
                     </div>
@@ -307,64 +463,134 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 
                 <div class="manage-specs-grid" style="margin-top: 2rem;">
                     <div class="manage-spec-card">
-                        <span class="manage-spec-label">Availability</span>
-                        <span class="manage-spec-value" id="manageAvailStatus" style="color: <?= $eq['is_available'] ? 'var(--secondary-action)' : 'var(--danger)' ?>;">
-                            <?= $eq['is_available'] ? 'Visible & Active' : 'Hidden from Browse' ?>
-                        </span>
+                        <span class="manage-spec-label">Status</span>
+                        <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="<?= $eq['is_available'] ? 'var(--secondary-action)' : 'var(--danger)' ?>" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <span class="manage-spec-value" style="font-size: 0.95rem; color: <?= $eq['is_available'] ? 'var(--secondary-action)' : 'var(--danger)' ?>;">
+                                <?= $eq['is_available'] ? 'Active' : 'Offline' ?>
+                            </span>
+                        </div>
                     </div>
                     <div class="manage-spec-card">
                         <span class="manage-spec-label">Daily Rate</span>
                         <span class="manage-spec-value">₹<?= number_format($eq['price_per_day'], 0) ?></span>
                     </div>
+                    <?php if ((float)($eq['safety_deposit'] ?? 0) > 0): ?>
                     <div class="manage-spec-card">
-                        <span class="manage-spec-label">Operator</span>
-                        <span class="manage-spec-value"><?= $eq['includes_operator'] ? 'Included' : 'Not Included' ?></span>
+                        <span class="manage-spec-label">Security Deposit</span>
+                        <span class="manage-spec-value">₹<?= number_format($eq['safety_deposit'], 0) ?></span>
+                    </div>
+                    <?php endif; ?>
+                    <div class="manage-spec-card">
+                        <span class="manage-spec-label">Listed On</span>
+                        <span class="manage-spec-value" style="font-size: 0.95rem;"><?= date('d M Y', strtotime($eq['created_at'])) ?></span>
                     </div>
                 </div>
             </div>
 
             <!-- Right: Details and Actions -->
-            <div class="owner-details-main">
-                <div class="manage-actions-bar">
-                    <button class="btn-manage-large <?= $eq['is_available'] ? 'is-active' : '' ?>" id="toggleAvailBtn" data-id="<?= $equipmentId ?>">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <div class="owner-details-main" style="background: none; border: none; padding: 0; box-shadow: none;">
+                <div class="manage-actions-row">
+                    <button class="btn-pill <?= $eq['is_available'] ? 'is-active' : 'is-offline' ?>" id="toggleAvailBtn" data-id="<?= $equipmentId ?>">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         <span><?= $eq['is_available'] ? 'Active' : 'Offline' ?></span>
                     </button>
                     
-                    <button class="btn-manage-large" id="editEquipmentBtn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <button class="btn-pill" id="editEquipmentBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                         <span>Edit Details</span>
                     </button>
 
                     <form method="POST" action="my-equipment-detail.php?id=<?= $equipmentId ?>" id="deleteEquipmentForm" style="display:contents;">
                         <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
                         <input type="hidden" name="action" value="delete">
-                        <button type="button" class="btn-manage-large danger" id="deleteListingBtn">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                            <span>Delete</span>
+                        <button type="button" class="btn-pill danger" id="deleteListingBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            <span>Delete Listing</span>
                         </button>
                     </form>
                 </div>
 
-                <h1 style="font-size: 2.25rem; margin-bottom: 0.5rem;"><?= e($eq['title']) ?></h1>
-                <p style="color: var(--text-muted); margin-bottom: 2rem;"><?= e(ucfirst(str_replace('_', ' ', $eq['category']))) ?> • <?= e($eq['location_village']) ?>, <?= e($eq['location_district']) ?></p>
-
-                <div class="premium-section">
-                    <span class="section-label">Listing Description</span>
-                    <p class="description-text" style="font-size: 1.1rem; line-height: 1.7; color: var(--text-color);"><?= nl2br(e($eq['description'])) ?></p>
+                <div class="title-section">
+                    <h1 style="font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem; color: var(--text-main);"><?= e($eq['title']) ?></h1>
+                    <div class="title-meta">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <?= e(ucfirst(str_replace('_', ' ', $eq['category']))) ?> • <?= e($eq['location_village']) ?>, <?= e($eq['location_district']) ?>
+                    </div>
+                    <div class="perk-tags">
+                        <span class="perk-tag">Powerful Engine</span>
+                        <span class="perk-tag">Easy to Use</span>
+                        <span class="perk-tag">Well Maintained</span>
+                    </div>
                 </div>
 
-                <div class="premium-section" style="border-bottom: none;">
-                    <span class="section-label">Full Specifications</span>
-                    <table class="specs-table" style="width: 100%;">
-                        <tr><th>Structural Condition</th><td><?= e(ucfirst($eq['condition'])) ?></td></tr>
-                        <tr><th>Operator Included</th><td><?= $eq['includes_operator'] ? 'Yes' : 'No' ?></td></tr>
-                        <tr><th>Base Price (Daily)</th><td>₹<?= number_format($eq['price_per_day'], 0) ?></td></tr>
-                        <?php if ((float)$eq['safety_deposit'] > 0): ?>
-                        <tr><th>Safety Deposit (Refundable)</th><td>₹<?= number_format($eq['safety_deposit'], 0) ?></td></tr>
-                        <?php endif; ?>
-                        <tr><th>Created On</th><td><?= date('d M Y', strtotime($eq['created_at'])) ?></td></tr>
-                    </table>
+                <div class="details-layout-split">
+                    <!-- Main Content Side -->
+                    <div class="details-content-main">
+                        <div class="detail-module-card">
+                            <h4 class="module-title">Listing Description</h4>
+                            <p style="font-size: 1.05rem; line-height: 1.7; color: var(--text-muted);"><?= nl2br(e($eq['description'])) ?></p>
+                        </div>
+
+                        <div class="detail-module-card">
+                            <h4 class="module-title">Full Specifications</h4>
+                            <div class="specs-grid-aesthetic">
+                                <div class="spec-aesthetic-item">
+                                    <span class="spec-label-sm">Structural Condition</span>
+                                    <span class="spec-value-md"><?= e(ucfirst($eq['condition'])) ?></span>
+                                </div>
+                                <div class="spec-aesthetic-item">
+                                    <span class="spec-label-sm">Operator Support</span>
+                                    <span class="spec-value-md"><?= $eq['includes_operator'] ? 'Driver Included' : 'Self-Drive Only' ?></span>
+                                </div>
+                                <div class="spec-aesthetic-item">
+                                    <span class="spec-label-sm">Fuel Type</span>
+                                    <span class="spec-value-md">Diesel / Heavy Duty</span>
+                                </div>
+                                <div class="spec-aesthetic-item">
+                                    <span class="spec-label-sm">Power Output</span>
+                                    <span class="spec-value-md">Standard Production</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar Cards Side -->
+                    <div class="sidebar-stack">
+                        <!-- Availability Card -->
+                        <div class="side-card">
+                            <div class="side-card-header">
+                                <span class="side-card-title">Availability</span>
+                            </div>
+                            <div class="status-dot-row">
+                                <div class="dot-ping"></div>
+                                Available for rent
+                            </div>
+                            <div style="margin-top: 1.25rem; padding: 0.75rem; background: rgba(0,0,0,0.2); border-radius: 10px; border: 1px solid var(--border-color);">
+                                <span style="display:block; font-size: 0.65rem; color: var(--text-subtle); text-transform: uppercase; margin-bottom: 4px;">Blocked Dates</span>
+                                <span style="font-size: 0.8rem; color: var(--text-muted);">No dates currently blocked</span>
+                            </div>
+                        </div>
+
+                        <!-- Location Card -->
+                        <div class="side-card">
+                            <div class="side-card-header">
+                                <span class="side-card-title">Location</span>
+                            </div>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+                                <?= e($eq['location_village']) ?>, <?= e($eq['location_district']) ?><br>
+                                Maharashtra, India
+                            </p>
+                        </div>
+
+                        <!-- Tips Card -->
+                        <div class="side-card tip-card">
+                            <span class="side-card-title" style="display:block; margin-bottom: 0.75rem;">Get More Bookings</span>
+                            <p class="tip-text">
+                                Farmers prefer owners who respond in less than 2 hours. Keep your availability calendar updated to rank higher in search results.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -498,6 +724,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
 <?php require_once __DIR__ . '/includes/profile-modal.php'; ?>
 <?php require_once __DIR__ . '/includes/viewer-reviews-modal.php'; ?>
+<?php require_once __DIR__ . '/includes/user-public-profile-modal.php'; ?>
 <script src="assets/js/dashboard.js" defer></script>
 <script src="assets/js/equipment.js?v=<?= time() ?>" defer></script>
 <script>
