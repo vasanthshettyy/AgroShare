@@ -336,20 +336,38 @@ img {
 }
 
 .btn-text-link {
-    background: none;
-    border: none;
-    padding: 0;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    padding: 0.35rem 0.75rem;
     margin: 0;
-    font: inherit;
-    color: var(--primary-action);
-    text-decoration: underline;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-main);
+    text-decoration: none;
     cursor: pointer;
-    transition: color 0.2s;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     text-align: left;
+    border-radius: 100px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-text-link::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--secondary-action);
+    border-radius: 50%;
+    display: inline-block;
 }
 
 .btn-text-link:hover {
-    color: var(--secondary-action);
+    background: var(--primary-10);
+    border-color: var(--primary-action);
+    color: var(--primary-action);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(76, 175, 120, 0.15);
 }
 
 /* Notification dot */
