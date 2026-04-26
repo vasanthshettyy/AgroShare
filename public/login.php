@@ -844,6 +844,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </svg>
                     </span>
                 </div>
+                <span id="login-identifier-status" class="ajax-status" aria-live="polite"></span>
                 <?php if (isset($errors['identifier'])): ?>
                     <span class="error-msg" role="alert"><?= e($errors['identifier']) ?></span>
                 <?php endif; ?>
@@ -856,7 +857,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="password" id="password" name="password"
                            placeholder="Enter your password"
                            class="form-input has-icon has-suffix<?= isset($errors['password']) ? ' is-invalid' : '' ?>"
-                           required>
+                           required disabled>
                     <span class="input-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -865,7 +866,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </svg>
                     </span>
                     <button type="button" class="pw-toggle" id="pw-toggle-login"
-                            aria-label="Show password" title="Show/hide password">
+                            aria-label="Show password" title="Show/hide password" disabled>
                         <!-- Eye open (default — password hidden) -->
                         <svg id="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1280,14 +1281,78 @@ if (signupForm) {
 
 // Login Form
 const loginForm = document.querySelector('.login-pane-container form');
+const loginIdentifierInput = document.getElementById('identifier');
+const loginIdentifierStatus = document.getElementById('login-identifier-status');
+const loginPasswordInput = document.getElementById('password');
+const loginPwToggleBtn = document.getElementById('pw-toggle-login');
+const loginSubmitBtn = loginForm ? loginForm.querySelector('.btn-submit') : null;
+const loginCsrfToken = loginForm ? loginForm.querySelector('input[name="csrf_token"]').value : '';
+
+async function validateLoginIdentifier() {
+    const value = loginIdentifierInput.value.trim();
+    if (!value) {
+        loginIdentifierStatus.textContent = '';
+        loginIdentifierStatus.className = 'ajax-status';
+        loginPasswordInput.disabled = true;
+        loginPwToggleBtn.disabled = true;
+        return;
+    }
+
+    loginIdentifierStatus.textContent = 'Verifying account...';
+    loginIdentifierStatus.className = 'ajax-status status-checking';
+
+    try {
+        const response = await fetch('api/validate-login-identifier.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ identifier: value, csrf_token: loginCsrfToken })
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            loginIdentifierStatus.textContent = data.message;
+            loginIdentifierStatus.className = 'ajax-status status-available';
+            loginPasswordInput.disabled = false;
+            loginPwToggleBtn.disabled = false;
+            if (loginSubmitBtn) loginSubmitBtn.disabled = false;
+        } else {
+            loginIdentifierStatus.textContent = data.message;
+            loginIdentifierStatus.className = 'ajax-status status-error';
+            loginPasswordInput.disabled = true;
+            loginPwToggleBtn.disabled = true;
+            if (loginSubmitBtn) loginSubmitBtn.disabled = true;
+        }
+    } catch (e) {
+        loginIdentifierStatus.textContent = 'Connection error.';
+        loginIdentifierStatus.className = 'ajax-status status-error';
+    }
+}
+
+if (loginIdentifierInput) {
+    loginIdentifierInput.addEventListener('input', debounce(validateLoginIdentifier, 500));
+    loginIdentifierInput.addEventListener('blur', validateLoginIdentifier);
+    
+    // Also handle existing value on load (if any)
+    if (loginIdentifierInput.value.trim()) {
+        validateLoginIdentifier();
+    }
+}
+
 if (loginForm) {
     const loginFormInputs = Array.from(loginForm.querySelectorAll('input:not([type="hidden"]):not([type="checkbox"])'));
     loginFormInputs.forEach((input, index) => {
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
+                // If it's the identifier input and it's invalid, block enter
+                if (input.id === 'identifier' && loginPasswordInput.disabled) {
+                    e.preventDefault();
+                    return;
+                }
+                
                 e.preventDefault();
                 const next = loginFormInputs[index + 1];
-                if (next) next.focus();
+                if (next && !next.disabled) next.focus();
+                else if (!loginPasswordInput.disabled) loginForm.submit();
             }
         });
     });
