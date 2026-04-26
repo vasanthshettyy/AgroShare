@@ -13,6 +13,7 @@ function createCampaign($conn, $data, $userId) {
     $unit = trim($data['unit'] ?? '');
     $offeringPrice = (float)($data['offering_price'] ?? 0);
     $targetQty = (float)($data['target_quantity'] ?? 0);
+    $minContribution = (float)($data['min_contribution'] ?? 1);
     $deadline = $data['deadline'] ?? '';
     $district = trim($data['district'] ?? '');
     $description = trim($data['description'] ?? '');
@@ -22,10 +23,11 @@ function createCampaign($conn, $data, $userId) {
     if (empty($unit)) return ['success' => false, 'message' => 'Unit is required.'];
     if ($offeringPrice <= 0) return ['success' => false, 'message' => 'Offering price must be greater than zero.'];
     if ($targetQty <= 0) return ['success' => false, 'message' => 'Target quantity must be greater than zero.'];
+    if ($minContribution <= 0) return ['success' => false, 'message' => 'Minimum contribution must be at least 1.'];
     if (strtotime($deadline) <= time()) return ['success' => false, 'message' => 'Deadline must be a future date.'];
 
-    $stmt = $conn->prepare("INSERT INTO pooling_campaigns (creator_id, title, item_name, unit, offering_price, target_quantity, deadline, district, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("isssddsss", $userId, $title, $itemName, $unit, $offeringPrice, $targetQty, $deadline, $district, $description);
+    $stmt = $conn->prepare("INSERT INTO pooling_campaigns (creator_id, title, item_name, unit, offering_price, target_quantity, min_contribution, deadline, district, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("isssddisss", $userId, $title, $itemName, $unit, $offeringPrice, $targetQty, $minContribution, $deadline, $district, $description);
 
     if ($stmt->execute()) {
         $id = $stmt->insert_id;
@@ -121,7 +123,7 @@ function addPledge($conn, $campaignId, $userId, $qty) {
 
     try {
         // Step 1: Check status and deadline with lock
-        $stmt = $conn->prepare("SELECT id, status, deadline, target_quantity, current_quantity FROM pooling_campaigns WHERE id = ? FOR UPDATE");
+        $stmt = $conn->prepare("SELECT id, status, deadline, target_quantity, min_contribution, current_quantity FROM pooling_campaigns WHERE id = ? FOR UPDATE");
         $stmt->bind_param("i", $campaignId);
         $stmt->execute();
         $camp = $stmt->get_result()->fetch_assoc();
@@ -130,6 +132,11 @@ function addPledge($conn, $campaignId, $userId, $qty) {
         if (!$camp || $camp['status'] !== 'open' || strtotime($camp['deadline']) < strtotime(date('Y-m-d'))) {
             $conn->rollback();
             return ['success' => false, 'message' => 'Campaign is no longer accepting pledges.'];
+        }
+
+        if ($qty < $camp['min_contribution']) {
+            $conn->rollback();
+            return ['success' => false, 'message' => 'Minimum contribution is ' . $camp['min_contribution']];
         }
 
         // Step 2: Insert pledge

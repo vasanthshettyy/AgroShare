@@ -490,6 +490,11 @@ $campaigns = getCampaigns($conn, $filters);
                         <input type="number" name="target_quantity" class="form-input" min="1" required placeholder="e.g. 100">
                     </div>
                 </div>
+                <div class="form-group" style="margin-top: 1.25rem;">
+                    <label class="form-label">Minimum contribution per farmer</label>
+                    <input type="number" name="min_contribution" class="form-input" min="1" value="1" required>
+                    <p style="font-size: 0.75rem; color: var(--text-subtle); margin-top: 6px;">Smallest amount a single person can contribute.</p>
+                </div>
             </div>
 
             <!-- Section 3: Location & Deadline -->
