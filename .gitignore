@@ -31,3 +31,6 @@ public/uploads/equipment/*
 !public/uploads/equipment/.gitkeep
 public/uploads/profiles/*
 !public/uploads/profiles/.gitkeep
+Reference lightmode images/
+project_report.md
+PROJECT_REPORT.md
