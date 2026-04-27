@@ -29,6 +29,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $remember   = isset($_POST['remember_me']);
         $old_identifier = $identifier;
 
+        // ── CAPTCHA Validation ──────────────────────────
+        $captcha_input  = strtoupper(trim($_POST['captcha_answer'] ?? ''));
+        $captcha_stored = $_SESSION['captcha_code'] ?? null;
+        if ($captcha_stored === null || $captcha_input === '' || $captcha_input !== $captcha_stored) {
+            $errors['captcha'] = 'Incorrect code. Please enter the characters shown.';
+        }
+
         if (empty($errors)) {
             if (empty($identifier)) {
                 $errors['identifier'] = 'Phone number or email is required.';
@@ -168,6 +175,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+// ── Generate fresh CAPTCHA for the page (after any POST validation) ──
+$captcha_chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+$captcha_code  = '';
+for ($i = 0; $i < 6; $i++) {
+    $captcha_code .= $captcha_chars[random_int(0, strlen($captcha_chars) - 1)];
+}
+$_SESSION['captcha_code'] = $captcha_code;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -563,6 +578,108 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             width: 0;
             transition: width 0.3s ease, background 0.3s ease;
         }
+        /* ── CAPTCHA Row ─────────────────────────────── */
+        .captcha-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+            padding: 12px 14px;
+            background: rgba(76, 175, 120, 0.06);
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-sm);
+        }
+        .captcha-group.is-invalid {
+            border-color: var(--danger);
+            background: rgba(198, 40, 40, 0.06);
+        }
+        .captcha-icon {
+            color: var(--primary-action);
+            flex-shrink: 0;
+            display: flex;
+        }
+        .captcha-icon svg { width: 20px; height: 20px; }
+        .captcha-code-display {
+            position: relative;
+            padding: 8px 18px;
+            background: hsl(144, 10%, 15%);
+            border: 2px solid hsl(150, 15%, 25%);
+            border-radius: 4px;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .captcha-code-display::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(25deg, transparent 42%, hsl(150,20%,30%) 42.5%, hsl(150,20%,30%) 43%, transparent 43.5%),
+                linear-gradient(-35deg, transparent 46%, hsl(0,0%,35%) 46.5%, hsl(0,0%,35%) 47%, transparent 47.5%),
+                linear-gradient(65deg, transparent 30%, hsl(150,15%,28%) 30.5%, hsl(150,15%,28%) 31%, transparent 31.5%),
+                linear-gradient(-15deg, transparent 55%, hsl(0,0%,32%) 55.5%, hsl(0,0%,32%) 56%, transparent 56.5%);
+            pointer-events: none;
+            z-index: 2;
+        }
+        .captcha-chars {
+            display: flex;
+            gap: 2px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: 5px;
+            color: hsl(90, 20%, 80%);
+            position: relative;
+            z-index: 1;
+        }
+        .captcha-chars span {
+            display: inline-block;
+        }
+        .captcha-chars span:nth-child(1) { transform: rotate(-3deg); }
+        .captcha-chars span:nth-child(2) { transform: rotate(4deg) translateY(2px); }
+        .captcha-chars span:nth-child(3) { transform: rotate(-5deg) translateY(-1px); }
+        .captcha-chars span:nth-child(4) { transform: rotate(3deg) translateY(1px); }
+        .captcha-chars span:nth-child(5) { transform: rotate(-2deg) translateY(-2px); }
+        .captcha-chars span:nth-child(6) { transform: rotate(5deg); }
+        .captcha-input {
+            width: 140px;
+            height: 38px;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: var(--font);
+            color: var(--text-main);
+            background: var(--bg-color);
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: border-color 0.2s;
+        }
+        .captcha-input:focus {
+            outline: none;
+            border-color: var(--primary-action);
+        }
+        .captcha-input.is-invalid {
+            border-color: var(--danger);
+        }
+        .captcha-refresh {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+            transition: color 0.2s, transform 0.3s;
+        }
+        .captcha-refresh:hover {
+            color: var(--primary-action);
+            transform: rotate(180deg);
+        }
+        .captcha-refresh svg { width: 16px; height: 16px; }
+
         .pw-hint {
             font-size: 0.7rem;
             color: var(--text-subtle);
@@ -895,6 +1012,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="forgot-password.php" class="forgot-link">Forgot Password?</a>
             </div>
 
+            <!-- CAPTCHA -->
+            <div class="captcha-group<?= isset($errors['captcha']) ? ' is-invalid' : '' ?>">
+                <span class="captcha-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                </span>
+                <div class="captcha-code-display" aria-label="CAPTCHA code">
+                    <span class="captcha-chars"><?php foreach (str_split($captcha_code) as $ch): ?><span><?= $ch ?></span><?php endforeach; ?></span>
+                </div>
+                <input type="text" name="captcha_answer" class="captcha-input<?= isset($errors['captcha']) ? ' is-invalid' : '' ?>" placeholder="Type code" maxlength="6" required autocomplete="off" spellcheck="false">
+                <button type="button" class="captcha-refresh" title="New code" onclick="location.reload()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 4 23 10 17 10"/>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                    </svg>
+                </button>
+            </div>
+            <?php if (isset($errors['captcha'])): ?>
+                <span class="error-msg" style="margin-top:-8px;margin-bottom:10px;display:block" role="alert"><?= e($errors['captcha']) ?></span>
+            <?php endif; ?>
+
             <button type="submit" class="btn-submit">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -906,27 +1045,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </button>
         </form>
 
-        <div class="trust-badges-container">
-            <div class="trust-badge">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
-                <span>100% Verified Profiles</span>
-            </div>
-            <div class="trust-badge">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
-                <span>Secure P2P Network</span>
-            </div>
-            <div class="trust-badge">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
-                <span>End-to-End Encrypted</span>
-            </div>
-        </div>
 
         
     
