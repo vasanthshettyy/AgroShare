@@ -936,18 +936,23 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             /* Liquid Fill Star Animation (Vector Precision) */
             .liquid-stars-wrapper {
                 position: relative;
-                width: 190px;
-                height: 36px;
+                width: 200px;
+                height: 48px;
                 cursor: pointer;
                 user-select: none;
                 margin-bottom: 0;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                transition: transform 0.2s ease;
+                transition: transform 0.2s ease, border-color 0.2s ease;
+                border: 1.5px solid rgba(251,191,36,0.5);
+                border-radius: 12px;
+                padding: 4px 8px;
+                background: rgba(255,255,255,0.08);
             }
             .liquid-stars-wrapper:hover {
                 transform: scale(1.02);
+                border-color: rgba(251,191,36,0.5);
             }
             
             .star-engine-svg {
@@ -970,8 +975,12 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 
             .star-path {
                 fill: url(#starGradient);
-                stroke: rgba(255,255,255,0.05);
-                stroke-width: 0.5;
+                stroke: rgba(251,191,36,0.45);
+                stroke-width: 1.2;
+                transition: stroke 0.2s ease;
+            }
+            .liquid-stars-wrapper:hover .star-path {
+                stroke: rgba(251,191,36,0.5);
             }
             .star-svg { width: 38px; height: 38px; fill: currentColor; flex-shrink: 0; }
             
@@ -1141,7 +1150,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                     <defs>
                         <linearGradient id="starGradient" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="200" y2="0">
                             <stop id="grad-stop-active" offset="0" stop-color="#fbbf24" />
-                            <stop id="grad-stop-ghost" offset="0" stop-color="rgba(255,255,255,0.1)" />
+                            <stop id="grad-stop-ghost" offset="0" stop-color="rgba(255,255,255,0.3)" />
                         </linearGradient>
                     </defs>
                     <!-- 5 Perfectly Spaced Stars (Width 40 each, 0 to 200) -->
