@@ -207,3 +207,43 @@ function updateBookingStatus(mysqli $conn, int $bookingId, int $userId, string $
         return false;
     }
 }
+
+/**
+ * Fetch the latest N activities for the user dashboard.
+ */
+function getRecentDashboardActivity(mysqli $conn, int $userId, int $limit = 5): array
+{
+    $sql = "SELECT b.id, b.status, b.created_at, e.title as equipment_title,
+                   IF(b.renter_id = ?, 'Rental', 'Request') as activity_type
+            FROM bookings b
+            JOIN equipment e ON b.equipment_id = e.id
+            WHERE b.renter_id = ? OR b.owner_id = ?
+            ORDER BY b.created_at DESC
+            LIMIT ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('iiii', $userId, $userId, $userId, $limit);
+    $stmt->execute();
+    return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+}
+
+/**
+ * Fetch monthly rental trends (counts) for the last 7 months.
+ */
+function getMonthlyDashboardTrend(mysqli $conn, int $userId): array
+{
+    $counts = [];
+    for ($i = 6; $i >= 0; $i--) {
+        $monthStr = date('Y-m', strtotime("-$i months"));
+        $sql = "SELECT COUNT(*) as total 
+                FROM bookings 
+                WHERE (renter_id = ? OR owner_id = ?) 
+                AND DATE_FORMAT(created_at, '%Y-%m') = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('iis', $userId, $userId, $monthStr);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        $counts[] = (int)($row['total'] ?? 0);
+        $stmt->close();
+    }
+    return $counts;
+}
