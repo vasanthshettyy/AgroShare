@@ -10,17 +10,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!themeBtn) return;
 
     themeBtn.addEventListener('click', () => {
-        const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        const root = document.documentElement;
+        const currentTheme = root.getAttribute('data-theme') || 'dark';
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
-        // Animate the button with a spin
-        themeBtn.style.transform = 'scale(0.8) rotate(180deg)';
+        // Apply transition class for smooth overall blend
+        root.classList.add('theme-transitioning');
+
+        // Animate the button with a fluid spin
+        themeBtn.style.transition = 'transform 0.5s var(--spring-ease)';
+        themeBtn.style.transform = 'scale(0.85) rotate(180deg)';
+
+        // Switch the theme attribute
+        root.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+
+        // Reset button and remove transition class after animation
         setTimeout(() => {
             themeBtn.style.transform = '';
-        }, 400);
-
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
+            root.classList.remove('theme-transitioning');
+        }, 500);
 
         // Dispatch event for other components (like charts) to react
         window.dispatchEvent(new Event('themeChanged'));

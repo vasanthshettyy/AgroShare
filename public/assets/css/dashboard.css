@@ -193,12 +193,24 @@
 /* Dark mode (default) → show moon */
 [data-theme="light"] .theme-toggle .sun {
     opacity: 1;
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    transform: translate(-50%, -50%) rotate(360deg) scale(1);
 }
 
 [data-theme="light"] .theme-toggle .moon {
     opacity: 0;
-    transform: translate(-50%, -50%) rotate(90deg) scale(0);
+    transform: translate(-50%, -50%) rotate(360deg) scale(0);
+}
+
+/* ── Smooth Theme Transition Helper ────────────────────── */
+.theme-transitioning,
+.theme-transitioning * {
+    transition: background 0.5s ease-in-out,
+        background-color 0.5s ease-in-out,
+        color 0.5s ease-in-out,
+        border-color 0.5s ease-in-out,
+        box-shadow 0.5s ease-in-out,
+        backdrop-filter 0.5s ease-in-out,
+        -webkit-backdrop-filter 0.5s ease-in-out !important;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -323,14 +335,25 @@ img {
     }
 }
 
-@keyframes shimmer {
+@keyframes statPulse {
     0% {
-        background-position: -200% 0;
+        transform: scale(1);
+        color: var(--text-main);
+    }
+
+    50% {
+        transform: scale(1.1);
+        color: var(--primary-action);
     }
 
     100% {
-        background-position: 200% 0;
+        transform: scale(1);
+        color: var(--text-main);
     }
+}
+
+.stat-update-pulse {
+    animation: statPulse 0.8s var(--ease-out);
 }
 
 /* ══════════════════════════════════════════════════════════
