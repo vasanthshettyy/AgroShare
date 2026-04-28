@@ -1,0 +1,36 @@
+# Gemini Ignore File
+# Exclude files that are not important for logic analysis or website execution
+
+# Agent and Context folders
+.agents/
+.context/
+.git/
+
+# Environment and Secrets
+.env
+.env.*
+config/local.secrets.php
+
+# Dependencies
+vendor/
+node_modules/
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs and Temp files
+*.log
+*.tmp
+*.bak
+*.swp
+
+# Media and Static Assets (not needed for code analysis)
+public/uploads/
+Reference lightmode images/
+
+# Project Reports and Documentation
+PROJECT_REPORT.md
+project_report.md
