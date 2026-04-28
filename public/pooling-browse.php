@@ -269,14 +269,6 @@ $campaigns = getCampaigns($conn, $filters);
             <p class="topbar-greeting">Community Pooling</p>
         </div>
 
-        <!-- Search bar -->
-        <label class="topbar-search" for="topbar-search-input" aria-label="Search">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-            <input type="search" id="topbar-search-input" placeholder="Search anything…" autocomplete="off">
-        </label>
-
         <div class="topbar-right" style="position: relative;">
             <!-- Theme Toggle -->
             <button class="btn-icon theme-toggle" id="themeToggleBtn" aria-label="Toggle light/dark mode" title="Toggle theme">
@@ -442,10 +434,10 @@ $campaigns = getCampaigns($conn, $filters);
                             <div class="progress-bar-sleek">
                                 <div class="progress-bar-fill" style="width: <?= $progress ?>%;"></div>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; padding: 0.75rem 1rem; margin-top: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(76, 175, 120, 0.08); border: 1px solid rgba(76, 175, 120, 0.2); border-radius: 12px; padding: 0.75rem 1rem; margin-top: 1rem;">
                                 <div>
                                     <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Target Needed</div>
-                                    <div style="font-size: 1.15rem; font-weight: 800; color: white;"><?= number_format($camp['target_quantity']) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($camp['unit']) ?></span></div>
+                                    <div style="font-size: 1.15rem; font-weight: 800; color: var(--text-main);"><?= number_format($camp['target_quantity']) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($camp['unit']) ?></span></div>
                                 </div>
                                 <div style="text-align: right;">
                                     <div style="font-size: 0.75rem; color: var(--primary-action); text-transform: uppercase; letter-spacing: 0.5px;">Already Filled</div>

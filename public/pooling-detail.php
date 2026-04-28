@@ -158,7 +158,7 @@ $is_creator = ($campaign['creator_id'] === $userId);
         .spec-strip-value {
             font-size: 1rem;
             font-weight: 700;
-            color: #fff;
+            color: var(--text-main);
         }
 
         /* Right Column Cards */
@@ -197,7 +197,7 @@ $is_creator = ($campaign['creator_id'] === $userId);
         }
         .creator-name-premium {
             font-weight: 800;
-            color: #fff;
+            color: var(--text-main);
             font-size: 1rem;
         }
         .creator-since {
@@ -291,7 +291,7 @@ $is_creator = ($campaign['creator_id'] === $userId);
         }
         .farmer-name {
             font-weight: 600;
-            color: #fff;
+            color: var(--text-main);
             font-size: 0.9rem;
         }
         .status-badge-confirmed {
@@ -327,7 +327,7 @@ $is_creator = ($campaign['creator_id'] === $userId);
             font-weight: 500;
         }
         .summary-value {
-            color: #fff;
+            color: var(--text-main);
             font-weight: 700;
         }
 
@@ -358,14 +358,6 @@ $is_creator = ($campaign['creator_id'] === $userId);
             <button class="hamburger" id="hamburgerBtn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
             <p class="topbar-greeting">Campaign Details</p>
         </div>
-
-        <!-- Search bar -->
-        <label class="topbar-search" for="topbar-search-input" aria-label="Search">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-            <input type="search" id="topbar-search-input" placeholder="Search anything…" autocomplete="off">
-        </label>
 
         <div class="topbar-right" style="position: relative;">
             <!-- Theme Toggle -->
@@ -492,11 +484,11 @@ $is_creator = ($campaign['creator_id'] === $userId);
                             <div class="pooling-progress-fill" style="width: <?= $progress ?>%;"></div>
                         </div>
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem;">
-                            <div style="background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; text-align: center;">
+                            <div style="background: rgba(76, 175, 120, 0.08); border: 1px solid rgba(76, 175, 120, 0.2); border-radius: 12px; padding: 1.25rem; text-align: center;">
                                 <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">1. Target Needed</div>
-                                <div style="color: white; font-size: 1.5rem; font-weight: 800; margin-top: 0.25rem;"><?= number_format($campaign['target_quantity']) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($campaign['unit']) ?></span></div>
+                                <div style="color: var(--text-main); font-size: 1.5rem; font-weight: 800; margin-top: 0.25rem;"><?= number_format($campaign['target_quantity']) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($campaign['unit']) ?></span></div>
                             </div>
-                            <div style="background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; text-align: center;">
+                            <div style="background: rgba(76, 175, 120, 0.08); border: 1px solid rgba(76, 175, 120, 0.2); border-radius: 12px; padding: 1.25rem; text-align: center;">
                                 <div style="color: var(--primary-action); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">2. Already Filled</div>
                                 <div style="color: var(--primary-action); font-size: 1.5rem; font-weight: 800; margin-top: 0.25rem;"><?= number_format($campaign['current_quantity']) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($campaign['unit']) ?></span></div>
                             </div>
@@ -555,7 +547,7 @@ $is_creator = ($campaign['creator_id'] === $userId);
 
                     <!-- MEMBER LIST -->
                     <div style="margin-top: 4rem;">
-                        <h3 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 1.5rem; color: #fff;">
+                        <h3 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 1.5rem; color: var(--text-main);">
                             Contributors <span style="color: var(--primary-action); margin-left: 8px;"><?= count($pledges) ?></span>
                         </h3>
                         
@@ -588,7 +580,7 @@ $is_creator = ($campaign['creator_id'] === $userId);
                                                     <span class="farmer-name"><?= e($p['full_name']) ?></span>
                                                 </div>
                                             </td>
-                                            <td style="font-weight: 700; color: #fff;"><?= number_format($p['quantity_pledged']) ?> <?= e($campaign['unit']) ?></td>
+                                            <td style="font-weight: 700; color: var(--text-main);"><?= number_format($p['quantity_pledged']) ?> <?= e($campaign['unit']) ?></td>
                                             <td style="font-weight: 700; color: var(--secondary-action);">₹<?= number_format($pledgeTotal, 0) ?></td>
                                             <td style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;"><?= date('d M Y', strtotime($p['created_at'])) ?></td>
                                             <td><span class="status-badge-confirmed">Confirmed</span></td>
@@ -610,7 +602,7 @@ $is_creator = ($campaign['creator_id'] === $userId);
                                 <div style="width: 56px; height: 56px; background: rgba(74, 222, 128, 0.1); color: #4ade80; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem;">
                                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                                 </div>
-                                <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem;">
+                                <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem;">
                                     <?= ($campaign['status'] === 'threshold_met') ? 'Goal Achieved!' : 'Campaign Closed' ?>
                                 </h3>
                                 <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
@@ -622,7 +614,7 @@ $is_creator = ($campaign['creator_id'] === $userId);
                                 <div style="width: 56px; height: 56px; background: var(--primary-10); color: var(--primary-action); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem;">
                                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                                 </div>
-                                <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 0.25rem;">You're in!</h3>
+                                <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;">You're in!</h3>
                                 <p style="font-size: 0.9rem; color: var(--primary-action); font-weight: 700; margin-bottom: 1.5rem;">
                                     You contributed <strong style="font-size: 1.2em; margin: 0 4px;"><?= number_format($userPledge['quantity_pledged']) ?></strong> <span style="opacity: 0.7; text-transform: lowercase;"><?= htmlspecialchars($campaign['unit']) ?> units</span>
                                 </p>
@@ -631,7 +623,7 @@ $is_creator = ($campaign['creator_id'] === $userId);
                                 </button>
                             </div>
                         <?php else: ?>
-                            <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.5rem; color: #fff;">Help Reach Goal</h3>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-main);">Help Reach Goal</h3>
                             <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Contribute your excess supply to help this farmer reach their target.</p>
                             
                             <div class="form-group" style="margin-bottom: 1.25rem;">

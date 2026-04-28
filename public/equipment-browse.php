@@ -79,14 +79,6 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
             </p>
         </div>
 
-        <label class="topbar-search" for="topbar-search-input" aria-label="Search">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-            <input type="search" id="topbar-search-input" placeholder="Search equipment…" autocomplete="off">
-        </label>
-
         <div class="topbar-right" style="position: relative;">
             <!-- Theme Toggle -->
             <button class="btn-icon theme-toggle" id="themeToggleBtn" aria-label="Toggle light/dark mode" title="Toggle theme">

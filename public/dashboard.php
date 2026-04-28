@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../src/Controllers/EquipmentController.php';
+require_once __DIR__ . '/../src/Controllers/BookingController.php';
 requireAuth();
 
 $userId = (int)$_SESSION['user_id'];
@@ -10,6 +11,11 @@ $totalEquipment = getUserEquipmentCount($conn, $userId);
 $activeRentals  = getUserActiveRentalsCount($conn, $userId);
 $poolCount      = getUserPoolCount($conn, $userId);
 $trustScore     = getUserTrustScore($conn, $userId);
+
+// Fetch Trend & Activity
+$monthlyTrend   = getMonthlyDashboardTrend($conn, $userId);
+$recentActivity = getRecentDashboardActivity($conn, $userId, 5);
+$trendValues    = implode(',', $monthlyTrend);
 
 // Derive initials from full name for the avatar
 $nameParts = explode(' ', $_SESSION['full_name']);
@@ -72,15 +78,6 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 <?= e($greeting) ?>, <strong><?= e($_SESSION['full_name']) ?></strong>
             </p>
         </div>
-
-        <!-- Search bar -->
-        <label class="topbar-search" for="topbar-search-input" aria-label="Search">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-            <input type="search" id="topbar-search-input" placeholder="Search anything…" autocomplete="off">
-        </label>
 
         <div class="topbar-right" style="position: relative;">
             <!-- Theme Toggle -->
@@ -263,7 +260,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         </svg>
                     </div>
                 </div>
-                <div class="kpi-value" data-target="<?= e($totalEquipment) ?>"><?= e($totalEquipment) ?></div>
+                <div class="kpi-value" id="kpi-total-equipment"><?= e($totalEquipment) ?></div>
                 <div class="kpi-trend neutral">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                          stroke-linecap="round" aria-hidden="true">
@@ -292,7 +289,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         </svg>
                     </a>
                 </div>
-                <div class="kpi-value" data-target="<?= e($activeRentals) ?>"><?= e($activeRentals) ?></div>
+                <div class="kpi-value" id="kpi-active-rentals"><?= e($activeRentals) ?></div>
                 <div class="kpi-trend neutral">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                          stroke-linecap="round" aria-hidden="true">
@@ -320,7 +317,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         </svg>
                     </span>
                 </div>
-                <div class="kpi-value" data-target="<?= e($poolCount) ?>"><?= e($poolCount) ?></div>
+                <div class="kpi-value" id="kpi-pool-count"><?= e($poolCount) ?></div>
                 <div class="kpi-trend neutral">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                          stroke-linecap="round" aria-hidden="true">
@@ -349,7 +346,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         </svg>
                     </span>
                 </div>
-                <div class="kpi-value" data-target="<?= e(number_format($trustScore, 1)) ?>"><?= e(number_format($trustScore, 1)) ?></div>
+                <div class="kpi-value" id="kpi-trust-score"><?= e(number_format($trustScore, 1)) ?></div>
                 <div class="kpi-trend neutral">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                          stroke-linecap="round" aria-hidden="true">
@@ -401,7 +398,8 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                                 <th scope="col">Status</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="dashboard-activity-body">
+                            <?php if (empty($recentActivity)): ?>
                             <tr>
                                 <td colspan="4" style="text-align:center;padding:36px 20px;">
                                     <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
@@ -416,6 +414,26 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                                     <p style="color:var(--text-subtle);font-size:0.82rem;font-weight:500;">No activity yet — bookings and rentals will appear here.</p>
                                 </td>
                             </tr>
+                            <?php else: ?>
+                                <?php foreach ($recentActivity as $act): ?>
+                                <tr>
+                                    <td><strong><?= e($act['equipment_title']) ?></strong></td>
+                                    <td>
+                                        <span class="activity-badge <?= strtolower($act['activity_type']) ?>">
+                                            <?= e($act['activity_type']) ?>
+                                        </span>
+                                    </td>
+                                    <td style="font-size: 0.8rem; color: var(--text-muted);">
+                                        <?= date('M j', strtotime($act['created_at'])) ?>
+                                    </td>
+                                    <td>
+                                        <span class="status-pill <?= strtolower($act['status']) ?>">
+                                            <?= ucfirst(e($act['status'])) ?>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -449,7 +467,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                     <!-- JS will render an SVG area chart here -->
                     <!-- data-values = comma-separated monthly booking counts (placeholder) -->
                     <div class="chart-svg-wrap" id="chart-area"
-                         data-values="0,0,0,0,0,0,0"
+                         data-values="<?= e($trendValues) ?>"
                          aria-label="Area chart — no rental data yet"
                          style="min-height:90px;">
                     </div>
@@ -669,5 +687,6 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
 <?php require_once __DIR__ . '/includes/user-public-profile-modal.php'; ?>
 <script src="assets/js/theme-toggle.js?v=<?= time() ?>" defer></script>
 <script src="assets/js/dashboard.js?v=<?= time() ?>" defer></script>
+<script src="assets/js/dashboard-stats.js?v=<?= time() ?>" defer></script>
 </body>
 </html>
