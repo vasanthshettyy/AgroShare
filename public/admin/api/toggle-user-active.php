@@ -16,23 +16,31 @@ if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
 }
 
 $userId = (int)($_POST['user_id'] ?? 0);
+$isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 
 if ($userId > 0) {
     try {
-        // Optimistic query: assumes is_active column will be added if it doesn't exist
         $stmt = $conn->prepare("UPDATE users SET is_active = NOT COALESCE(is_active, 1) WHERE id = ?");
         if ($stmt) {
             $stmt->bind_param('i', $userId);
             $stmt->execute();
             logAuditEvent($conn, 'admin_toggle_user', $userId, "Admin toggled active status for user $userId", $_SESSION['user_id']);
+            
+            if ($isAjax) {
+                echo json_encode(['success' => true, 'message' => 'User status updated.']);
+                exit();
+            }
             setFlash('success', "User active status toggled.");
         } else {
-            setFlash('error', "is_active column may not exist in schema yet.");
+            if ($isAjax) { echo json_encode(['success' => false, 'message' => 'Database error.']); exit(); }
+            setFlash('error', "is_active column error.");
         }
     } catch (Exception $e) {
+        if ($isAjax) { echo json_encode(['success' => false, 'message' => $e->getMessage()]); exit(); }
         setFlash('error', "Database error: " . $e->getMessage());
     }
 }
 
-header('Location: ../users.php');
+if ($isAjax) { echo json_encode(['success' => false, 'message' => 'Invalid ID.']); exit(); }
+header('Location: ../index.php?view=users');
 exit();

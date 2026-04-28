@@ -7,22 +7,38 @@ function getAdminDashboardStats(mysqli $conn): array
 {
     $stats = [
         'users_count' => 0,
+        'unverified_users' => 0,
         'equipment_count' => 0,
+        'pending_equipment' => 0,
         'bookings_count' => 0,
+        'active_disputes' => 0,
+        'total_revenue' => 0,
         'recent_logs' => []
     ];
 
     $res = $conn->query("SELECT COUNT(*) FROM users WHERE role = 'farmer'");
     if ($res) $stats['users_count'] = (int)$res->fetch_column();
 
+    $res = $conn->query("SELECT COUNT(*) FROM users WHERE role = 'farmer' AND is_verified = 0");
+    if ($res) $stats['unverified_users'] = (int)$res->fetch_column();
+
     $res = $conn->query("SELECT COUNT(*) FROM equipment");
     if ($res) $stats['equipment_count'] = (int)$res->fetch_column();
+
+    $res = $conn->query("SELECT COUNT(*) FROM equipment WHERE is_available = 0");
+    if ($res) $stats['pending_equipment'] = (int)$res->fetch_column();
 
     $res = $conn->query("SELECT COUNT(*) FROM bookings");
     if ($res) $stats['bookings_count'] = (int)$res->fetch_column();
 
+    $res = $conn->query("SELECT COUNT(*) FROM bookings WHERE status = 'disputed'");
+    if ($res) $stats['active_disputes'] = (int)$res->fetch_column();
+
+    $res = $conn->query("SELECT SUM(total_price) FROM bookings WHERE status != 'cancelled'");
+    if ($res) $stats['total_revenue'] = (float)$res->fetch_column();
+
     try {
-        $res = $conn->query("SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT 5");
+        $res = $conn->query("SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT 8");
         if ($res) $stats['recent_logs'] = $res->fetch_all(MYSQLI_ASSOC);
     } catch (Exception $e) {} catch (Error $e) {}
 
@@ -83,4 +99,16 @@ function getAuditLogs(mysqli $conn): array
     } catch (Exception $e) {} catch (Error $e) {}
     
     return [];
+}
+
+function getPoolingCampaignsForAdmin(mysqli $conn): array
+{
+    $sql = "SELECT c.*, u.full_name as creator_name,
+            (SELECT COUNT(*) FROM pledges WHERE campaign_id = c.id) as pledge_count,
+            (SELECT SUM(quantity) FROM pledges WHERE campaign_id = c.id) as current_quantity
+            FROM campaigns c
+            JOIN users u ON c.creator_id = u.id
+            ORDER BY c.created_at DESC";
+    $res = $conn->query($sql);
+    return $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
 }

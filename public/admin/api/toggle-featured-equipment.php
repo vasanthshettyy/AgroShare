@@ -16,23 +16,31 @@ if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
 }
 
 $eqId = (int)($_POST['equipment_id'] ?? 0);
+$isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 
 if ($eqId > 0) {
     try {
-        // Optimistic toggle for is_featured. Fallback if column missing.
         $stmt = $conn->prepare("UPDATE equipment SET is_featured = NOT COALESCE(is_featured, 0) WHERE id = ?");
         if ($stmt) {
             $stmt->bind_param('i', $eqId);
             $stmt->execute();
             logAuditEvent($conn, 'admin_toggle_equipment_featured', $eqId, "Admin toggled featured status for equipment $eqId", $_SESSION['user_id']);
+            
+            if ($isAjax) {
+                echo json_encode(['success' => true, 'message' => 'Equipment status updated.']);
+                exit();
+            }
             setFlash('success', "Equipment featured status toggled.");
         } else {
-            setFlash('error', "is_featured column may not exist in schema yet.");
+            if ($isAjax) { echo json_encode(['success' => false, 'message' => 'Database error.']); exit(); }
+            setFlash('error', "Database error.");
         }
     } catch (Exception $e) {
+        if ($isAjax) { echo json_encode(['success' => false, 'message' => $e->getMessage()]); exit(); }
         setFlash('error', "Database error: " . $e->getMessage());
     }
 }
 
-header('Location: ../equipment.php');
+if ($isAjax) { echo json_encode(['success' => false, 'message' => 'Invalid ID.']); exit(); }
+header('Location: ../index.php?view=equipment');
 exit();
