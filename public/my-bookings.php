@@ -1038,7 +1038,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             }
             .premium-textarea {
                 width: 100%;
-                background: rgba(0, 0, 0, 0.25);
+                background: rgba(76, 175, 120, 0.08);
                 border: 1px solid var(--border-color);
                 border-radius: 14px;
                 padding: 1rem;

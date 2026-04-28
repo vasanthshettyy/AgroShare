@@ -586,8 +586,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                                 <div class="dot-ping"></div>
                                 Available for rent
                             </div>
-                            <div style="margin-top: 1.25rem; padding: 0.75rem; background: rgba(0,0,0,0.2); border-radius: 10px; border: 1px solid var(--border-color);">
-                                <span style="display:block; font-size: 0.65rem; color: var(--text-subtle); text-transform: uppercase; margin-bottom: 4px;">Blocked Dates</span>
+                            <div style="margin-top: 1.25rem; padding: 0.75rem; background: rgba(76, 175, 120, 0.08); border-radius: 10px; border: 1px solid rgba(76, 175, 120, 0.2);">
+                                <span style="display:block; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Blocked Dates</span>
                                 <span style="font-size: 0.8rem; color: var(--text-muted);">No dates currently blocked</span>
                             </div>
                         </div>
