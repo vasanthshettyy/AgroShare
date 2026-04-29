@@ -28,7 +28,7 @@ date_default_timezone_set(APP_TIMEZONE);
 if (session_status() === PHP_SESSION_NONE) {
     ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
     ini_set('session.cookie_httponly', 1);   // JS cannot read session cookie
-    ini_set('session.cookie_samesite', 'Strict');
+    ini_set('session.cookie_samesite', 'Lax');
     ini_set('session.use_strict_mode', 1);   // Reject uninitialized session IDs
     session_start();
 }

@@ -36,3 +36,8 @@ if (!defined('SMTP_PASS')) { define('SMTP_PASS', 'your_app_password_without_spac
 if (!defined('SMTP_SECURE')) { define('SMTP_SECURE', 'tls'); } // 'tls' or 'ssl'
 if (!defined('SMTP_FROM_EMAIL')) { define('SMTP_FROM_EMAIL', 'your_email@gmail.com'); }
 if (!defined('SMTP_FROM_NAME')) { define('SMTP_FROM_NAME', 'AgroShare Support'); }
+
+// Google OAuth Configuration
+if (!defined('GOOGLE_CLIENT_ID')) { define('GOOGLE_CLIENT_ID', 'YOUR_GOOGLE_CLIENT_ID'); }
+if (!defined('GOOGLE_CLIENT_SECRET')) { define('GOOGLE_CLIENT_SECRET', 'YOUR_GOOGLE_CLIENT_SECRET'); }
+if (!defined('GOOGLE_REDIRECT_URI')) { define('GOOGLE_REDIRECT_URI', APP_URL . '/public/auth/google-callback.php'); }
