@@ -23,22 +23,13 @@ if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
     exit();
 }
 
-// Ensure settings table exists, or catch error gracefully
 try {
-    $siteName = trim($_POST['site_name'] ?? APP_NAME);
     $maintenanceMode = (($_POST['maintenance_mode'] ?? '0') === '1') ? 1 : 0;
 
-    // Simplistic approach for two settings using REPLACE INTO or INSERT ON DUPLICATE KEY UPDATE
-    // Assumes `settings` table has `setting_key` (VARCHAR, UNIQUE) and `setting_value` (VARCHAR)
     $sql = "INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)";
     
     $stmt = $conn->prepare($sql);
     if ($stmt) {
-        // Save Site Name
-        $key1 = 'site_name';
-        $stmt->bind_param('ss', $key1, $siteName);
-        $stmt->execute();
-
         // Save Maintenance Mode
         $key2 = 'maintenance_mode';
         $val2 = (string)$maintenanceMode;
@@ -47,7 +38,7 @@ try {
         
         $stmt->close();
 
-        logAuditEvent($conn, 'admin_update_settings', null, "Admin updated global settings", $_SESSION['user_id']);
+        logAuditEvent($conn, 'admin_update_settings', null, "Admin updated maintenance mode status", null, $_SESSION['user_id']);
 
         if ($isAjax) {
             header('Content-Type: application/json; charset=utf-8');
@@ -63,10 +54,10 @@ try {
         if ($isAjax) {
             http_response_code(500);
             header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(['success' => false, 'message' => 'Settings table may not exist in schema yet.']);
+            echo json_encode(['success' => false, 'message' => 'Settings table may not exist.']);
             exit();
         }
-        setFlash('error', "Settings table may not exist in schema yet.");
+        setFlash('error', "Settings table may not exist.");
     }
 } catch (Exception $e) {
     if ($isAjax) {

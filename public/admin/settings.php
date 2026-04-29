@@ -180,10 +180,7 @@ $settings = getSettings($conn);
     <aside class="sidebar">
         <div class="sidebar-brand">
             <div class="brand-mark" aria-hidden="true">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M2 22c1.25-7 6-10 10.5-10S20 9.9 20 5.4c0-2.3-.9-3.9-.9-3.9C17 5 14.8 6 14.8 6 11.4 2.5 7 2 7 2S3 8 3 13c0 3 1.5 5.5 3.5 7"/>
-                    <path d="M6 22c0-4 2-7 6-9"/>
-                </svg>
+                <img src="../assets/img/logo.png" alt="AgroShare" width="28" height="28" style="object-fit: contain;">
             </div>
             <span class="brand-name"><?= e(APP_NAME) ?> Admin</span>
         </div>
@@ -258,12 +255,7 @@ $settings = getSettings($conn);
                     </div>
                 </div>
                 
-                <div class="form-group">
-                    <label class="form-label" for="site_name">Site Name</label>
-                    <input type="text" id="site_name" name="site_name" class="form-input" value="<?= e($settings['site_name'] ?? APP_NAME) ?>">
-                </div>
 
-                <button type="submit" class="btn-submit">Save Settings</button>
             </form>
         </div>
     </main>
@@ -280,7 +272,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const pill = document.getElementById('maintenanceStatusPill');
     const saveState = document.getElementById('maintenanceSaveState');
     const toast = document.getElementById('settingsToast');
-    const siteNameInput = document.getElementById('site_name');
 
     if (!form || !switchBtn || !maintenanceInput) return;
 
@@ -316,7 +307,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const payload = new FormData();
             payload.append('csrf_token', form.querySelector('input[name="csrf_token"]').value);
-            payload.append('site_name', siteNameInput ? siteNameInput.value : '');
             payload.append('maintenance_mode', nextValue);
 
             const response = await fetch(form.action, {
@@ -369,3 +359,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
