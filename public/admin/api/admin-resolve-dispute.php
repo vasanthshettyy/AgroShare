@@ -25,7 +25,7 @@ if ($bookingId > 0) {
         $stmt->execute();
         
         if ($stmt->affected_rows > 0) {
-            logAuditEvent($conn, 'admin_resolve_dispute', $bookingId, "Admin marked disputed booking $bookingId as resolved/completed", $_SESSION['user_id']);
+            logAuditEvent($conn, 'admin_resolve_dispute', $bookingId, "Admin marked disputed booking $bookingId as resolved/completed", null, $_SESSION['user_id']);
             setFlash('success', "Dispute resolved successfully.");
         } else {
             setFlash('error', "Could not resolve dispute. Ensure the booking is currently disputed.");

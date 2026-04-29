@@ -64,7 +64,7 @@ try {
     
     if ($stmt->execute()) {
         $newAdminId = $stmt->insert_id;
-        logAuditEvent($conn, 'admin_created', $newAdminId, "Admin created a new admin account: $fullName ($phone)", $_SESSION['user_id']);
+        logAuditEvent($conn, 'admin_created', $newAdminId, "Admin created a new admin account: $fullName ($phone)", null, $_SESSION['user_id']);
         setFlash('success', "New admin account created successfully.");
         header('Location: ../users.php');
         exit();

@@ -13,34 +13,40 @@
  * 
  * @param mysqli $conn        The database connection.
  * @param string $actionType  Type of action (e.g. 'login_failed').
- * @param int|null $targetId  Optional target ID (e.g. user ID).
+ * @param int|null $actorId   The user ID performing the action (if applicable).
  * @param string $description Detailed description.
+ * @param array|null $metadata Optional array of extra context (will be JSON encoded).
  * @param int|null $adminId   Optional admin ID performing the action.
  */
-function logAuditEvent(mysqli $conn, string $actionType, ?int $targetId, string $description, ?int $adminId = null): void
+function logAuditEvent(mysqli $conn, string $actionType, ?int $actorId, string $description, ?array $metadata = null, ?int $adminId = null): void
 {
     try {
+        $metaJson = $metadata ? json_encode($metadata) : null;
+
+        // Try inserting into the modern schema first
         $sql = "INSERT INTO audit_logs 
-                (admin_id, action_type, target_id, description)
-                VALUES (?, ?, ?, ?)";
+                (admin_id, action_type, actor_user_id, description, metadata_json)
+                VALUES (?, ?, ?, ?, ?)";
 
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
-            return; // Fail silently
+            // Fallback for older schema (target_id instead of actor_user_id, no metadata)
+            $sqlFallback = "INSERT INTO audit_logs (admin_id, action_type, target_id, description) VALUES (?, ?, ?, ?)";
+            $stmt = $conn->prepare($sqlFallback);
+            if (!$stmt) return;
+            $stmt->bind_param('isis', $adminId, $actionType, $actorId, $description);
+        } else {
+            $stmt->bind_param(
+                'isiss',
+                $adminId, $actionType, $actorId, $description, $metaJson
+            );
         }
-
-        $stmt->bind_param(
-            'isis',
-            $adminId, $actionType, $targetId, $description
-        );
 
         $stmt->execute();
         $stmt->close();
     } catch (Exception $e) {
-        // Swallow exception, only log to PHP error log
         error_log("Audit log failed: " . $e->getMessage());
     } catch (Error $e) {
-        // Handle database-level errors (like missing table) gracefully
         error_log("Audit log error: " . $e->getMessage());
     }
 }

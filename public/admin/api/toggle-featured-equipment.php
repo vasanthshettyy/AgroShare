@@ -24,7 +24,7 @@ if ($eqId > 0) {
         if ($stmt) {
             $stmt->bind_param('i', $eqId);
             $stmt->execute();
-            logAuditEvent($conn, 'admin_toggle_equipment_featured', $eqId, "Admin toggled featured status for equipment $eqId", $_SESSION['user_id']);
+            logAuditEvent($conn, 'admin_toggle_equipment_featured', $eqId, "Admin toggled featured status for equipment $eqId", null, $_SESSION['user_id']);
             
             if ($isAjax) {
                 echo json_encode(['success' => true, 'message' => 'Equipment status updated.']);

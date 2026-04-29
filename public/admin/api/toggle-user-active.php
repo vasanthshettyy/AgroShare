@@ -24,7 +24,7 @@ if ($userId > 0) {
         if ($stmt) {
             $stmt->bind_param('i', $userId);
             $stmt->execute();
-            logAuditEvent($conn, 'admin_toggle_user', $userId, "Admin toggled active status for user $userId", $_SESSION['user_id']);
+            logAuditEvent($conn, 'admin_toggle_user', $userId, "Admin toggled active status for user $userId", null, $_SESSION['user_id']);
             
             if ($isAjax) {
                 echo json_encode(['success' => true, 'message' => 'User status updated.']);

@@ -25,7 +25,7 @@ if ($userId > 0) {
         $stmt->bind_param('ii', $status, $userId);
         $stmt->execute();
         
-        logAuditEvent($conn, 'admin_verify_user', $userId, "Admin updated is_verified to $status for user $userId", $_SESSION['user_id']);
+        logAuditEvent($conn, 'admin_verify_user', $userId, "Admin updated is_verified to $status for user $userId", null, $_SESSION['user_id']);
         
         if ($isAjax) {
             echo json_encode(['success' => true, 'message' => 'User verification updated.']);

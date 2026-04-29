@@ -29,7 +29,7 @@ if ($bookingId > 0) {
             $eqStmt->bind_param('i', $bookingId);
             $eqStmt->execute();
 
-            logAuditEvent($conn, 'admin_cancel_booking', $bookingId, "Admin forcibly cancelled booking $bookingId", $_SESSION['user_id']);
+            logAuditEvent($conn, 'admin_cancel_booking', $bookingId, "Admin forcibly cancelled booking $bookingId", null, $_SESSION['user_id']);
             setFlash('success', "Booking forcibly cancelled.");
         } else {
             setFlash('error', "Could not cancel booking. It may already be completed or cancelled.");
