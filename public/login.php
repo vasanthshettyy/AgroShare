@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../src/Controllers/GoogleAuthController.php';
 
 // Redirect if already logged in
 if (isset($_SESSION['user_id'])) {
@@ -191,6 +192,7 @@ $_SESSION['captcha_code'] = $captcha_code;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log In / Sign Up — <?= e(APP_NAME) ?></title>
     <meta name="description" content="Join <?= e(APP_NAME) ?> — India's farmer resource sharing platform.">
+    <script>(function(){ var t = localStorage.getItem('theme') || 'dark'; document.documentElement.setAttribute('data-theme', t); })();</script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -217,6 +219,24 @@ $_SESSION['captcha_code'] = $captcha_code;
             --font:                'Inter', system-ui, -apple-system, sans-serif;
         }
 
+        [data-theme="light"] {
+            --bg-color: hsl(120, 10%, 95%);
+            --surface-color: hsl(0, 0%, 100%);
+            --text-main: hsl(210, 20%, 18%);
+            --text-muted: hsl(210, 10%, 45%);
+            --text-subtle: hsl(210, 8%, 60%);
+            --border-color: hsl(210, 12%, 78%);
+            --primary-action: hsl(150, 55%, 38%);
+            --secondary-action: hsl(171, 40%, 42%);
+            --accent-soft: hsl(150, 20%, 85%);
+            --accent-dark: hsl(150, 45%, 32%);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .theme-transitioning, .theme-transitioning * {
+            transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease !important;
+        }
+
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         a { color: inherit; text-decoration: none; }
         button { font-family: inherit; cursor: pointer; }
@@ -232,6 +252,51 @@ $_SESSION['captcha_code'] = $captcha_code;
             padding: 16px;
             -webkit-font-smoothing: antialiased;
         }
+
+        /* -- Floating Theme Toggle -- */
+        .theme-toggle-wrapper {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 1000;
+        }
+        .btn-icon.theme-toggle-btn {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 0;
+            cursor: pointer;
+        }
+        .btn-icon.theme-toggle-btn:hover {
+            border-color: var(--primary-action);
+            color: var(--primary-action);
+            transform: rotate(15deg) scale(1.1);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        }
+        .theme-toggle-animated {
+            position: relative;
+            width: 20px;
+            height: 20px;
+        }
+        #theme-icon-sun, #theme-icon-moon {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        }
+        #theme-icon-sun { opacity: 0; transform: rotate(-90deg) scale(0); }
+        #theme-icon-moon { opacity: 1; transform: rotate(0) scale(1); }
+
+        [data-theme="light"] #theme-icon-sun { opacity: 1; transform: rotate(0) scale(1); }
+        [data-theme="light"] #theme-icon-moon { opacity: 0; transform: rotate(90deg) scale(0); }
 
         /* Basic unified panel styling for this step */
         .auth-slider-container {
@@ -919,8 +984,51 @@ $_SESSION['captcha_code'] = $captcha_code;
             height: 14px;
             fill: currentColor;
             flex-shrink: 0;
-        }        </style></head>
+        }
+
+        /* -- Google Login Buttons (Emerald Harvest Theme) -- */
+        .btn-google {
+            width: 100%; height: 50px;
+            background: var(--surface-color);
+            color: var(--text-main); 
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-family: var(--font);
+            font-size: 0.95rem; font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; align-items: center;
+            justify-content: center; gap: 14px;
+            margin-top: 16px;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .btn-google:hover {
+            background: var(--primary-10);
+            border-color: var(--primary-action);
+            color: var(--primary-action);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 15px rgba(76, 175, 120, 0.1);
+        }
+        .btn-google:active {
+            transform: translateY(0) scale(0.98);
+        }
+        .btn-google svg { width: 20px; height: 20px; }
+
+        .auth-divider {
+            display: flex; align-items: center;
+            gap: 16px; margin: 20px 0;
+            color: var(--text-subtle); font-size: 0.75rem; font-weight: 600;
+        }
+        .auth-divider::before, .auth-divider::after {
+            content: ''; flex: 1; height: 1px; background: var(--border-color);
+        }
+        </style></head>
 <body>
+
+<div class="theme-toggle-wrapper">
+    <?php include __DIR__ . '/includes/theme-toggle-btn.php'; ?>
+</div>
 
 <div id="auth-slider-container" class="auth-slider-container">
 
@@ -1044,6 +1152,18 @@ $_SESSION['captcha_code'] = $captcha_code;
                 Log In
             </button>
         </form>
+
+        <div class="auth-divider">OR</div>
+
+        <a href="<?= getGoogleAuthUrl() ?>" class="btn-google">
+            <svg viewBox="0 0 48 48" width="18" height="18">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+            Continue with Google
+        </a>
 
 
         
@@ -1207,6 +1327,18 @@ $_SESSION['captcha_code'] = $captcha_code;
                 Create Free Account
             </button>
         </form>
+
+        <div class="auth-divider">OR</div>
+
+        <a href="<?= getGoogleAuthUrl() ?>" class="btn-google">
+            <svg viewBox="0 0 48 48" width="18" height="18">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+            Continue with Google
+        </a>
 
         
     
@@ -1556,5 +1688,6 @@ if (emailInput && emailStatus) {
     emailInput.addEventListener('blur', checkEmail);
 }
 </script>
+<script src="assets/js/theme-toggle.js"></script>
 </body>
 </html>
