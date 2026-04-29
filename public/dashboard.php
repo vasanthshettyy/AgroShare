@@ -6,6 +6,16 @@ requireAuth();
 
 $userId = (int)$_SESSION['user_id'];
 
+// Ensure full_name is in session (fallback: fetch from DB)
+if (empty($_SESSION['full_name'])) {
+    $stmt = $conn->prepare("SELECT full_name FROM users WHERE id = ?");
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $_SESSION['full_name'] = $row['full_name'] ?? 'Farmer';
+}
+
 // Fetch KPI data
 $totalEquipment = getUserEquipmentCount($conn, $userId);
 $activeRentals  = getUserActiveRentalsCount($conn, $userId);
@@ -18,7 +28,8 @@ $recentActivity = getRecentDashboardActivity($conn, $userId, 5);
 $trendValues    = implode(',', $monthlyTrend);
 
 // Derive initials from full name for the avatar
-$nameParts = explode(' ', $_SESSION['full_name']);
+$fullName  = $_SESSION['full_name'] ?? 'Farmer';
+$nameParts = explode(' ', $fullName);
 $initials   = strtoupper(substr($nameParts[0], 0, 1));
 if (isset($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 
@@ -75,7 +86,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
             </button>
 
             <p class="topbar-greeting">
-                <?= e($greeting) ?>, <strong><?= e($_SESSION['full_name']) ?></strong>
+                <?= e($greeting) ?>, <strong><?= e($fullName) ?></strong>
             </p>
         </div>
 
@@ -116,7 +127,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
 
             <!-- Avatar -->
             <div class="avatar" id="avatar-btn" role="button" tabindex="0"
-                 title="Profile — <?= e($_SESSION['full_name']) ?>" aria-label="Open profile">
+                 title="Profile — <?= e($fullName) ?>" aria-label="Open profile">
                 <?= e($initials) ?>
             </div>
         </div>
