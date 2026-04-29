@@ -192,7 +192,7 @@ $_SESSION['captcha_code'] = $captcha_code;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log In / Sign Up — <?= e(APP_NAME) ?></title>
     <meta name="description" content="Join <?= e(APP_NAME) ?> — India's farmer resource sharing platform.">
-    <script>(function(){ var t = localStorage.getItem('theme') || 'dark'; document.documentElement.setAttribute('data-theme', t); })();</script>
+    <?php require_once __DIR__ . '/includes/theme-script.php'; ?>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -301,9 +301,9 @@ $_SESSION['captcha_code'] = $captcha_code;
         /* Basic unified panel styling for this step */
         .auth-slider-container {
             position: relative;
-            max-width: 1000px;
+            max-width: 880px;
             width: 100%;
-            min-height: 650px;
+            min-height: 660px;
             background: var(--surface-color);
             border-radius: var(--radius);
             overflow: hidden;
@@ -317,17 +317,24 @@ $_SESSION['captcha_code'] = $captcha_code;
             top: 0;
             width: 50%;
             height: 100%;
-            padding: 40px 36px;
+            padding: 32px 36px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
+            overflow-y: auto;
+            scrollbar-width: none; /* Hide for Firefox */
+            -ms-overflow-style: none; /* Hide for IE/Edge */
             /* Subtle 20px grid pattern */
             background-image: 
                 linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
             background-size: 20px 20px;
-            /* Synchronize pane fade with overlay slide */
+            -ms-overflow-style: none; /* Hide for IE/Edge */
             transition: opacity 0.6s ease-in-out, z-index 0.6s ease-in-out;
+        }
+        .login-pane-container::-webkit-scrollbar,
+        .signup-pane-container::-webkit-scrollbar {
+            display: none;
         }
 
         .login-pane-container {
@@ -350,7 +357,7 @@ $_SESSION['captcha_code'] = $captcha_code;
             left: 50%;
             width: 50%;
             height: 100%;
-            padding: 40px 36px;
+            padding: 32px 36px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -543,7 +550,7 @@ $_SESSION['captcha_code'] = $captcha_code;
             width: 100%;
         }
 
-        .form-head { margin-bottom: 22px; }
+        .form-head { margin-bottom: 18px; }
         .form-head h1 {
             font-size: 1.45rem; font-weight: 800;
             color: var(--text-main); letter-spacing: -0.4px;
@@ -560,11 +567,11 @@ $_SESSION['captcha_code'] = $captcha_code;
         .alert-error   { background: rgba(198,40,40,0.08);  color: var(--danger);          border: 1px solid rgba(198,40,40,0.2);  }
         .alert-success { background: rgba(19,83,44,0.08);   color: var(--primary-action);  border: 1px solid rgba(19,83,44,0.2);   }
 
-        .form-group { margin-bottom: 12px; }
+        .form-group { margin-bottom: 10px; }
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 10px;
         }
 
         .form-label {
@@ -1017,7 +1024,7 @@ $_SESSION['captcha_code'] = $captcha_code;
 
         .auth-divider {
             display: flex; align-items: center;
-            gap: 16px; margin: 20px 0;
+            gap: 16px; margin: 16px 0;
             color: var(--text-subtle); font-size: 0.75rem; font-weight: 600;
         }
         .auth-divider::before, .auth-divider::after {
