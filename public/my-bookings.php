@@ -33,10 +33,9 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
         .bookings-tabs {
             display: flex;
             justify-content: center;
-            gap: 2rem;
+            gap: 1rem;
             margin-bottom: 2.5rem;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 0.5rem;
         }
         .tab-btn {
             background: none;
@@ -54,13 +53,13 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
         .tab-btn.active::after {
             content: '';
             position: absolute;
-            bottom: -0.6rem;
-            left: 0;
-            right: 0;
+            bottom: -1px;
+            left: 1rem;
+            right: 1rem;
             height: 3px;
             background: var(--primary-action);
             border-radius: 10px 10px 0 0;
-            box-shadow: 0 -2px 10px var(--primary-40);
+            box-shadow: 0 -2px 10px rgba(76, 175, 120, 0.4);
         }
 
         /* -- Booking Cards Grid -- */
@@ -335,10 +334,24 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
         .btn-sm:hover { filter: brightness(1.2); transform: translateY(-1px); }
 
         .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            padding: 4rem 2rem;
+            padding: 5rem 2rem;
             color: var(--text-muted);
             grid-column: 1 / -1;
+        }
+        .empty-state svg {
+            margin-bottom: 1.5rem;
+            opacity: 0.5;
+        }
+        .empty-state p {
+            font-size: 1.1rem;
+            font-weight: 500;
+            max-width: 300px;
+            line-height: 1.5;
         }
 
         /* -- Status Capsules -- */
@@ -639,7 +652,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                     <div class="empty-state">
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--border-color)" stroke-width="1.5"><path d="M3 11V5h9l3 6m0 0H3m12 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m14 0h2a2 2 0 0 1 2 2v4h-3.5"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/></svg>
                         <p>You haven't rented any equipment yet.</p>
-                        <a href="equipment-browse.php" class="btn-primary" style="margin-top:1rem; display:inline-block;">Browse Equipment</a>
+                        <a href="equipment-browse.php" class="btn-primary" style="margin-top:2rem;">Browse Equipment</a>
                     </div>
                 <?php else: foreach ($rentals as $b): 
                     $images = !empty($b['equipment_images']) ? json_decode($b['equipment_images'], true) : [];
