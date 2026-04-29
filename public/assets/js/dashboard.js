@@ -464,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Use event delegation or multiple listeners for triggers
     document.addEventListener('click', (e) => {
-        const target = e.target.closest('#profile-btn, #avatar-btn, #edit-profile-quick-action');
+        const target = e.target.closest('#profile-btn, #avatar-btn, #edit-profile-quick-action, #trust-score-card');
         if (target) {
             openProfileModal(e);
         }

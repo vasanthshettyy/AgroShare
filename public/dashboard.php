@@ -52,12 +52,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
     <title>Dashboard — <?= e(APP_NAME) ?></title>
     <meta name="description" content="<?= e(APP_NAME) ?> farmer dashboard — manage your equipment, bookings and pooling campaigns.">
 
-    <script>
-        (function(){
-            var t = localStorage.getItem('theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', t);
-        })();
-    </script>
+    <?php require_once __DIR__ . '/includes/theme-script.php'; ?>
 
     <?php if ($needsTabCheck): ?>
     <script>
@@ -289,16 +284,16 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
             </a>
 
             <!-- KPI 2 — Active Rentals -->
-            <div class="kpi-card">
+            <a href="my-bookings.php" class="kpi-card" style="text-decoration: none; display: block; cursor: pointer;">
                 <div class="kpi-header">
                     <span class="kpi-label">Active Rentals</span>
-                    <a href="my-bookings.php" class="kpi-header-link" aria-label="View rentals">
+                    <div class="kpi-header-link" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="7" y1="17" x2="17" y2="7"/>
                             <polyline points="7 7 17 7 17 17"/>
                         </svg>
-                    </a>
+                    </div>
                 </div>
                 <div class="kpi-value" id="kpi-active-rentals"><?= e($activeRentals) ?></div>
                 <div class="kpi-trend neutral">
@@ -314,19 +309,19 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         <path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/>
                     </svg>
                 </div>
-            </div>
+            </a>
 
             <!-- KPI 3 — Pool Campaigns -->
-            <div class="kpi-card">
+            <a href="pooling-browse.php" class="kpi-card" style="text-decoration: none; display: block; cursor: pointer;">
                 <div class="kpi-header">
                     <span class="kpi-label">Pool Campaigns</span>
-                    <span class="kpi-header-link is-disabled" title="Coming soon" aria-disabled="true" aria-label="View campaigns">
+                    <div class="kpi-header-link" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="7" y1="17" x2="17" y2="7"/>
                             <polyline points="7 7 17 7 17 17"/>
                         </svg>
-                    </span>
+                    </div>
                 </div>
                 <div class="kpi-value" id="kpi-pool-count"><?= e($poolCount) ?></div>
                 <div class="kpi-trend neutral">
@@ -343,19 +338,19 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
                     </svg>
                 </div>
-            </div>
+            </a>
 
             <!-- KPI 4 — Trust Score -->
-            <div class="kpi-card">
+            <a href="javascript:void(0)" class="kpi-card" id="trust-score-card" style="text-decoration: none; display: block; cursor: pointer;">
                 <div class="kpi-header">
                     <span class="kpi-label">Trust Score</span>
-                    <span class="kpi-header-link is-disabled" title="Coming soon" aria-disabled="true" aria-label="View reviews">
+                    <div class="kpi-header-link" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="7" y1="17" x2="17" y2="7"/>
                             <polyline points="7 7 17 7 17 17"/>
                         </svg>
-                    </span>
+                    </div>
                 </div>
                 <div class="kpi-value" id="kpi-trust-score"><?= e(number_format($trustScore, 1)) ?></div>
                 <div class="kpi-trend neutral">
@@ -363,21 +358,21 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                          stroke-linecap="round" aria-hidden="true">
                         <line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
-                    No reviews yet
+                    View reviews
                 </div>
                 <div class="kpi-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                     </svg>
                 </div>
-            </div>
+            </a>
         </section>
 
         <!-- —— ROW 2: Recent Activity + Chart ─────────────────── -->
         <div class="bento-row bento-row-2">
 
             <!-- Recent Activity Table -->
-            <article class="bento-card" aria-label="Recent booking activity">
+            <article class="bento-card" onclick="window.location.href='my-bookings.php'" style="cursor: pointer;" aria-label="Recent booking activity">
                 <div class="card-header">
                     <h2 class="card-title">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -450,8 +445,8 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 </div>
             </article>
 
-            <!-- Rental Trend Chart -->
-            <article class="bento-card" aria-label="Monthly rental trend chart">
+            <!-- Rental Activity Chart -->
+            <article class="bento-card" onclick="window.location.href='my-bookings.php'" style="cursor: pointer;" aria-label="Monthly rental trend chart">
                 <div class="card-header">
                     <h2 class="card-title">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -515,7 +510,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 </div>
             </a>
 
-            <span class="action-card is-disabled" title="Coming soon" aria-disabled="true" style="cursor: not-allowed; opacity: 0.7;">
+            <a href="pooling-browse.php" class="action-card">
                 <div class="action-icon-wrap amber" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -536,7 +531,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         </svg>
                     </div>
                 </div>
-            </span>
+            </a>
 
             <a href="javascript:void(0)" class="action-card" id="edit-profile-quick-action">
                 <div class="action-icon-wrap purple" aria-hidden="true">
