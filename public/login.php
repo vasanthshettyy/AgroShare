@@ -195,7 +195,8 @@ $_SESSION['captcha_code'] = $captcha_code;
     <?php require_once __DIR__ . '/includes/theme-script.php'; ?>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"></noscript>
 
     <style>
         /* ── Tokens (AgroShare Dark Only) ──────────────── */
@@ -1138,7 +1139,7 @@ $_SESSION['captcha_code'] = $captcha_code;
                     <span class="captcha-chars"><?php foreach (str_split($captcha_code) as $ch): ?><span><?= $ch ?></span><?php endforeach; ?></span>
                 </div>
                 <input type="text" name="captcha_answer" class="captcha-input<?= isset($errors['captcha']) ? ' is-invalid' : '' ?>" placeholder="Type code" maxlength="6" required autocomplete="off" spellcheck="false">
-                <button type="button" class="captcha-refresh" title="New code" onclick="location.reload()">
+                <button type="button" class="captcha-refresh" title="New code" id="captcha-refresh-btn">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="23 4 23 10 17 10"/>
                         <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
@@ -1693,6 +1694,30 @@ if (emailInput && emailStatus) {
     const checkEmail = () => checkAvailability('email', emailInput, emailStatus);
     emailInput.addEventListener('input', debounce(checkEmail, 400));
     emailInput.addEventListener('blur', checkEmail);
+}
+
+// ── Local Captcha Refresh ──
+const captchaRefreshBtn = document.getElementById('captcha-refresh-btn');
+const captchaCharsContainer = document.querySelector('.captcha-chars');
+
+if (captchaRefreshBtn && captchaCharsContainer) {
+    captchaRefreshBtn.addEventListener('click', async () => {
+        captchaRefreshBtn.style.pointerEvents = 'none';
+        captchaRefreshBtn.style.opacity = '0.5';
+        
+        try {
+            const response = await fetch('api/refresh-captcha.php');
+            const data = await response.json();
+            if (data.success) {
+                captchaCharsContainer.innerHTML = data.captcha.split('').map(ch => `<span>${ch}</span>`).join('');
+            }
+        } catch (e) {
+            console.error('Offline captcha refresh failed.');
+        } finally {
+            captchaRefreshBtn.style.pointerEvents = 'auto';
+            captchaRefreshBtn.style.opacity = '1';
+        }
+    });
 }
 </script>
 <script src="assets/js/theme-toggle.js"></script>
