@@ -34,3 +34,7 @@ public/uploads/profiles/*
 Reference lightmode images/
 project_report.md
 PROJECT_REPORT.md
+
+# AgroPay QR codes
+public/uploads/qrs/*
+!public/uploads/qrs/.gitkeep
