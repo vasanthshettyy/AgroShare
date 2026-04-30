@@ -194,9 +194,7 @@ $_SESSION['captcha_code'] = $captcha_code;
     <meta name="description" content="Join <?= e(APP_NAME) ?> — India's farmer resource sharing platform.">
     <?php require_once __DIR__ . '/includes/theme-script.php'; ?>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"></noscript>
+    <link rel="stylesheet" href="assets/css/fonts.css">
 
     <style>
         /* ── Tokens (AgroShare Dark Only) ──────────────── */

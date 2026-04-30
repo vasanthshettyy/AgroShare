@@ -3,8 +3,8 @@
    Modern Glassmorphism · Deep Green Palette · Vanilla CSS3
    ═══════════════════════════════════════════════════════════ */
 
-/* ── Google Fonts ─────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+/* ── Local Fonts ───────────────────────────────────────────── */
+@import url('fonts.css');
 
 /* ══════════════════════════════════════════════════════════
    1. DESIGN TOKENS (CSS Custom Properties)

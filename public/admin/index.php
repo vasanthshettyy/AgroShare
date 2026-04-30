@@ -29,7 +29,7 @@ if (isset($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 
     <link rel="stylesheet" href="../assets/css/dashboard.css?v=<?= time() ?>">
     <link rel="stylesheet" href="../assets/css/admin-layout.css?v=<?= time() ?>">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="../assets/css/fonts.css">
 </head>
 <body class="admin-body">
 
