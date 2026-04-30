@@ -672,7 +672,7 @@ $_SESSION['captcha_code'] = $captcha_code;
         .captcha-icon svg { width: 20px; height: 20px; }
         .captcha-code-display {
             position: relative;
-            padding: 8px 18px;
+            padding: 8px 10px;
             background: hsl(144, 10%, 15%);
             border: 2px solid hsl(150, 15%, 25%);
             border-radius: 4px;
@@ -698,7 +698,7 @@ $_SESSION['captcha_code'] = $captcha_code;
             font-family: 'Courier New', monospace;
             font-size: 1.35rem;
             font-weight: 700;
-            letter-spacing: 5px;
+            letter-spacing: 3px;
             color: hsl(90, 20%, 80%);
             position: relative;
             z-index: 1;

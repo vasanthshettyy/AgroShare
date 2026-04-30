@@ -3,7 +3,13 @@
     <div class="modal-content profile-modal-content booking-premium-modal" style="max-width: 700px; width: 95%; padding: 0; overflow: hidden;">
         <!-- Header Image & Overlay -->
         <div class="booking-modal-hero">
-            <img id="bd-hero-img" src="assets/img/placeholder.png" alt="Equipment">
+            <img id="bd-hero-img" src="assets/img/logo.png" alt="Equipment" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="eq-card-placeholder" style="display:none; width:100%; height:100%; align-items:center; justify-content:center; background:rgba(255,255,255,0.03);">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                    <path d="M3 11V5h9l3 6m0 0H3m12 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m14 0h2a2 2 0 0 1 2 2v4h-3.5"/>
+                    <circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/>
+                </svg>
+            </div>
             <div class="hero-overlay"></div>
             <button id="closeBookingModal" class="modal-close-x" style="background: rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.1); color: #fff;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
