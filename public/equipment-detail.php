@@ -445,6 +445,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                             <input type="hidden" id="est-start" value="">
                             <input type="hidden" id="est-end" value="">
 
+                            <!-- AgroPay Payment Notice -->
+                            <div class="payment-notice-box" style="margin-top: 1.5rem; padding: 1rem; background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 12px; display: flex; gap: 0.75rem; align-items: flex-start;">
+                                <div style="color: #fbbf24; flex-shrink: 0; margin-top: 2px;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    </svg>
+                                </div>
+                                <div style="font-size: 0.78rem; line-height: 1.4; color: var(--text-main);">
+                                    <strong style="display: block; color: #fbbf24; margin-bottom: 2px; font-weight: 700;">Payment Notice</strong>
+                                    You will not be asked for payment now. Once the owner accepts your request, the payment details (UPI/QR) will be available in your <strong>My Bookings</strong> page.
+                                </div>
+                            </div>
+
                             <?php if (!$isOwner && $eq['is_available']): ?>
                                 <?php if ($isLoggedIn): ?>
                                 <button class="btn-primary btn-book-cta" id="btnBookNow" disabled style="width: 100%; margin-top: 1.5rem; border-radius: 12px; padding: 1rem;">
