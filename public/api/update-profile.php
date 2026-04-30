@@ -28,6 +28,7 @@ $email    = trim($_POST['email'] ?? '');
 $village  = trim($_POST['village'] ?? '');
 $district = trim($_POST['district'] ?? '');
 $state    = trim($_POST['state'] ?? '');
+$upiId    = trim($_POST['upi_id'] ?? '');
 
 // Simple validation
 if (empty($fullName) || empty($village) || empty($district) || empty($state)) {
@@ -80,14 +81,72 @@ try {
         }
     }
 
-    // Build SQL
-    if ($photoPath) {
-        $stmt = $conn->prepare("UPDATE users SET full_name = ?, email = ?, village = ?, district = ?, state = ?, profile_photo = ? WHERE id = ?");
-        $stmt->bind_param('ssssssi', $fullName, $email, $village, $district, $state, $photoPath, $userId);
-    } else {
-        $stmt = $conn->prepare("UPDATE users SET full_name = ?, email = ?, village = ?, district = ?, state = ? WHERE id = ?");
-        $stmt->bind_param('sssssi', $fullName, $email, $village, $district, $state, $userId);
+    // Handle UPI QR Code Upload
+    $qrPath = null;
+    if (isset($_FILES['upi_qr_image']) && $_FILES['upi_qr_image']['error'] === UPLOAD_ERR_OK) {
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        $maxSize = 2 * 1024 * 1024; // 2MB
+
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($_FILES['upi_qr_image']['tmp_name']);
+
+        if (!in_array($mimeType, $allowedTypes)) {
+            echo json_encode(['success' => false, 'message' => 'Invalid QR image format. Use JPG, PNG or WebP.']);
+            exit();
+        }
+
+        if ($_FILES['upi_qr_image']['size'] > $maxSize) {
+            echo json_encode(['success' => false, 'message' => 'QR image size exceeds 2MB limit.']);
+            exit();
+        }
+
+        $qrUploadDir = __DIR__ . '/../../public/uploads/qrs/';
+        if (!is_dir($qrUploadDir)) {
+            mkdir($qrUploadDir, 0755, true);
+        }
+
+        $extension = pathinfo($_FILES['upi_qr_image']['name'], PATHINFO_EXTENSION);
+        $fileName = 'qr_' . $userId . '_' . time() . '.' . $extension;
+        $destPath = $qrUploadDir . $fileName;
+
+        if (move_uploaded_file($_FILES['upi_qr_image']['tmp_name'], $destPath)) {
+            $qrPath = 'uploads/qrs/' . $fileName;
+            
+            // Delete old QR if exists
+            $stmt = $conn->prepare("SELECT upi_qr_path FROM users WHERE id = ?");
+            $stmt->bind_param('i', $userId);
+            $stmt->execute();
+            $oldQr = $stmt->get_result()->fetch_assoc()['upi_qr_path'] ?? null;
+            $stmt->close();
+
+            if ($oldQr && file_exists(__DIR__ . '/../../public/' . $oldQr)) {
+                unlink(__DIR__ . '/../../public/' . $oldQr);
+            }
+        }
     }
+
+    // Build SQL
+    $query = "UPDATE users SET full_name = ?, email = ?, village = ?, district = ?, state = ?, upi_id = ?";
+    $params = [$fullName, $email, $village, $district, $state, $upiId];
+    $types = "ssssss";
+
+    if ($photoPath) {
+        $query .= ", profile_photo = ?";
+        $params[] = $photoPath;
+        $types .= "s";
+    }
+    if ($qrPath) {
+        $query .= ", upi_qr_path = ?";
+        $params[] = $qrPath;
+        $types .= "s";
+    }
+
+    $query .= " WHERE id = ?";
+    $params[] = $userId;
+    $types .= "i";
+
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param($types, ...$params);
 
     if ($stmt->execute()) {
         $_SESSION['full_name'] = $fullName;

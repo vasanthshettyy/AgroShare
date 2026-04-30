@@ -65,6 +65,27 @@
                 </div>
             </div>
 
+            <!-- Payment Settings Section -->
+            <div class="form-section">
+                <h2 class="form-section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    Payment Settings
+                </h2>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="prof-upi-id" class="form-label">UPI ID</label>
+                        <input type="text" name="upi_id" id="prof-upi-id" class="form-input" placeholder="e.g. username@bankname">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="prof-upi-qr" class="form-label">UPI QR Scanner Image</label>
+                        <input type="file" name="upi_qr_image" id="prof-upi-qr" class="form-input" accept="image/jpeg,image/png,image/webp">
+                        <small style="color: var(--text-muted); font-size: 0.75rem; margin-top: 5px; display: block;">
+                            Upload your UPI QR code to receive payments directly from other farmers.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
             <!-- Reviews Shortcut -->
             <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); text-align: center;">
                 <button type="button" class="btn-secondary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0.85rem;" onclick="showUserReviews(<?= (int)$_SESSION['user_id'] ?>)">
