@@ -232,6 +232,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
         .dots-container {
             position: relative;
             display: inline-block;
+            z-index: 100; /* Ensure menu is above other card elements */
         }
         .dots-trigger {
             width: 32px;
@@ -672,7 +673,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                             <?php endif; ?>
                         </div>
 
-                        <div class="card-details">
+                        <div class="card-actions" style="position: relative; z-index: 5;">
                             <div class="card-header">
                                 <h3 class="eq-title"><?= e($b['equipment_title']) ?></h3>
                                 <div style="text-align: right;">
@@ -692,7 +693,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                             </div>
                         </div>
 
-                        <div class="card-person">
+                        <div class="card-actions" style="position: relative; z-index: 5;">
                             <div class="person-avatar-wrap">
                                 <div class="person-avatar"><?= strtoupper(substr($b['owner_name'], 0, 1)) ?></div>
                                 <button type="button" class="person-name btn-text-link" onclick="showUserReviews(<?= (int)$b['owner_id'] ?>)"><?= e($b['owner_name']) ?></button>
@@ -771,6 +772,10 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                     </a>
                                 <?php endif; ?>
                                 
+                                <?php 
+                                    $hasRenterActions = in_array($b['status'], ['pending', 'confirmed', 'active', 'completed']);
+                                ?>
+                                <?php if ($hasRenterActions): ?>
                                 <div class="dots-container">
                                     <button class="btn-sm btn-icon dots-trigger" aria-label="More actions">⋮</button>
                                     <div class="dots-menu">
@@ -787,6 +792,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                         <?php endif; ?>
                                     </div>
                                 </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -818,7 +824,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                             <?php endif; ?>
                         </div>
 
-                        <div class="card-details">
+                        <div class="card-actions" style="position: relative; z-index: 5;">
                             <div class="card-header">
                                 <h3 class="eq-title"><?= e($b['equipment_title']) ?></h3>
                                 <div style="text-align: right;">
@@ -838,7 +844,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                             </div>
                         </div>
 
-                        <div class="card-person">
+                        <div class="card-actions" style="position: relative; z-index: 5;">
                             <div class="person-avatar-wrap">
                                 <div class="person-avatar"><?= strtoupper(substr($b['renter_name'], 0, 1)) ?></div>
                                 <button type="button" class="person-name btn-text-link" onclick="showUserReviews(<?= (int)$b['renter_id'] ?>)"><?= e($b['renter_name']) ?></button>
@@ -910,15 +916,22 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                     </a>
                                 <?php endif; ?>
 
-                                <div class="dots-container">
+                                <?php 
+                                    $hasOwnerActions = in_array($b['status'], ['pending', 'confirmed']);
+                                ?>
+                                <?php if ($hasOwnerActions): ?>
+                                <div class="dots-container" style="position: relative; z-index: 10;">
                                     <button class="btn-sm btn-icon dots-trigger" aria-label="More actions">⋮</button>
-                                    <div class="dots-menu">
+                                    <div class="dots-menu" style="z-index: 100;">
                                         <?php if ($b['status'] === 'confirmed'): ?>
                                             <button class="btn-sm status-action" <?= $btnData ?> data-status="completed">Mark Completed</button>
                                             <button class="btn-sm status-action" <?= $btnData ?> data-status="cancelled" style="color: var(--danger);">Cancel Booking</button>
+                                        <?php elseif ($b['status'] === 'pending'): ?>
+                                            <button class="btn-sm status-action" <?= $btnData ?> data-status="cancelled" style="color: var(--danger);">Decline Request</button>
                                         <?php endif; ?>
                                     </div>
                                 </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
