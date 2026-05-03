@@ -73,12 +73,19 @@
 
 /* ── Light Mode ────────────────────────────────────────── */
 [data-theme="light"] {
-    --bg-color: hsl(120, 10%, 95%);
-    --surface-color: hsl(0, 0%, 100%);
+    --bg-color: hsl(140, 20%, 96%);
+    --surface-color: hsl(140, 25%, 93%);
     --text-main: hsl(210, 20%, 18%);
     --text-muted: hsl(210, 10%, 45%);
     --text-subtle: hsl(210, 8%, 60%);
-    --border-color: hsl(210, 12%, 78%);
+    --border-color: hsl(145, 30%, 82%); 
+
+    /* Enhanced Agro-Tokens */
+    --bg-main: hsl(140, 20%, 96%);
+    --bg-surface: hsl(140, 25%, 93%);
+    --bg-card: #ffffff;
+    --accent-light: hsla(145, 45%, 45%, 0.1);
+    --border-agro: hsl(145, 30%, 82%);
 
     --primary-action: hsl(150, 55%, 38%);
     --secondary-action: hsl(171, 40%, 42%);
@@ -92,7 +99,7 @@
 
     --glass-bg: rgba(255, 255, 255, 0.70);
     --glass-bg-heavy: rgba(255, 255, 255, 0.90);
-    --glass-border: rgba(0, 0, 0, 0.14);
+    --glass-border: rgba(0, 0, 0, 0.22); /* Highly visible border */
     --glass-blur: 16px;
 
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
@@ -108,10 +115,63 @@
     --purple-accent: #7C3AED;
 }
 
+[data-theme="light"] body { background: var(--bg-main) !important; }
+
+[data-theme="light"] .sidebar,
+[data-theme="light"] .kpi-card,
+[data-theme="light"] .bento-card,
+[data-theme="light"] .action-card,
+[data-theme="light"] .modal-content,
+[data-theme="light"] .booking-card,
+[data-theme="light"] .listing-card {
+    border-top: none !important;
+}
+
 /* ── Light Mode — Sidebar visibility boost ─────────────── */
 [data-theme="light"] .sidebar {
-    background: rgba(245, 248, 246, 0.95);
+    background: rgba(245, 248, 246, 0.95) !important;
     border-color: var(--border-color);
+}
+
+/* ── Light Mode — Global Micro-interactions ────────────── */
+[data-theme="light"] .form-input,
+[data-theme="light"] .form-textarea,
+[data-theme="light"] .form-select {
+    background: var(--bg-card) !important;
+    border: 1.5px solid var(--border-agro) !important;
+    color: var(--text-primary, #111827) !important;
+}
+
+[data-theme="light"] .form-input:focus,
+[data-theme="light"] .form-textarea:focus,
+[data-theme="light"] .form-select:focus {
+    border-color: var(--primary-action) !important;
+    box-shadow: 0 0 0 4px var(--accent-light) !important;
+}
+
+[data-theme="light"] .btn-primary {
+    background: var(--primary-action) !important;
+    box-shadow: 0 4px 14px rgba(76, 175, 120, 0.3) !important;
+}
+
+[data-theme="light"] .btn-primary:hover {
+    box-shadow: 0 6px 20px rgba(76, 175, 120, 0.4) !important;
+}
+
+[data-theme="light"] .btn-secondary {
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--border-agro) !important;
+    color: var(--primary-action) !important;
+}
+
+[data-theme="light"] .btn-secondary:hover {
+    background: hsl(140, 25%, 88%) !important;
+    border-color: var(--primary-action) !important;
+}
+
+[data-theme="light"] .badge-active {
+    background: var(--accent-light);
+    border: 1px solid var(--primary-action);
 }
 
 [data-theme="light"] .sidebar:hover {
@@ -227,6 +287,8 @@
 html {
     scroll-behavior: smooth;
 }
+
+[data-theme="light"] body { background: var(--bg-main); }
 
 body {
     font-family: var(--font);

@@ -1,8 +1,58 @@
-/* ═══════════════════════════════════════════════════════════
-   AgroShare — Equipment Module Styles (equipment.css)
-   Extends the dashboard.css design system.
-   Glassmorphism · Smooth Animations · Vanilla CSS3
-   ═══════════════════════════════════════════════════════════ */
+/* ── Light Mode Branded Accents ────────────────────────── */
+[data-theme="light"] {
+    --bg-main: hsl(140, 20%, 96%);
+    --bg-surface: hsl(140, 25%, 93%);
+    --bg-card: #ffffff;
+    --accent-light: hsla(145, 45%, 45%, 0.1);
+    --border-agro: hsl(145, 30%, 82%);
+}
+
+[data-theme="light"] .eq-card,
+[data-theme="light"] .filter-bar,
+[data-theme="light"] .glass-card,
+[data-theme="light"] .premium-section,
+[data-theme="light"] .booking-widget {
+    border-top: none !important;
+    background: var(--bg-card) !important;
+    border-left: 1px solid var(--border-agro);
+    border-right: 1px solid var(--border-agro);
+    border-bottom: 1px solid var(--border-agro);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .form-input,
+[data-theme="light"] .filter-input,
+[data-theme="light"] .filter-select {
+    background: var(--bg-card) !important;
+    border: 1.5px solid var(--border-agro) !important;
+    color: var(--text-primary, #111827) !important;
+}
+
+[data-theme="light"] .form-input:focus,
+[data-theme="light"] .filter-input:focus,
+[data-theme="light"] .filter-select:focus {
+    border-color: var(--primary-action) !important;
+    box-shadow: 0 0 0 4px var(--accent-light) !important;
+}
+
+[data-theme="light"] .filter-icon,
+[data-theme="light"] .form-section-title svg {
+    color: var(--primary-action) !important;
+}
+
+[data-theme="light"] .eq-card-image {
+    border-bottom: 1px solid var(--border-agro);
+}
+
+[data-theme="light"] .eq-card-footer {
+    background: var(--bg-surface) !important;
+    border-top: 1px solid var(--border-agro);
+}
+
+[data-theme="light"] .btn-toggle-avail.is-available {
+    background: var(--accent-light) !important;
+    border-color: var(--primary-action);
+}
 
 /* ══════════════════════════════════════════════════════════
    1. PAGE HEADER
