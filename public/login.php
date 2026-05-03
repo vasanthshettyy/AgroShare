@@ -1338,27 +1338,7 @@ $_SESSION['captcha_code'] = $captcha_code;
                 </div>
             </div>
 
-            <!-- CAPTCHA for Signup -->
-            <div class="captcha-group<?= isset($errors['captcha']) ? ' is-invalid' : '' ?>">
-                <span class="captcha-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                    </svg>
-                </span>
-                <div class="captcha-code-display" aria-label="CAPTCHA code">
-                    <span class="captcha-chars"><?php foreach (str_split($captcha_code) as $ch): ?><span><?= $ch ?></span><?php endforeach; ?></span>
-                </div>
-                <input type="text" name="captcha_answer" class="captcha-input<?= isset($errors['captcha']) ? ' is-invalid' : '' ?>" placeholder="Type code" maxlength="6" required autocomplete="off" spellcheck="false">
-                <button type="button" class="captcha-refresh" title="New code" id="captcha-refresh-signup-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="23 4 23 10 17 10"/>
-                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-                    </svg>
-                </button>
-            </div>
-            <?php if (isset($errors['captcha'])): ?>
-                <span class="error-msg" style="margin-top:-8px;margin-bottom:10px;display:block" role="alert"><?= e($errors['captcha']) ?></span>
-            <?php endif; ?>
+
 
             <button type="submit" class="btn-submit">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -1691,11 +1671,8 @@ function validateSignup() {
         passwordsMatch = false;
     }
 
-    // 5. CAPTCHA Check
-    const captchaCorrect = isCaptchaValid('.signup-pane-container');
-    
     // Activate only if EVERY condition is met
-    signupSubmitBtn.disabled = !(allFilled && phoneValid && emailValid && !phoneError && !emailError && passwordsMatch && captchaCorrect);
+    signupSubmitBtn.disabled = !(allFilled && phoneValid && emailValid && !phoneError && !emailError && passwordsMatch);
 }
 
 if (signupForm) {
