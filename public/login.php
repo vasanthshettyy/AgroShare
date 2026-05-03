@@ -1322,7 +1322,7 @@ $_SESSION['captcha_code'] = $captcha_code;
                                     <li>Use Uppercase & Lowercase letters</li>
                                     <li>Include a symbol (e.g. @, #, $, !)</li>
                                 </ul>
-                                <p><em>Reach 'Fair' or 'Strong' to unlock.</em></p>
+                                <p><em>Reach 'Strong' to unlock.</em></p>
                             </div>
                         </span>
                     </label>
@@ -1348,7 +1348,7 @@ $_SESSION['captcha_code'] = $captcha_code;
                     </div>
                     <!-- Strength meter -->
                     <div class="pw-strength"><div class="pw-strength-bar" id="pw-bar"></div></div>
-                    <span class="pw-hint" id="pw-hint">Min 8 characters &amp; reach 'Fair' strength</span>
+                    <span class="pw-hint" id="pw-hint">Min 8 characters &amp; reach 'Strong' strength</span>
                     <?php if (isset($errors['password'])): ?>
                         <span class="error-msg" role="alert"><?= e($errors['password']) ?></span>
                     <?php endif; ?>
@@ -1596,7 +1596,7 @@ if (signupPwInput && pwBar && pwHint) {
         const level = calcStrength(signupPwInput.value);
         if (level < 0) {
             pwBar.style.width      = '0';
-            pwHint.textContent     = "Min 8 characters & reach 'Fair' strength";
+            pwHint.textContent     = "Min 8 characters & reach 'Strong' strength";
             pwHint.style.color     = 'var(--text-subtle)';
         } else {
             const l = strengthLevels[level];
@@ -1735,8 +1735,8 @@ function validateSignup() {
         confirmStatus.textContent = '✓ Passwords match';
         confirmStatus.className = 'ajax-status status-available';
         
-        // Enforce STRICT: Must be 'Fair' (score 2) or higher
-        passwordsMatch = calcStrength(password) >= 2;
+        // Enforce STRICT: Must be 'Strong' (score 4)
+        passwordsMatch = calcStrength(password) >= 4;
     } else {
         confirmStatus.textContent = '✗ Passwords do not match';
         confirmStatus.className = 'ajax-status status-error';
