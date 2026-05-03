@@ -205,7 +205,7 @@ $_SESSION['captcha_code'] = $captcha_code;
             --text-main:           hsl(90, 20%, 90%);
             --text-muted:          hsl(140, 14%, 60%);
             --text-subtle:         hsl(150, 12%, 38%);
-            --border-color:        hsl(150, 20%, 16%);
+            --border-color:        hsl(150, 20%, 25%); /* Higher contrast */
             --primary-action:      hsl(150, 50%, 45%); 
             --secondary-action:    hsl(171, 35%, 55%);
             --accent-dark:         hsl(150, 50%, 30%);
@@ -225,12 +225,85 @@ $_SESSION['captcha_code'] = $captcha_code;
             --text-main: hsl(210, 20%, 18%);
             --text-muted: hsl(210, 10%, 45%);
             --text-subtle: hsl(210, 8%, 60%);
-            --border-color: hsl(210, 12%, 78%);
+            --border-color: hsl(210, 12%, 65%); /* Darker charcoal border */
             --primary-action: hsl(150, 55%, 38%);
             --secondary-action: hsl(171, 40%, 42%);
             --accent-soft: hsl(150, 20%, 85%);
             --accent-dark: hsl(150, 45%, 32%);
             --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08);
+
+            /* High-Fidelity Tokens */
+            --bg-main: #f4f6f8;
+            --bg-surface: #eef2f5;
+            --bg-card: #ffffff;
+            --border-subtle: #d1d5db; /* Darker subtle border */
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        [data-theme="light"] body { background: var(--bg-main) !important; }
+        [data-theme="light"] .auth-slider-container { background: var(--bg-surface); border: 1px solid var(--border-subtle); }
+
+        /* Card Visibility and Contrast Fixes */
+        [data-theme="light"] .login-pane-container,
+        [data-theme="light"] .signup-pane-container {
+            background: var(--bg-card) !important;
+            background-image: none !important; /* Remove grid pattern for clean look */
+            border: 1px solid var(--border-subtle);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Typography Contrast Fixes */
+        [data-theme="light"] h1, 
+        [data-theme="light"] h2, 
+        [data-theme="light"] h3, 
+        [data-theme="light"] .form-label {
+            color: var(--text-primary) !important;
+            font-weight: 800;
+        }
+
+        [data-theme="light"] p, 
+        [data-theme="light"] .form-head p, 
+        [data-theme="light"] .pw-hint, 
+        [data-theme="light"] .remember-label {
+            color: var(--text-secondary) !important;
+        }
+
+        [data-theme="light"] .form-input {
+            background: var(--bg-card) !important;
+            border: 1.5px solid var(--border-subtle) !important;
+            color: var(--text-primary) !important;
+        }
+
+        [data-theme="light"] .form-input:focus {
+            border-color: var(--primary-action) !important;
+            box-shadow: 0 0 0 4px rgba(76, 175, 120, 0.1) !important;
+        }
+
+        [data-theme="light"] .btn-submit {
+            background: var(--primary-action) !important; /* Flatten gradient */
+            box-shadow: var(--shadow-sm);
+        }
+
+        [data-theme="light"] .btn-submit:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(76, 175, 120, 0.2) !important;
+        }
+
+        [data-theme="light"] .auth-chip:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: var(--shadow-sm) !important;
+        }
+
+        [data-theme="light"] .captcha-code-display {
+            background: #f8fafc;
+            border-color: var(--border-subtle);
+        }
+
+        [data-theme="light"] .captcha-chars {
+            color: #334155;
         }
 
         .theme-transitioning, .theme-transitioning * {
@@ -460,14 +533,14 @@ $_SESSION['captcha_code'] = $captcha_code;
         .panel-content h2 {
             font-size: 1.75rem;
             font-weight: 800;
-            color: #FFF;
+            color: #FFFFFF !important;
             line-height: 1.25;
             margin-bottom: 14px;
             letter-spacing: -0.5px;
         }
         .panel-content p {
             font-size: 0.88rem;
-            color: rgba(255,255,255,0.72);
+            color: rgba(255, 255, 255, 0.95) !important;
             line-height: 1.65;
             margin-bottom: 28px;
         }
