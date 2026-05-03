@@ -133,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             --primary-10:          rgba(76, 175, 120, 0.12);
             --secondary-10:        rgba(90, 180, 170, 0.10);
             --shadow-lg:           0 10px 25px rgba(0, 0, 0, 0.5);
-            --radius:              18px;
+            --radius:              24px;
             --radius-sm:           12px;
             --font:                'Inter', system-ui, -apple-system, sans-serif;
         }
@@ -144,6 +144,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border: 1.5px solid #94A3B8 !important;
             background-color: #FFFFFF !important;
             color: #111827 !important;
+        }
+
+        [data-theme="light"] .auth-wrapper,
+        [data-theme="light"] .auth-panel {
+            border-radius: 24px !important;
+            overflow: hidden;
         }
 
         [data-theme="light"] {
@@ -158,6 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             --accent-soft: hsl(150, 20%, 85%);
             --accent-dark: hsl(150, 45%, 32%);
             --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08);
+            --radius: 24px;
         }
 
         .theme-transitioning, .theme-transitioning * {

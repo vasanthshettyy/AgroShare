@@ -214,7 +214,7 @@ $_SESSION['captcha_code'] = $captcha_code;
             --primary-10:          rgba(76, 175, 120, 0.12);
             --secondary-10:        rgba(90, 180, 170, 0.10);
             --shadow-lg:           0 10px 25px rgba(0, 0, 0, 0.5);
-            --radius:              18px;
+            --radius:              24px;
             --radius-sm:           12px;
             --font:                'Inter', system-ui, -apple-system, sans-serif;
         }
@@ -243,6 +243,7 @@ $_SESSION['captcha_code'] = $captcha_code;
             --text-secondary: #6b7280;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --radius: 24px;
         }
 
         [data-theme="light"] body { background: var(--bg-main) !important; }
@@ -253,7 +254,19 @@ $_SESSION['captcha_code'] = $captcha_code;
             border-top: none !important;
         }
 
-        [data-theme="light"] .auth-slider-container { background: var(--bg-surface); border-left: 1px solid var(--border-agro); border-right: 1px solid var(--border-agro); border-bottom: 1px solid var(--border-agro); }
+        [data-theme="light"] .auth-slider-container,
+        [data-theme="light"] .login-pane-container,
+        [data-theme="light"] .signup-pane-container,
+        [data-theme="light"] .overlay-container,
+        [data-theme="light"] .auth-panel { 
+            border-radius: 24px !important;
+            overflow: hidden;
+        }
+
+        [data-theme="light"] .auth-slider-container { 
+            background: var(--bg-surface); 
+            border: 1px solid var(--border-agro);
+        }
 
         /* Card Visibility and Contrast Fixes */
         [data-theme="light"] .login-pane-container,
