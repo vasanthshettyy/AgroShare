@@ -31,10 +31,15 @@ public/uploads/equipment/*
 !public/uploads/equipment/.gitkeep
 public/uploads/profiles/*
 !public/uploads/profiles/.gitkeep
-Reference lightmode images/
-project_report.md
-PROJECT_REPORT.md
 
 # AgroPay QR codes
 public/uploads/qrs/*
 !public/uploads/qrs/.gitkeep
+
+# Project Reports and unwanted files
+project_report.md
+PROJECT_REPORT.md
+"Cyber cafe final report-mitr.pdf"
+index1.html
+index1.php
+Reference lightmode images/
