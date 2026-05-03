@@ -88,7 +88,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             gap: 1.5rem;
             transition: all 0.3s ease;
             position: relative;
-            overflow: visible; /* Prevent clipping of dropdown menus */
+            overflow: visible; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             animation: fadeSlideIn 0.35s ease-out;
         }
@@ -106,6 +106,17 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             overflow: hidden;
             border-radius: 10px;
             background: rgba(255,255,255,0.03);
+            position: relative;
+        }
+        .card-thumb::after {
+            content: '';
+            position: absolute;
+            right: -0.75rem;
+            top: 10%;
+            height: 80%;
+            width: 1px;
+            background: var(--border-color);
+            opacity: 0.5;
         }
         .card-thumb img {
             width: 100%;
@@ -118,11 +129,23 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
         }
 
         .card-details {
-            flex: 1;
-            min-width: 0;
+            flex: 2; /* Give more priority to details */
+            min-width: 200px;
             display: flex;
             flex-direction: column;
             gap: 0.4rem;
+            position: relative;
+            padding-right: 1rem;
+        }
+        .card-details::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 10%;
+            height: 80%;
+            width: 1px;
+            background: var(--border-color);
+            opacity: 0.5;
         }
 
         .card-person {
@@ -132,8 +155,17 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             gap: 0.25rem;
             font-size: 0.82rem;
             padding: 0 1.25rem;
-            border-left: 1px solid var(--border-color);
-            border-right: 1px solid var(--border-color);
+            position: relative;
+        }
+        .card-person::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 10%;
+            height: 80%;
+            width: 1px;
+            background: var(--border-color);
+            opacity: 0.5;
         }
         .person-avatar-wrap {
             display: flex;
@@ -192,6 +224,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             font-size: 1.1rem;
             font-weight: 800;
             color: var(--primary-action);
+            white-space: nowrap;
         }
 
         .card-body {
@@ -205,6 +238,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             gap: 0.6rem;
             font-size: 0.82rem;
             color: var(--text-subtle);
+            white-space: nowrap; /* Prevent dates from wrapping */
         }
         .info-row svg { opacity: 0.6; flex-shrink: 0; }
         .info-label { font-weight: 600; color: var(--text-muted); min-width: 50px; }
@@ -212,12 +246,12 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
         .card-footer {
             margin-top: 0;
             display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            justify-content: center;
+            flex-direction: row; /* Use row for actions to save vertical space */
+            align-items: center;
+            justify-content: flex-end;
             padding: 0;
             gap: 12px;
-            min-width: 160px; /* Slightly wider for new layout */
+            min-width: 180px; 
             position: relative;
         }
 
@@ -824,7 +858,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                             <?php endif; ?>
                         </div>
 
-                        <div class="card-actions" style="position: relative; z-index: 5;">
+                        <div class="card-details">
                             <div class="card-header">
                                 <h3 class="eq-title"><?= e($b['equipment_title']) ?></h3>
                                 <div style="text-align: right;">
@@ -844,7 +878,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                             </div>
                         </div>
 
-                        <div class="card-actions" style="position: relative; z-index: 5;">
+                        <div class="card-person">
                             <div class="person-avatar-wrap">
                                 <div class="person-avatar"><?= strtoupper(substr($b['renter_name'], 0, 1)) ?></div>
                                 <button type="button" class="person-name btn-text-link" onclick="showUserReviews(<?= (int)$b['renter_id'] ?>)"><?= e($b['renter_name']) ?></button>

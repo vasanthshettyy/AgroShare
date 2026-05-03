@@ -138,6 +138,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             --font:                'Inter', system-ui, -apple-system, sans-serif;
         }
 
+        [data-theme="light"] .form-input,
+        [data-theme="light"] .captcha-group,
+        [data-theme="light"] .captcha-input {
+            border: 1.5px solid #94A3B8 !important;
+            background-color: #FFFFFF !important;
+            color: #111827 !important;
+        }
+
         [data-theme="light"] {
             --bg-color: hsl(120, 10%, 95%);
             --surface-color: hsl(0, 0%, 100%);
@@ -638,11 +646,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .auth-divider {
             display: flex; align-items: center;
+            justify-content: center;
             gap: 16px; margin: 20px 0;
             color: var(--text-subtle); font-size: 0.75rem; font-weight: 600;
         }
         .auth-divider::before, .auth-divider::after {
-            content: ''; flex: 1; height: 1px; background: var(--border-color);
+            display: none;
         }
         </style></head>
 <body>

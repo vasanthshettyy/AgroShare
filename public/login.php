@@ -299,6 +299,14 @@ $_SESSION['captcha_code'] = $captcha_code;
             color: var(--primary-action) !important;
         }
 
+        [data-theme="light"] .form-input,
+        [data-theme="light"] .captcha-group,
+        [data-theme="light"] .captcha-input {
+            border: 1.5px solid #94A3B8 !important;
+            background-color: #FFFFFF !important;
+            color: #111827 !important;
+        }
+
         [data-theme="light"] .input-icon,
         [data-theme="light"] .captcha-icon,
         [data-theme="light"] .pw-info-icon {
@@ -759,13 +767,13 @@ $_SESSION['captcha_code'] = $captcha_code;
         .form-input {
             width: 100%; height: 44px;
             padding: 0 12px;
-            border: 1.5px solid #CBD5E1;
+            border: 1.5px solid #94A3B8;
             border-radius: var(--radius-sm);
             font-family: var(--font);
             font-size: 0.875rem;
             color: var(--text-main);
             background: var(--bg-color);
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
             transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
         }
         .form-input.is-invalid {
@@ -834,7 +842,7 @@ $_SESSION['captcha_code'] = $captcha_code;
             margin-bottom: 14px;
             padding: 12px 14px;
             background: rgba(76, 175, 120, 0.06);
-            border: 1.5px solid var(--border-color);
+            border: 1.5px solid #94A3B8;
             border-radius: var(--radius-sm);
         }
         .captcha-group.is-invalid {
@@ -898,7 +906,7 @@ $_SESSION['captcha_code'] = $captcha_code;
             font-family: var(--font);
             color: var(--text-main);
             background: var(--bg-color);
-            border: 1.5px solid var(--border-color);
+            border: 1.5px solid #94A3B8;
             border-radius: 8px;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -1213,6 +1221,7 @@ $_SESSION['captcha_code'] = $captcha_code;
 
         .auth-divider {
             display: flex; align-items: center;
+            justify-content: center;
             gap: 16px; margin: 16px 0;
             color: var(--text-subtle); font-size: 0.75rem; font-weight: 600;
         }
