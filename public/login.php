@@ -1636,18 +1636,29 @@ const signupRequiredInputs = signupForm ? Array.from(signupForm.querySelectorAll
 function validateSignup() {
     if (!signupSubmitBtn) return;
     
-    // Check all required inputs
+    // 1. Basic Check: All required fields must have content
     const allFilled = signupRequiredInputs.every(input => input.value.trim() !== '');
     
-    // Premium Touch: Check if passwords match
+    // 2. Format Check: Phone must be 10 digits (starting 6-9), Email must be valid format
+    const phone = signupForm.querySelector('#phone').value.trim();
+    const email = signupForm.querySelector('#email').value.trim();
+    const phoneValid = /^[6-9]\d{9}$/.test(phone);
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    
+    // 3. Availability Check: Check if AJAX status shows any errors (like "Already Registered")
+    const phoneError = document.querySelector('#phone-status').classList.contains('status-error');
+    const emailError = document.querySelector('#email-status').classList.contains('status-error');
+    
+    // 4. Match Check: Passwords must match and meet min length
     const password = signupForm.querySelector('#password').value;
     const confirmPassword = signupForm.querySelector('#confirm_password').value;
-    const passwordsMatch = password === confirmPassword && password !== '';
+    const passwordsMatch = password === confirmPassword && password.length >= 8;
 
-    // CAPTCHA check
+    // 5. CAPTCHA Check
     const captchaCorrect = isCaptchaValid('.signup-pane-container');
     
-    signupSubmitBtn.disabled = !(allFilled && passwordsMatch && captchaCorrect);
+    // Activate only if EVERY condition is met
+    signupSubmitBtn.disabled = !(allFilled && phoneValid && emailValid && !phoneError && !emailError && passwordsMatch && captchaCorrect);
 }
 
 if (signupForm) {
@@ -1713,6 +1724,7 @@ async function checkAvailability(field, inputElement, statusElement) {
     if (!value) {
         statusElement.textContent = '';
         statusElement.className = 'ajax-status';
+        validateSignup();
         return;
     }
 
@@ -1720,11 +1732,13 @@ async function checkAvailability(field, inputElement, statusElement) {
     if (field === 'phone' && !/^[6-9]\d{9}$/.test(value)) {
         statusElement.textContent = 'Invalid format';
         statusElement.className = 'ajax-status status-error';
+        validateSignup();
         return;
     }
     if (field === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
         statusElement.textContent = 'Invalid format';
         statusElement.className = 'ajax-status status-error';
+        validateSignup();
         return;
     }
 
@@ -1756,6 +1770,8 @@ async function checkAvailability(field, inputElement, statusElement) {
     } catch (e) {
         statusElement.textContent = 'Error checking availability';
         statusElement.className = 'ajax-status status-error';
+    } finally {
+        validateSignup();
     }
 }
 
