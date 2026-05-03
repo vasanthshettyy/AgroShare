@@ -220,23 +220,25 @@ $_SESSION['captcha_code'] = $captcha_code;
         }
 
         [data-theme="light"] {
-            --bg-color: hsl(120, 10%, 95%);
-            --surface-color: hsl(0, 0%, 100%);
+            --bg-color: hsl(140, 20%, 96%);
+            --surface-color: hsl(140, 25%, 93%);
             --text-main: hsl(210, 20%, 18%);
             --text-muted: hsl(210, 10%, 45%);
             --text-subtle: hsl(210, 8%, 60%);
-            --border-color: hsl(210, 12%, 65%); /* Darker charcoal border */
+            --border-color: hsl(145, 30%, 82%); 
             --primary-action: hsl(150, 55%, 38%);
             --secondary-action: hsl(171, 40%, 42%);
             --accent-soft: hsl(150, 20%, 85%);
             --accent-dark: hsl(150, 45%, 32%);
             --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08);
 
-            /* High-Fidelity Tokens */
-            --bg-main: #f4f6f8;
-            --bg-surface: #eef2f5;
+            /* Enhanced Agro-Tokens */
+            --bg-main: hsl(140, 20%, 96%);          /* Soft Mint Gray Background */
+            --bg-surface: hsl(140, 25%, 93%);       /* Subtle Green-tinted surfaces */
             --bg-card: #ffffff;
-            --border-subtle: #d1d5db; /* Darker subtle border */
+            --accent-light: hsla(145, 45%, 45%, 0.1); /* Very soft green tint for highlights */
+            --border-agro: hsl(145, 30%, 82%);      /* Soft Sage border */
+
             --text-primary: #111827;
             --text-secondary: #6b7280;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
@@ -244,7 +246,14 @@ $_SESSION['captcha_code'] = $captcha_code;
         }
 
         [data-theme="light"] body { background: var(--bg-main) !important; }
-        [data-theme="light"] .auth-slider-container { background: var(--bg-surface); border: 1px solid var(--border-subtle); }
+        
+        [data-theme="light"] .auth-slider-container,
+        [data-theme="light"] .auth-form-panel,
+        [data-theme="light"] .card {
+            border-top: none !important;
+        }
+
+        [data-theme="light"] .auth-slider-container { background: var(--bg-surface); border-left: 1px solid var(--border-agro); border-right: 1px solid var(--border-agro); border-bottom: 1px solid var(--border-agro); }
 
         /* Card Visibility and Contrast Fixes */
         [data-theme="light"] .login-pane-container,
@@ -279,12 +288,52 @@ $_SESSION['captcha_code'] = $captcha_code;
 
         [data-theme="light"] .form-input:focus {
             border-color: var(--primary-action) !important;
-            box-shadow: 0 0 0 4px rgba(76, 175, 120, 0.1) !important;
+            box-shadow: 0 0 0 4px var(--accent-light) !important;
         }
 
+        /* Icon Accents & Tints */
+        [data-theme="light"] .input-icon svg,
+        [data-theme="light"] .captcha-icon svg,
+        [data-theme="light"] .pw-info-icon svg,
+        [data-theme="light"] .btn-icon-inner svg {
+            color: var(--primary-action) !important;
+        }
+
+        [data-theme="light"] .input-icon,
+        [data-theme="light"] .captcha-icon,
+        [data-theme="light"] .pw-info-icon {
+            background: var(--accent-light) !important;
+            border-radius: 8px;
+        }
+
+        /* Chip & Badge Variety */
+        [data-theme="light"] .auth-chip {
+            background: var(--bg-surface) !important;
+            border: 1px solid var(--border-agro) !important;
+            color: var(--primary-action) !important;
+            font-weight: 700;
+        }
+
+        [data-theme="light"] .auth-chip:hover {
+            background: hsl(140, 25%, 88%) !important;
+            transform: translateY(-2px);
+        }
+
+        [data-theme="light"] .auth-chip.active {
+            background: var(--primary-action) !important;
+            color: #ffffff !important;
+            border-color: var(--primary-action) !important;
+        }
+
+        /* Submit Button Polish */
         [data-theme="light"] .btn-submit {
-            background: var(--primary-action) !important; /* Flatten gradient */
-            box-shadow: var(--shadow-sm);
+            background: var(--primary-action) !important;
+            box-shadow: 0 4px 14px rgba(76, 175, 120, 0.3) !important;
+            border: none !important;
+        }
+
+        [data-theme="light"] .btn-submit:hover {
+            box-shadow: 0 6px 20px rgba(76, 175, 120, 0.4) !important;
         }
 
         [data-theme="light"] .btn-submit:hover {
@@ -710,12 +759,13 @@ $_SESSION['captcha_code'] = $captcha_code;
         .form-input {
             width: 100%; height: 44px;
             padding: 0 12px;
-            border: 1.5px solid var(--border-color);
+            border: 1.5px solid #CBD5E1;
             border-radius: var(--radius-sm);
             font-family: var(--font);
             font-size: 0.875rem;
             color: var(--text-main);
             background: var(--bg-color);
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
             transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
         }
         .form-input.is-invalid {
@@ -1167,7 +1217,7 @@ $_SESSION['captcha_code'] = $captcha_code;
             color: var(--text-subtle); font-size: 0.75rem; font-weight: 600;
         }
         .auth-divider::before, .auth-divider::after {
-            content: ''; flex: 1; height: 1px; background: var(--border-color);
+            display: none;
         }
         </style></head>
 <body>
