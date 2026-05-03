@@ -1348,7 +1348,7 @@ $_SESSION['captcha_code'] = $captcha_code;
                     </div>
                     <!-- Strength meter -->
                     <div class="pw-strength"><div class="pw-strength-bar" id="pw-bar"></div></div>
-                    <span class="pw-hint" id="pw-hint">At least 8 characters &amp; 1 number</span>
+                    <span class="pw-hint" id="pw-hint">Min 8 characters &amp; reach 'Fair' strength</span>
                     <?php if (isset($errors['password'])): ?>
                         <span class="error-msg" role="alert"><?= e($errors['password']) ?></span>
                     <?php endif; ?>
@@ -1596,7 +1596,7 @@ if (signupPwInput && pwBar && pwHint) {
         const level = calcStrength(signupPwInput.value);
         if (level < 0) {
             pwBar.style.width      = '0';
-            pwHint.textContent     = 'At least 8 characters & 1 number';
+            pwHint.textContent     = "Min 8 characters & reach 'Fair' strength";
             pwHint.style.color     = 'var(--text-subtle)';
         } else {
             const l = strengthLevels[level];
