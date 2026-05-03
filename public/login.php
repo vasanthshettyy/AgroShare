@@ -575,11 +575,64 @@ $_SESSION['captcha_code'] = $captcha_code;
         }
 
         .form-label {
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             font-size: 0.76rem; font-weight: 700;
             color: var(--text-main);
             margin-bottom: 5px; letter-spacing: 0.1px;
         }
+        
+        .pw-info-icon {
+            display: inline-flex;
+            cursor: help;
+            color: var(--text-subtle);
+            transition: color 0.2s;
+            position: relative;
+        }
+        .pw-info-icon svg { width: 14px; height: 14px; }
+        .pw-info-icon:hover { color: var(--primary-action); }
+
+        .pw-tooltip {
+            position: absolute;
+            bottom: 120%;
+            right: 0;
+            width: 220px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            font-size: 0.75rem;
+            color: var(--text-main);
+            visibility: hidden;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            pointer-events: none;
+            backdrop-filter: blur(8px);
+        }
+        .pw-info-icon:hover .pw-tooltip {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .pw-tooltip strong { display: block; margin-bottom: 6px; color: var(--primary-action); }
+        .pw-tooltip ul { list-style: none; margin-bottom: 8px; }
+        .pw-tooltip ul li { 
+            position: relative; 
+            padding-left: 14px; 
+            margin-bottom: 4px;
+            color: var(--text-muted);
+        }
+        .pw-tooltip ul li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--primary-action);
+        }
+        .pw-tooltip p em { font-size: 0.7rem; color: var(--text-subtle); }
         .input-wrap { position: relative; }
         .form-input {
             width: 100%; height: 44px;
@@ -1255,7 +1308,24 @@ $_SESSION['captcha_code'] = $captcha_code;
             <!-- Password / Confirm row -->
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label" for="password">Password</label>
+                    <label class="form-label" for="password">
+                        Password
+                        <span class="pw-info-icon" title="View Requirements">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                            </svg>
+                            <div class="pw-tooltip">
+                                <strong>Secure Password Rules:</strong>
+                                <ul>
+                                    <li>At least 8 characters long</li>
+                                    <li>Include at least one number (0-9)</li>
+                                    <li>Use Uppercase & Lowercase letters</li>
+                                    <li>Include a symbol (e.g. @, #, $, !)</li>
+                                </ul>
+                                <p><em>Reach 'Fair' or 'Strong' to unlock.</em></p>
+                            </div>
+                        </span>
+                    </label>
                     <div class="input-wrap">
                         <input type="password" id="password" name="password"
                                placeholder="Min 8 chars, 1 number"
@@ -1664,7 +1734,9 @@ function validateSignup() {
     } else if (password === confirmPassword) {
         confirmStatus.textContent = '✓ Passwords match';
         confirmStatus.className = 'ajax-status status-available';
-        passwordsMatch = password.length >= 8;
+        
+        // Enforce STRICT: Must be 'Fair' (score 2) or higher
+        passwordsMatch = calcStrength(password) >= 2;
     } else {
         confirmStatus.textContent = '✗ Passwords do not match';
         confirmStatus.className = 'ajax-status status-error';
