@@ -1545,14 +1545,32 @@ const loginPwToggleBtn = document.getElementById('pw-toggle-login');
 const loginSubmitBtn = loginForm ? loginForm.querySelector('.btn-submit') : null;
 const loginCsrfToken = loginForm ? loginForm.querySelector('input[name="csrf_token"]').value : '';
 
+/**
+ * Helper to verify CAPTCHA correctness in real-time
+ */
+function isCaptchaValid(formContainerSelector) {
+    const container = document.querySelector(formContainerSelector);
+    if (!container) return false;
+    const displayChars = container.querySelector('.captcha-chars');
+    const inputField = container.querySelector('.captcha-input');
+    if (!displayChars || !inputField) return false;
+    
+    const targetCode = displayChars.textContent.replace(/\s/g, '').toUpperCase();
+    const userInput = inputField.value.trim().toUpperCase();
+    return userInput === targetCode && targetCode !== '';
+}
+
 function validateLogin() {
     if (!loginSubmitBtn) return;
     const identifier = loginIdentifierInput.value.trim();
     const password = loginPasswordInput.value.trim();
     const captcha = loginCaptchaInput.value.trim();
     
-    // Only enable if all fields are non-empty AND password field is not disabled by AJAX
-    loginSubmitBtn.disabled = !(identifier && password && captcha && !loginPasswordInput.disabled);
+    // Check if CAPTCHA matches the displayed code
+    const captchaCorrect = isCaptchaValid('.login-pane-container');
+    
+    // Only enable if all fields are non-empty AND password field is not disabled AND captcha is correct
+    loginSubmitBtn.disabled = !(identifier && password && captcha && captchaCorrect && !loginPasswordInput.disabled);
 }
 
 if (loginForm) {
@@ -1625,8 +1643,11 @@ function validateSignup() {
     const password = signupForm.querySelector('#password').value;
     const confirmPassword = signupForm.querySelector('#confirm_password').value;
     const passwordsMatch = password === confirmPassword && password !== '';
+
+    // CAPTCHA check
+    const captchaCorrect = isCaptchaValid('.signup-pane-container');
     
-    signupSubmitBtn.disabled = !(allFilled && passwordsMatch);
+    signupSubmitBtn.disabled = !(allFilled && passwordsMatch && captchaCorrect);
 }
 
 if (signupForm) {
