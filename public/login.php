@@ -1338,6 +1338,28 @@ $_SESSION['captcha_code'] = $captcha_code;
                 </div>
             </div>
 
+            <!-- CAPTCHA for Signup -->
+            <div class="captcha-group<?= isset($errors['captcha']) ? ' is-invalid' : '' ?>">
+                <span class="captcha-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                </span>
+                <div class="captcha-code-display" aria-label="CAPTCHA code">
+                    <span class="captcha-chars"><?php foreach (str_split($captcha_code) as $ch): ?><span><?= $ch ?></span><?php endforeach; ?></span>
+                </div>
+                <input type="text" name="captcha_answer" class="captcha-input<?= isset($errors['captcha']) ? ' is-invalid' : '' ?>" placeholder="Type code" maxlength="6" required autocomplete="off" spellcheck="false">
+                <button type="button" class="captcha-refresh" title="New code" id="captcha-refresh-signup-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 4 23 10 17 10"/>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                    </svg>
+                </button>
+            </div>
+            <?php if (isset($errors['captcha'])): ?>
+                <span class="error-msg" style="margin-top:-8px;margin-bottom:10px;display:block" role="alert"><?= e($errors['captcha']) ?></span>
+            <?php endif; ?>
+
             <button type="submit" class="btn-submit">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1809,26 +1831,37 @@ if (emailInput && emailStatus) {
 
 // ── Local Captcha Refresh ──
 const captchaRefreshBtn = document.getElementById('captcha-refresh-btn');
-const captchaCharsContainer = document.querySelector('.captcha-chars');
+const captchaRefreshSignupBtn = document.getElementById('captcha-refresh-signup-btn');
+const captchaCharsContainers = document.querySelectorAll('.captcha-chars');
 
-if (captchaRefreshBtn && captchaCharsContainer) {
-    captchaRefreshBtn.addEventListener('click', async () => {
-        captchaRefreshBtn.style.pointerEvents = 'none';
-        captchaRefreshBtn.style.opacity = '0.5';
-        
-        try {
-            const response = await fetch('api/refresh-captcha.php');
-            const data = await response.json();
-            if (data.success) {
-                captchaCharsContainer.innerHTML = data.captcha.split('').map(ch => `<span>${ch}</span>`).join('');
-            }
-        } catch (e) {
-            console.error('Offline captcha refresh failed.');
-        } finally {
-            captchaRefreshBtn.style.pointerEvents = 'auto';
-            captchaRefreshBtn.style.opacity = '1';
+const refreshCaptcha = async (btn) => {
+    if (!btn) return;
+    btn.style.pointerEvents = 'none';
+    btn.style.opacity = '0.5';
+    
+    try {
+        const response = await fetch('api/refresh-captcha.php');
+        const data = await response.json();
+        if (data.success) {
+            captchaCharsContainers.forEach(container => {
+                container.innerHTML = data.captcha.split('').map(ch => `<span>${ch}</span>`).join('');
+            });
         }
-    });
+    } catch (e) {
+        console.error('Offline captcha refresh failed.');
+    } finally {
+        btn.style.pointerEvents = 'auto';
+        btn.style.opacity = '1';
+        validateLogin();
+        validateSignup();
+    }
+};
+
+if (captchaRefreshBtn) {
+    captchaRefreshBtn.addEventListener('click', () => refreshCaptcha(captchaRefreshBtn));
+}
+if (captchaRefreshSignupBtn) {
+    captchaRefreshSignupBtn.addEventListener('click', () => refreshCaptcha(captchaRefreshSignupBtn));
 }
 </script>
 <script src="assets/js/theme-toggle.js"></script>
