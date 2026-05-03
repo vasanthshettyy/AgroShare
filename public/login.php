@@ -1305,6 +1305,7 @@ $_SESSION['captcha_code'] = $captcha_code;
                             </svg>
                         </button>
                     </div>
+                    <span id="confirm-pw-status" class="ajax-status" aria-live="polite"></span>
                     <?php if (isset($errors['confirm_password'])): ?>
                         <span class="error-msg" role="alert"><?= e($errors['confirm_password']) ?></span>
                     <?php endif; ?>
@@ -1652,7 +1653,21 @@ function validateSignup() {
     // 4. Match Check: Passwords must match and meet min length
     const password = signupForm.querySelector('#password').value;
     const confirmPassword = signupForm.querySelector('#confirm_password').value;
-    const passwordsMatch = password === confirmPassword && password.length >= 8;
+    const confirmStatus = document.getElementById('confirm-pw-status');
+    
+    let passwordsMatch = false;
+    if (confirmPassword === '') {
+        confirmStatus.textContent = '';
+        confirmStatus.className = 'ajax-status';
+    } else if (password === confirmPassword) {
+        confirmStatus.textContent = '✓ Passwords match';
+        confirmStatus.className = 'ajax-status status-available';
+        passwordsMatch = password.length >= 8;
+    } else {
+        confirmStatus.textContent = '✗ Passwords do not match';
+        confirmStatus.className = 'ajax-status status-error';
+        passwordsMatch = false;
+    }
 
     // 5. CAPTCHA Check
     const captchaCorrect = isCaptchaValid('.signup-pane-container');
