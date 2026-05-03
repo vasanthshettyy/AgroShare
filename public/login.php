@@ -14,6 +14,7 @@ if (isset($_SESSION['user_id'])) {
 $errors = [];
 $old    = [];
 $old_identifier = '';
+$isSignup = ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['identifier']));
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
@@ -770,8 +771,21 @@ $_SESSION['captcha_code'] = $captcha_code;
             margin-top: 6px;
             position: relative;
             overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            transition: all 0.3s ease;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-submit:disabled {
+            background: hsl(150, 8%, 25%);
+            color: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.05);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none !important;
+        }
+
+        .btn-submit:disabled::after {
+            display: none;
         }
 
         /* Glass shimmer effect */
@@ -1036,7 +1050,7 @@ $_SESSION['captcha_code'] = $captcha_code;
     <?php include __DIR__ . '/includes/theme-toggle-btn.php'; ?>
 </div>
 
-<div id="auth-slider-container" class="auth-slider-container">
+<div id="auth-slider-container" class="auth-slider-container<?= $isSignup ? ' right-panel-active' : '' ?>">
 
     <div class="login-pane-container">
         <div class="auth-form-panel">
@@ -1055,7 +1069,7 @@ $_SESSION['captcha_code'] = $captcha_code;
         <?php endif; ?>
         <?= renderFlash() ?>
 
-        <form method="POST" action="" novalidate>
+        <form id="login-form" method="POST" action="" novalidate>
             <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
 
             <!-- Identifier (Phone or Email) -->
@@ -1441,12 +1455,14 @@ if (container) {
         switchToSignupBtn.addEventListener('click', (e) => {
             e.preventDefault();
             container.classList.add('right-panel-active');
+            validateSignup(); // Re-run validation for visible form
         });
     }
     if (switchToLoginBtn) {
         switchToLoginBtn.addEventListener('click', (e) => {
             e.preventDefault();
             container.classList.remove('right-panel-active');
+            validateLogin(); // Re-run validation for visible form
         });
     }
 }
@@ -1519,30 +1535,29 @@ if (signupPwInput && pwBar && pwHint) {
     });
 }
 
-// ── Prevent Enter from submitting, move to next input ─────
-// Signup Form
-const signupForm = document.getElementById('signup-form');
-if (signupForm) {
-    const signupFormInputs = Array.from(signupForm.querySelectorAll('input:not([type="hidden"]):not([type="checkbox"])'));
-    signupFormInputs.forEach((input, index) => {
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const next = signupFormInputs[index + 1];
-                if (next) next.focus();
-            }
-        });
-    });
-}
-
 // Login Form
-const loginForm = document.querySelector('.login-pane-container form');
+const loginForm = document.getElementById('login-form');
 const loginIdentifierInput = document.getElementById('identifier');
 const loginIdentifierStatus = document.getElementById('login-identifier-status');
 const loginPasswordInput = document.getElementById('password');
+const loginCaptchaInput = document.querySelector('.login-pane-container .captcha-input');
 const loginPwToggleBtn = document.getElementById('pw-toggle-login');
 const loginSubmitBtn = loginForm ? loginForm.querySelector('.btn-submit') : null;
 const loginCsrfToken = loginForm ? loginForm.querySelector('input[name="csrf_token"]').value : '';
+
+function validateLogin() {
+    if (!loginSubmitBtn) return;
+    const identifier = loginIdentifierInput.value.trim();
+    const password = loginPasswordInput.value.trim();
+    const captcha = loginCaptchaInput.value.trim();
+    
+    // Only enable if all fields are non-empty AND password field is not disabled by AJAX
+    loginSubmitBtn.disabled = !(identifier && password && captcha && !loginPasswordInput.disabled);
+}
+
+if (loginForm) {
+    loginForm.addEventListener('input', validateLogin);
+}
 
 async function validateLoginIdentifier() {
     const value = loginIdentifierInput.value.trim();
@@ -1551,6 +1566,7 @@ async function validateLoginIdentifier() {
         loginIdentifierStatus.className = 'ajax-status';
         loginPasswordInput.disabled = true;
         loginPwToggleBtn.disabled = true;
+        validateLogin();
         return;
     }
 
@@ -1570,17 +1586,17 @@ async function validateLoginIdentifier() {
             loginIdentifierStatus.className = 'ajax-status status-available';
             loginPasswordInput.disabled = false;
             loginPwToggleBtn.disabled = false;
-            if (loginSubmitBtn) loginSubmitBtn.disabled = false;
         } else {
             loginIdentifierStatus.textContent = data.message;
             loginIdentifierStatus.className = 'ajax-status status-error';
             loginPasswordInput.disabled = true;
             loginPwToggleBtn.disabled = true;
-            if (loginSubmitBtn) loginSubmitBtn.disabled = true;
         }
+        validateLogin();
     } catch (e) {
         loginIdentifierStatus.textContent = 'Connection error.';
         loginIdentifierStatus.className = 'ajax-status status-error';
+        validateLogin();
     }
 }
 
@@ -1594,6 +1610,51 @@ if (loginIdentifierInput) {
     }
 }
 
+// Signup Form
+const signupForm = document.getElementById('signup-form');
+const signupSubmitBtn = signupForm ? signupForm.querySelector('.btn-submit') : null;
+const signupRequiredInputs = signupForm ? Array.from(signupForm.querySelectorAll('input[required]')) : [];
+
+function validateSignup() {
+    if (!signupSubmitBtn) return;
+    
+    // Check all required inputs
+    const allFilled = signupRequiredInputs.every(input => input.value.trim() !== '');
+    
+    // Premium Touch: Check if passwords match
+    const password = signupForm.querySelector('#password').value;
+    const confirmPassword = signupForm.querySelector('#confirm_password').value;
+    const passwordsMatch = password === confirmPassword && password !== '';
+    
+    signupSubmitBtn.disabled = !(allFilled && passwordsMatch);
+}
+
+if (signupForm) {
+    signupForm.addEventListener('input', validateSignup);
+}
+
+// Ensure initial button states are correct
+document.addEventListener('DOMContentLoaded', () => {
+    validateLogin();
+    validateSignup();
+});
+
+// ── Prevent Enter from submitting, move to next input ─────
+// Signup Form
+if (signupForm) {
+    const signupFormInputs = Array.from(signupForm.querySelectorAll('input:not([type="hidden"]):not([type="checkbox"])'));
+    signupFormInputs.forEach((input, index) => {
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const next = signupFormInputs[index + 1];
+                if (next) next.focus();
+            }
+        });
+    });
+}
+
+// Login Form
 if (loginForm) {
     const loginFormInputs = Array.from(loginForm.querySelectorAll('input:not([type="hidden"]):not([type="checkbox"])'));
     loginFormInputs.forEach((input, index) => {
