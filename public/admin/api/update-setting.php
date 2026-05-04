@@ -24,32 +24,35 @@ if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
 }
 
 try {
-    $maintenanceMode = (($_POST['maintenance_mode'] ?? '0') === '1') ? 1 : 0;
+    $settingKey   = trim($_POST['setting_key'] ?? '');
+    $settingValue = $_POST['setting_value'] ?? '';
 
-    $sql = "INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)";
+    if ($settingKey === '') {
+        throw new Exception("Setting key is required.");
+    }
+
+    $sql = "INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) 
+            ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)";
     
     $stmt = $conn->prepare($sql);
     if ($stmt) {
-        // Save Maintenance Mode
-        $key2 = 'maintenance_mode';
-        $val2 = (string)$maintenanceMode;
-        $stmt->bind_param('ss', $key2, $val2);
+        $stmt->bind_param('ss', $settingKey, $settingValue);
         $stmt->execute();
-        
         $stmt->close();
 
-        logAuditEvent($conn, 'admin_update_settings', null, "Admin updated maintenance mode status", null, $_SESSION['user_id']);
+        logAuditEvent($conn, 'admin_update_setting', null, "Admin updated setting: $settingKey", null, $_SESSION['user_id']);
 
         if ($isAjax) {
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode([
                 'success' => true,
-                'message' => 'Settings saved successfully.',
-                'maintenance_mode' => (string)$maintenanceMode
+                'message' => 'Setting updated successfully.',
+                'setting_key' => $settingKey,
+                'setting_value' => $settingValue
             ]);
             exit();
         }
-        setFlash('success', "Settings saved successfully.");
+        setFlash('success', "Setting updated successfully.");
     } else {
         if ($isAjax) {
             http_response_code(500);

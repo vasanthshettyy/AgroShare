@@ -30,5 +30,6 @@ try {
         echo json_encode(['success' => false, 'message' => 'User not found']);
     }
 } catch (Exception $e) {
+    logError('Profile fetch error: ' . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'Server error']);
 }

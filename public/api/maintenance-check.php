@@ -24,5 +24,6 @@ try {
     $conn->close();
     echo json_encode(['maintenance' => $isMaintenance]);
 } catch (Exception $e) {
+    logError('Maintenance check error: ' . $e->getMessage());
     echo json_encode(['maintenance' => false, 'error' => $e->getMessage()]);
 }

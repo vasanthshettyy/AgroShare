@@ -22,6 +22,7 @@ $filters = [];
 if (!empty($_GET['category']))     $filters['category']     = $_GET['category'];
 if (!empty($_GET['district']))     $filters['district']     = $_GET['district'];
 if (!empty($_GET['max_price']))    $filters['max_price']    = $_GET['max_price'];
+if (!empty($_GET['search']))       $filters['search']       = $_GET['search'];
 if (!empty($_GET['has_operator'])) $filters['has_operator'] = true;
 if (isset($_GET['mine']) && $_GET['mine'] === '1') {
     $filters['owner_id'] = $_SESSION['user_id'];
@@ -249,6 +250,17 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
         <!-- —— Filter Bar ────────────────────────────────────────── -->
         <?php if (!$isMyEquipment): ?>
         <form class="filter-bar" method="GET" action="equipment-browse.php" aria-label="Filter equipment">
+            <div class="filter-group">
+                <label for="filter-search" class="filter-label">Keyword Search</label>
+                <div class="filter-input-wrapper">
+                    <svg class="filter-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    <input type="text" name="search" id="filter-search" class="form-input filter-input"
+                           placeholder="Search equipment..." value="<?= e($filters['search'] ?? '') ?>">
+                </div>
+            </div>
+
             <div class="filter-group">
                 <label for="filter-category" class="filter-label">Category</label>
                 <div class="filter-input-wrapper">

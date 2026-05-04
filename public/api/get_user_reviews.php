@@ -61,6 +61,6 @@ try {
     ]);
 
 } catch (Exception $e) {
-    error_log('API Error (get_user_reviews): ' . $e->getMessage());
+    logError('API Error (get_user_reviews): ' . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'Internal server error']);
 }

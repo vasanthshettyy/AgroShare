@@ -180,18 +180,17 @@ if ($res) {
     <div class="maintenance-card">
         <div class="glow-orb"></div>
         <div class="brand-icon">
+            <!-- Clock Icon -->
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M2 22c1.25-7 6-10 10.5-10S20 9.9 20 5.4c0-2.3-.9-3.9-.9-3.9C17 5 14.8 6 14.8 6 11.4 2.5 7 2 7 2S3 8 3 13c0 3 1.5 5.5 3.5 7"/>
-                <path d="M6 22c0-4 2-7 6-9"/>
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
         </div>
 
-        <span class="apology">We're Sincerely Sorry</span>
-        <h1>Enhancing Your Field</h1>
+        <span class="apology">Scheduled Update</span>
+        <h1>System Under Maintenance</h1>
         
         <p>
-            We are currently performing essential maintenance to improve the platform's stability. 
-            <strong>We apologize for this temporary inconvenience</strong> and appreciate your patience as we work to serve you better.
+            We're currently performing scheduled maintenance to improve our services. Please check back later.
         </p>
 
         <div class="status-box">

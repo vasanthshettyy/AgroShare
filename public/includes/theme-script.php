@@ -7,6 +7,12 @@ require_once __DIR__ . '/../../src/Helpers/auth.php'; // For getBasePath()
 ?>
 <script>
     (function(){
+        // ── 0. Global Configuration ──
+        window.AgroShare = {
+            apiUrl: '<?= SITE_URL ?>/public/api',
+            adminApiUrl: '<?= SITE_URL ?>/public/admin/api'
+        };
+
         // ── 1. Theme Initialization ──
         const savedTheme = localStorage.getItem('theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);

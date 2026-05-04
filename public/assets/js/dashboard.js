@@ -30,7 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Fetch notifications
         async function fetchNotifications() {
             try {
-                const res = await fetch('api/get-notifications.php');
+                const apiBase = (window.AgroShare && window.AgroShare.apiUrl) ? window.AgroShare.apiUrl : 'api';
+                const res = await fetch(`${apiBase}/get-notifications.php`);
                 const data = await res.json();
 
                 if (data.success) {
@@ -72,7 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                     const csrfToken = document.getElementById('global-csrf-token') || document.querySelector('input[name="csrf_token"]');
                                     if (csrfToken) formData.append('csrf_token', csrfToken.value);
 
-                                    const mRes = await fetch('api/mark-notification-read.php', { method: 'POST', body: formData });
+                                    const apiBase = (window.AgroShare && window.AgroShare.apiUrl) ? window.AgroShare.apiUrl : 'api';
+                                    const mRes = await fetch(`${apiBase}/mark-notification-read.php`, { method: 'POST', body: formData });
                                     const mData = await mRes.json();
 
                                     if (mData.success) {
@@ -348,8 +350,8 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const formData = new FormData(equipmentForm);
 
-                const basePath = document.documentElement.dataset.basePath || '';
-                const response = await fetch(`${basePath}/api/create-equipment.php`, {
+                const apiBase = (window.AgroShare && window.AgroShare.apiUrl) ? window.AgroShare.apiUrl : 'api';
+                const response = await fetch(`${apiBase}/create-equipment.php`, {
                     method: 'POST',
                     body: formData
                 });
@@ -407,11 +409,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        try {
-            // Use absolute-style relative path from public root
-            const response = await fetch('api/get-profile.php');
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const result = await response.json();
+            try {
+                const apiBase = (window.AgroShare && window.AgroShare.apiUrl) ? window.AgroShare.apiUrl : 'api';
+                const response = await fetch(`${apiBase}/get-profile.php`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const result = await response.json();
 
             if (result.success) {
                 const user = result.data;
@@ -515,7 +517,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 const formData = new FormData(form);
-                const response = await fetch('api/update-profile.php', {
+                const apiBase = (window.AgroShare && window.AgroShare.apiUrl) ? window.AgroShare.apiUrl : 'api';
+                const response = await fetch(`${apiBase}/update-profile.php`, {
                     method: 'POST',
                     body: formData
                 });

@@ -129,9 +129,11 @@ try {
 
     } catch (Exception $e) {
         $conn->rollback();
+        logError('Booking transaction error: ' . $e->getMessage(), ['equipment_id' => $eqId, 'renter_id' => $renterId]);
         echo json_encode(['success' => false, 'message' => $e->getMessage() ?: 'Server error during transaction.']);
     }
 
 } catch (Exception $e) {
+    logError('Booking initiation fatal error: ' . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'Server error. Please try again.']);
 }

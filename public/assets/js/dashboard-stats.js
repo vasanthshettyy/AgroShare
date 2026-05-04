@@ -16,7 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     async function updateStats() {
         try {
-            const response = await fetch('api/dashboard-stats.php');
+            const apiBase = (window.AgroShare && window.AgroShare.apiUrl) ? window.AgroShare.apiUrl : 'api';
+            const response = await fetch(`${apiBase}/dashboard-stats.php`);
             const result = await response.json();
 
             if (result.success && result.data) {
@@ -63,7 +64,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Failed to fetch dashboard stats:', error);
+        } finally {
+            // Update every 30 seconds, but ONLY after the previous one finishes
+            setTimeout(updateStats, 30000);
         }
+    }
+
+    /**
+     * Helper to escape HTML to prevent XSS
+     */
+    function escapeHTML(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
     }
 
     /**
@@ -78,8 +92,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const date = new Date(act.created_at);
             const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
-            row.innerHTML = `
-                <td><strong>${act.equipment_title}</strong></td>
+            // Create title cell safely
+            const titleTd = document.createElement('td');
+            const titleStrong = document.createElement('strong');
+            titleStrong.textContent = act.equipment_title;
+            titleTd.appendChild(titleStrong);
+            row.appendChild(titleTd);
+
+            // Other cells can use innerHTML for simple badges/spans as they are status/type strings
+            row.innerHTML += `
                 <td><span class="activity-badge ${act.activity_type.toLowerCase()}">${act.activity_type}</span></td>
                 <td style="font-size: 0.8rem; color: var(--text-muted);">${dateStr}</td>
                 <td><span class="status-pill ${act.status.toLowerCase()}">${act.status.charAt(0).toUpperCase() + act.status.slice(1)}</span></td>
@@ -88,6 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Update every 30 seconds
-    setInterval(updateStats, 30000);
+    // Initial call to start the recursive loop
+    updateStats();
 });

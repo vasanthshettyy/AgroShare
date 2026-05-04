@@ -43,5 +43,6 @@ try {
     $stmt->close();
 
 } catch (Exception $e) {
+    logError('Raise dispute error: ' . $e->getMessage(), ['booking_id' => $bookingId, 'renter_id' => $renterId]);
     echo json_encode(['success' => false, 'message' => 'Server error. Please try again.']);
 }

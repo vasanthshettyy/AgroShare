@@ -342,6 +342,15 @@ function browseEquipment(mysqli $conn, array $filters = [], int $page = 1, int $
         $params[] = '%' . $filters['district'] . '%';
     }
 
+    // Filter: search
+    if (!empty($filters['search'])) {
+        $where[]  = '(e.title LIKE ? OR e.description LIKE ?)';
+        $types   .= 'ss';
+        $searchTerm = '%' . $filters['search'] . '%';
+        $params[] = $searchTerm;
+        $params[] = $searchTerm;
+    }
+
     // Filter: max price per day
     if (!empty($filters['max_price']) && is_numeric($filters['max_price'])) {
         $where[]  = 'e.price_per_day <= ?';

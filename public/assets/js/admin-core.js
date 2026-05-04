@@ -21,7 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
         viewContainer.innerHTML = '<div class="admin-skeleton" style="height: 400px; width: 100%;"></div>';
 
         try {
-            const response = await fetch(`api/view-loader.php?view=${viewName}`);
+            const adminApi = (window.AgroShare && window.AgroShare.adminApiUrl) ? window.AgroShare.adminApiUrl : 'api';
+            const response = await fetch(`${adminApi}/view-loader.php?view=${viewName}`);
             if (!response.ok) throw new Error('Failed to load view');
 
             const html = await response.text();
@@ -72,14 +73,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const btn = e.target.closest('button');
         if (!btn) return;
 
+        const adminApi = (window.AgroShare && window.AgroShare.adminApiUrl) ? window.AgroShare.adminApiUrl : 'api';
+
         // User Actions
         if (btn.classList.contains('user-action-btn')) {
             const action = btn.dataset.action;
             const id = btn.dataset.id;
             if (action === 'toggle-verify') {
-                handleAction('api/verify-user.php', { user_id: id, status: btn.title === 'Verify' ? 1 : 0 });
+                handleAction(`${adminApi}/verify-user.php`, { user_id: id, status: btn.title === 'Verify' ? 1 : 0 });
             } else if (action === 'toggle-active') {
-                handleAction('api/toggle-user-active.php', { user_id: id });
+                handleAction(`${adminApi}/toggle-user-active.php`, { user_id: id });
             }
         }
 
@@ -88,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const action = btn.dataset.action;
             const id = btn.dataset.id;
             if (action === 'toggle-featured') {
-                handleAction('api/toggle-featured-equipment.php', { equipment_id: id });
+                handleAction(`${adminApi}/toggle-featured-equipment.php`, { equipment_id: id });
             }
         }
     });

@@ -44,3 +44,8 @@ index1.html
 index1.php
 Reference lightmode images/
 *.pdf
+
+# Temporary and Audit folders
+scratch/
+.tempmediaStorage/
+.gemini/

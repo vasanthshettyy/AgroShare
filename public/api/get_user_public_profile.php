@@ -81,6 +81,6 @@ try {
     ]);
 
 } catch (Exception $e) {
-    error_log('Public Profile API Error: ' . $e->getMessage());
+    logError('Public Profile API Error: ' . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'Internal server error']);
 }

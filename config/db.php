@@ -14,9 +14,19 @@
 // Load credentials
 require_once __DIR__ . '/constants.php';
 
-// Load helper functions (auth, CSRF, flash messages)
+// ── Global Path Configuration ──────────────────────────────
+if (!defined('SITE_URL')) {
+    define('SITE_URL', APP_URL); // http://localhost/agroshare3
+}
+if (!defined('BASE_PATH')) {
+    // This helper already exists in auth.php, but we can define it here for global consistency
+    define('BASE_PATH', '/agroshare3');
+}
+
+// Load helper functions (auth, CSRF, flash messages, logger)
 require_once __DIR__ . '/../src/Helpers/auth.php';
 require_once __DIR__ . '/../src/Helpers/audit.php';
+require_once __DIR__ . '/../src/Helpers/logger.php';
 
 // Apply global security headers (X-Frame-Options, X-Content-Type-Options)
 applySecurityHeaders();
