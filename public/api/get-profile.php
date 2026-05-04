@@ -14,7 +14,7 @@ if (!isset($_SESSION['user_id'])) {
 
 try {
     $userId = (int)$_SESSION['user_id'];
-    $stmt = $conn->prepare("SELECT full_name, phone, email, village, district, state, profile_photo, trust_score, is_verified FROM users WHERE id = ?");
+    $stmt = $conn->prepare("SELECT full_name, phone, email, village, district, state, profile_photo, trust_score, is_verified, (password_hash IS NOT NULL) as has_password FROM users WHERE id = ?");
     $stmt->bind_param('i', $userId);
     $stmt->execute();
     $user = $stmt->get_result()->fetch_assoc();
@@ -25,6 +25,10 @@ try {
         if (empty($user['profile_photo'])) {
             $user['profile_photo'] = 'assets/img/default-avatar.png';
         }
+        
+        // Convert has_password to boolean for JS
+        $user['has_password'] = (bool)$user['has_password'];
+        
         echo json_encode(['success' => true, 'data' => $user]);
     } else {
         echo json_encode(['success' => false, 'message' => 'User not found']);

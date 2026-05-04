@@ -86,6 +86,33 @@
                 </div>
             </div>
 
+            <!-- Security Section -->
+            <div class="form-section">
+                <h2 class="form-section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Security
+                </h2>
+                <div class="form-grid">
+                    <div class="form-group full-width" id="old-password-group">
+                        <label for="prof-old-password" class="form-label">Current Password</label>
+                        <input type="password" name="old_password" id="prof-old-password" class="form-input" placeholder="Enter current password">
+                    </div>
+                    <div class="form-group">
+                        <label for="prof-new-password" class="form-label">New Password</label>
+                        <input type="password" name="new_password" id="prof-new-password" class="form-input" placeholder="Min. 8 characters">
+                    </div>
+                    <div class="form-group">
+                        <label for="prof-confirm-password" class="form-label">Confirm New Password</label>
+                        <input type="password" name="confirm_password" id="prof-confirm-password" class="form-input" placeholder="Repeat new password">
+                    </div>
+                    <div class="form-group full-width">
+                        <small style="color: var(--text-muted); font-size: 0.75rem;">
+                            Forgot your password? <a href="forgot-password.php" style="color: var(--primary-action);">Reset it here</a>.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
             <!-- Reviews Shortcut -->
             <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); text-align: center;">
                 <button type="button" class="btn-secondary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0.85rem;" onclick="showUserReviews(<?= (int)$_SESSION['user_id'] ?>)">
