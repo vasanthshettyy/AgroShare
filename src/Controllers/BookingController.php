@@ -206,6 +206,7 @@ function updateBookingStatus(mysqli $conn, int $bookingId, int $userId, string $
         return true;
     } catch (Exception $e) {
         $conn->rollback();
+        logError('updateBookingStatus error: ' . $e->getMessage());
         return false;
     }
 }

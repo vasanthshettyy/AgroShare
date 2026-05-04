@@ -40,7 +40,11 @@ function getAdminDashboardStats(mysqli $conn): array
     try {
         $res = $conn->query("SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT 8");
         if ($res) $stats['recent_logs'] = $res->fetch_all(MYSQLI_ASSOC);
-    } catch (Exception $e) {} catch (Error $e) {}
+    } catch (Exception $e) {
+        logError('AdminDashboard Exception: ' . $e->getMessage());
+    } catch (Error $e) {
+        logError('AdminDashboard Error: ' . $e->getMessage());
+    }
 
     return $stats;
 }

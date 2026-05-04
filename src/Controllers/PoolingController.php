@@ -239,6 +239,7 @@ function cancelPledge($conn, $campaignId, $userId) {
         return ['success' => true, 'new_quantity' => $updatedQty];
     } catch (Exception $e) {
         $conn->rollback();
+        logError('cancelPledge error: ' . $e->getMessage());
         return ['success' => false, 'message' => 'Failed to cancel pledge.'];
     }
 }
