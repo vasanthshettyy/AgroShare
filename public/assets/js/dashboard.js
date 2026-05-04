@@ -430,6 +430,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 setVal('prof-village', user.village);
                 setVal('prof-district', user.district);
                 setVal('prof-state', user.state);
+                setVal('prof-upi-id', user.upi_id);
+
+                // Password logic: Hide 'Current Password' if user doesn't have a hash (Google user)
+                const oldPassGroup = document.getElementById('old-password-group');
+                if (oldPassGroup) {
+                    oldPassGroup.style.display = user.has_password ? 'block' : 'none';
+                }
 
                 // Avatar preview
                 const preview = document.getElementById('prof-photo-preview');
@@ -518,21 +525,43 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const formData = new FormData(form);
                 const apiBase = (window.AgroShare && window.AgroShare.apiUrl) ? window.AgroShare.apiUrl : 'api';
-                const response = await fetch(`${apiBase}/update-profile.php`, {
+                
+                // 1. Handle Profile Update
+                const profileResponse = await fetch(`${apiBase}/update-profile.php`, {
                     method: 'POST',
                     body: formData
                 });
 
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const result = await response.json();
+                if (!profileResponse.ok) throw new Error(`HTTP ${profileResponse.status}`);
+                const profileResult = await profileResponse.json();
 
-                if (result.success) {
-                    alert(result.message);
+                // 2. Handle Password Change (if new password is provided)
+                const newPass = document.getElementById('prof-new-password')?.value;
+                if (newPass) {
+                    const passResponse = await fetch(`${apiBase}/change-password.php`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const passResult = await passResponse.json();
+                    if (!passResult.success) {
+                        alert("Profile updated, but password failed: " + passResult.message);
+                    }
+                }
+
+                if (profileResult.success) {
+                    alert(profileResult.message);
                     const greetings = document.querySelectorAll('.topbar-greeting strong');
-                    greetings.forEach(el => el.textContent = result.full_name);
+                    greetings.forEach(el => el.textContent = profileResult.full_name);
+                    
+                    // Clear password fields
+                    ['prof-old-password', 'prof-new-password', 'prof-confirm-password'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.value = '';
+                    });
+                    
                     closeProfileModal();
                 } else {
-                    alert(result.message);
+                    alert(profileResult.message);
                 }
             } catch (error) {
                 console.error('Profile update error:', error);

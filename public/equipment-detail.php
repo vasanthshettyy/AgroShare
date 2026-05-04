@@ -235,10 +235,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         <?= renderFlash() ?>
 
         <div class="product-header">
-            <a href="equipment-browse.php" class="btn-back">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-                Back to Browse
-            </a>
+            <div style="display: flex; gap: 10px;">
+                <a href="dashboard.php" class="btn-back">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="3" y1="9" x2="12" y2="2" /><line x1="21" y1="9" x2="12" y2="2" /><path d="M9 22V12h6v10" /><path d="M21 22V9" /><path d="M3 22V9" /></svg>
+                    Back to Home
+                </a>
+                <a href="equipment-browse.php" class="btn-back">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                    Back to Browse
+                </a>
+            </div>
             
             <div style="display: flex; justify-content: flex-end; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem;">
                 <?php if ($isOwner): ?>

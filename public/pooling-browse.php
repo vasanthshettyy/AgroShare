@@ -351,6 +351,11 @@ $campaigns = getCampaigns($conn, $filters);
     <main class="main-content">
         <?= renderFlash() ?>
 
+        <a href="dashboard.php" class="btn-back" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--primary-10); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--primary-action); font-size: 0.85rem; font-weight: 700; transition: all 0.2s ease; margin-bottom: 20px; text-decoration: none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="3" y1="9" x2="12" y2="2" /><line x1="21" y1="9" x2="12" y2="2" /><path d="M9 22V12h6v10" /><path d="M21 22V9" /><path d="M3 22V9" /></svg>
+            Back to Home
+        </a>
+
         <div class="page-header-premium">
             <div class="header-left">
                 <h2 class="header-title-main">Community Pooling</h2>

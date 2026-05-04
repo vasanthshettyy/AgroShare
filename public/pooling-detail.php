@@ -440,11 +440,17 @@ $is_creator = ($campaign['creator_id'] === $userId);
             <div class="campaign-grid">
                 <!-- LEFT COLUMN -->
                 <div class="campaign-main-col">
-                    <div class="campaign-header-row">
-                        <a href="pooling-browse.php" class="back-link" style="margin-bottom: 0;">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-                            Back to Campaigns
-                        </a>
+                    <div class="campaign-header-row" style="flex-wrap: wrap;">
+                        <div style="display: flex; gap: 10px;">
+                            <a href="dashboard.php" class="btn-back" style="margin-bottom: 0; display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--primary-10); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--primary-action); font-size: 0.85rem; font-weight: 700; transition: all 0.2s ease; text-decoration: none;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="3" y1="9" x2="12" y2="2" /><line x1="21" y1="9" x2="12" y2="2" /><path d="M9 22V12h6v10" /><path d="M21 22V9" /><path d="M3 22V9" /></svg>
+                                Home
+                            </a>
+                            <a href="pooling-browse.php" class="back-link" style="margin-bottom: 0; display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--primary-10); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--primary-action); font-size: 0.85rem; font-weight: 700; transition: all 0.2s ease; text-decoration: none;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                                Browse
+                            </a>
+                        </div>
                         <span class="status-badge-premium status-<?= $campaign['status'] ?>">
                             <?= str_replace('_', ' ', $campaign['status']) ?>
                         </span>
