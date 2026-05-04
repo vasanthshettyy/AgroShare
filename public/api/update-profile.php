@@ -36,6 +36,20 @@ if (empty($fullName) || empty($village) || empty($district) || empty($state)) {
     exit();
 }
 
+// Check for duplicate email
+if (!empty($email)) {
+    $stmt = $conn->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
+    $stmt->bind_param('si', $email, $userId);
+    $stmt->execute();
+    $stmt->store_result();
+    if ($stmt->num_rows > 0) {
+        echo json_encode(['success' => false, 'message' => 'This email address is already registered to another account.']);
+        $stmt->close();
+        exit();
+    }
+    $stmt->close();
+}
+
 try {
     // Handle Profile Photo Upload
     $photoPath = null;
@@ -157,6 +171,6 @@ try {
     $stmt->close();
 
 } catch (Exception $e) {
-    error_log('Profile update error: ' . $e->getMessage());
+    logError('Profile update error: ' . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'An unexpected server error occurred. Please try again later.']);
 }

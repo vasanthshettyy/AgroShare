@@ -39,7 +39,23 @@ if (hasBookingConflict($conn, $eqId, $start, $end)) {
     exit();
 }
 
-// 2. Pricing (Server-side calculation only)
+// 2. Fetch owner_id and validate
+$eqStmt = $conn->prepare("SELECT owner_id FROM equipment WHERE id = ?");
+$eqStmt->bind_param('i', $eqId);
+$eqStmt->execute();
+$eqRes = $eqStmt->get_result()->fetch_assoc();
+if (!$eqRes) {
+    echo json_encode(['success' => false, 'message' => 'Equipment not found.']);
+    exit();
+}
+$ownerId = (int)$eqRes['owner_id'];
+
+if ($ownerId === $userId) {
+    echo json_encode(['success' => false, 'message' => 'You cannot book your own equipment.']);
+    exit();
+}
+
+// 3. Pricing (Server-side calculation only)
 $totalPrice = calculateServerSidePrice($conn, $eqId, $start, $end);
 
 // 4. Insert

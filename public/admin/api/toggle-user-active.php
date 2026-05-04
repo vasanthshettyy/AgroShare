@@ -18,6 +18,17 @@ if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
 $userId = (int)($_POST['user_id'] ?? 0);
 $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 
+// Prevent admin self-lockout
+if ($userId === (int)($_SESSION['user_id'] ?? 0)) {
+    if ($isAjax) {
+        echo json_encode(['success' => false, 'message' => 'Security Error: You cannot disable your own administrator account.']);
+        exit();
+    }
+    setFlash('error', 'Security Error: You cannot disable your own administrator account.');
+    header('Location: ../users.php');
+    exit();
+}
+
 if ($userId > 0) {
     try {
         $stmt = $conn->prepare("UPDATE users SET is_active = NOT COALESCE(is_active, 1) WHERE id = ?");
