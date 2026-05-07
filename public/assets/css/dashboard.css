@@ -301,6 +301,15 @@ body {
 }
 
 /* ── Form Normalization ── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px var(--surface-color) inset !important;
+    -webkit-text-fill-color: var(--text-main) !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
 button,
 input,
 select,
@@ -2672,4 +2681,69 @@ input[type="number"].form-input::-webkit-inner-spin-button {
     to {
         transform: rotate(360deg);
     }
+}
+
+/* ── 15. Sidebar Feedback Box ────────────────────────── */
+.sidebar-feedback {
+    margin-top: auto;
+    padding: 1.25rem 0.75rem;
+    border-top: 1px solid var(--glass-border);
+}
+
+.feedback-box {
+    background: var(--primary-10);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    padding: 0.875rem;
+    display: none; /* Hidden when sidebar is collapsed */
+    flex-direction: column;
+    gap: 0.625rem;
+    transition: var(--transition-base);
+}
+
+.sidebar:hover .feedback-box {
+    display: flex;
+}
+
+.feedback-box p {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+}
+
+.feedback-box textarea {
+    background: var(--surface-color);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xs);
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-main);
+    resize: none;
+    height: 60px;
+    width: 100%;
+}
+
+.feedback-box textarea:focus {
+    border-color: var(--primary-action);
+}
+
+.feedback-box button {
+    background: var(--primary-action);
+    color: #fff;
+    border-radius: var(--radius-xs);
+    padding: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    transition: var(--transition-base);
+}
+
+.feedback-box button:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.feedback-box button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }

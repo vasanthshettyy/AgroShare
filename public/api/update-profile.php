@@ -99,18 +99,13 @@ try {
     $qrPath = null;
     if (isset($_FILES['upi_qr_image']) && $_FILES['upi_qr_image']['error'] === UPLOAD_ERR_OK) {
         $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-        $maxSize = 2 * 1024 * 1024; // 2MB
-
+        // No size limit for high quality transaction QR codes as requested
+        
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $mimeType = $finfo->file($_FILES['upi_qr_image']['tmp_name']);
 
         if (!in_array($mimeType, $allowedTypes)) {
             echo json_encode(['success' => false, 'message' => 'Invalid QR image format. Use JPG, PNG or WebP.']);
-            exit();
-        }
-
-        if ($_FILES['upi_qr_image']['size'] > $maxSize) {
-            echo json_encode(['success' => false, 'message' => 'QR image size exceeds 2MB limit.']);
             exit();
         }
 

@@ -216,6 +216,12 @@ document.addEventListener('DOMContentLoaded', () => {
  * showUserReviews — Now acts as the Public Profile trigger.
  */
 async function showUserReviews(userId) {
+    const profModal = document.getElementById('profileModal');
+    if (profModal && profModal.classList.contains('show-modal')) {
+        profModal.classList.remove('show-modal');
+        setTimeout(() => profModal.style.display = 'none', 400);
+    }
+
     const modal = document.getElementById('userPublicProfileModal');
     if (!modal) return;
 

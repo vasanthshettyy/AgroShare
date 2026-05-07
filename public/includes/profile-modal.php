@@ -78,7 +78,11 @@
                     </div>
                     <div class="form-group full-width">
                         <label for="prof-upi-qr" class="form-label">UPI QR Scanner Image</label>
-                        <input type="file" name="upi_qr_image" id="prof-upi-qr" class="form-input" accept="image/jpeg,image/png,image/webp">
+                        <label class="btn-secondary btn-upload-avatar" style="width: 100%; display: flex; justify-content: center; margin-top: 5px;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            Upload QR Image
+                            <input type="file" name="upi_qr_image" id="prof-upi-qr" accept="image/jpeg,image/png,image/webp" style="display: none;">
+                        </label>
                         <small style="color: var(--text-muted); font-size: 0.75rem; margin-top: 5px; display: block;">
                             Upload your UPI QR code to receive payments directly from other farmers.
                         </small>
@@ -93,19 +97,32 @@
                     Security
                 </h2>
                 <div class="form-grid">
-                    <div class="form-group full-width" id="old-password-group">
-                        <label for="prof-old-password" class="form-label">Current Password</label>
-                        <input type="password" name="old_password" id="prof-old-password" class="form-input" placeholder="Enter current password">
+                    <!-- Read-Only View -->
+                    <div class="form-group full-width" id="readonly-password-group" style="display: flex; gap: 10px; align-items: flex-end;">
+                        <div style="flex-grow: 1;">
+                            <label class="form-label">Current Password</label>
+                            <input type="password" value="••••••••••••" class="form-input" readonly disabled style="color: var(--text-muted); background: var(--bg-color); letter-spacing: 2px;">
+                        </div>
+                        <button type="button" class="btn-secondary" id="btn-reveal-password-change" style="height: 44px; white-space: nowrap; padding: 0 1.5rem;">Change Password</button>
                     </div>
-                    <div class="form-group">
-                        <label for="prof-new-password" class="form-label">New Password</label>
-                        <input type="password" name="new_password" id="prof-new-password" class="form-input" placeholder="Min. 8 characters">
+                    <!-- Hidden Change Password Form -->
+                    <div id="change-password-fields" style="display: none; width: 100%; grid-column: 1 / -1; gap: 1rem; grid-template-columns: 1fr 1fr;">
+                        <div class="form-group full-width" id="old-password-group" style="grid-column: 1 / -1;">
+                            <label for="prof-old-password" class="form-label">Verify Current Password</label>
+                            <input type="password" name="old_password" id="prof-old-password" class="form-input" placeholder="Enter current password to verify">
+                        </div>
+                        <div class="form-group">
+                            <label for="prof-new-password" class="form-label">New Password</label>
+                            <input type="password" name="new_password" id="prof-new-password" class="form-input" placeholder="Min 8 chars, 1 number">
+                            <div class="pw-strength" style="height: 3px; border-radius: 4px; background: var(--border-color); margin-top: 6px; overflow: hidden;"><div id="prof-pw-bar" style="height: 100%; width: 0; transition: all 0.3s ease;"></div></div>
+                            <span class="pw-hint" style="font-size: 0.7rem; color: var(--text-subtle);">At least 8 characters & 1 number</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="prof-confirm-password" class="form-label">Confirm New Password</label>
+                            <input type="password" name="confirm_password" id="prof-confirm-password" class="form-input" placeholder="Repeat new password">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="prof-confirm-password" class="form-label">Confirm New Password</label>
-                        <input type="password" name="confirm_password" id="prof-confirm-password" class="form-input" placeholder="Repeat new password">
-                    </div>
-                    <div class="form-group full-width">
+                    <div class="form-group full-width" style="margin-top: 0.5rem;">
                         <small style="color: var(--text-muted); font-size: 0.75rem;">
                             Forgot your password? <a href="forgot-password.php" style="color: var(--primary-action);">Reset it here</a>.
                         </small>

@@ -399,8 +399,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileModal = document.getElementById('profileModal');
     const profileForm = document.getElementById('profileForm');
 
+    // Password Reveal Logic
+    const revealBtn = document.getElementById('btn-reveal-password-change');
+    const readonlyGroup = document.getElementById('readonly-password-group');
+    const changeFields = document.getElementById('change-password-fields');
+    
+    if (revealBtn) {
+        revealBtn.addEventListener('click', () => {
+            if (readonlyGroup) readonlyGroup.style.display = 'none';
+            if (changeFields) changeFields.style.display = 'grid'; // Reveal fields
+            const oldPassInput = document.getElementById('prof-old-password');
+            if (oldPassInput) oldPassInput.focus();
+        });
+    }
+    // Password Strength Meter Logic
+    const newPwInput = document.getElementById('prof-new-password');
+    const pwBar = document.getElementById('prof-pw-bar');
+    if (newPwInput && pwBar) {
+        newPwInput.addEventListener('input', (e) => {
+            const val = e.target.value;
+            let strength = 0;
+            if (val.length >= 8) strength += 50;
+            if (/\d/.test(val)) strength += 50;
+            
+            pwBar.style.width = strength + '%';
+            if (strength === 0) pwBar.style.background = 'transparent';
+            else if (strength === 50) pwBar.style.background = 'var(--amber)';
+            else pwBar.style.background = 'var(--primary-action)';
+        });
+    }
+
     const openProfileModal = async (e) => {
         if (e) e.preventDefault();
+
+        // Reset password fields to hidden state when opening
+        if (readonlyGroup) readonlyGroup.style.display = 'flex';
+        if (changeFields) changeFields.style.display = 'none';
+        if (pwBar) pwBar.style.width = '0';
 
         // Find modal again in case DOM was updated
         const modal = document.getElementById('profileModal');
