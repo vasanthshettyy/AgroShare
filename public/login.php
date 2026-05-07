@@ -56,10 +56,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($user && password_verify($password, $user['password_hash'])) {
                 if (isset($user['is_active']) && $user['is_active'] == 0) {
-                    $errors['general'] = 'Your account has been deactivated. Please contact support.';
                     $maskedId = (strlen($identifier) >= 4) ? substr($identifier, 0, 2) . '***' . substr($identifier, -2) : '***';
                     $ip = $_SERVER['REMOTE_ADDR'] ?? 'Unknown IP';
                     logAuditEvent($conn, 'login_failed', $user['id'], "Failed login attempt (Account Deactivated) for: " . $maskedId . " from IP: " . $ip);
+                    
+                    // Set deactivated user session and redirect
+                    $_SESSION['deactivated_user_id'] = $user['id'];
+                    header('Location: deactivated.php');
+                    exit();
                 } else {
                     session_regenerate_id(true);
                     $_SESSION['user_id']       = $user['id'];

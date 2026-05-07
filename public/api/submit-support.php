@@ -10,8 +10,10 @@ header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../../config/db.php';
 
-// 1. Authentication Check
-if (!isset($_SESSION['user_id'])) {
+// 1. Authentication Check (Allow active OR deactivated users)
+$userId = $_SESSION['user_id'] ?? $_SESSION['deactivated_user_id'] ?? null;
+
+if (!$userId) {
     echo json_encode(['success' => false, 'message' => 'Not authenticated.']);
     exit();
 }
@@ -36,14 +38,14 @@ if (mb_strlen($message) > 2000) {
 
 // 4. Database Insertion
 try {
-    $userId = (int)$_SESSION['user_id'];
+    $userId = (int)$userId;
     $stmt = $conn->prepare("INSERT INTO support_messages (user_id, message) VALUES (?, ?)");
     $stmt->bind_param('is', $userId, $message);
     
     if ($stmt->execute()) {
         echo json_encode([
             'success' => true,
-            'message' => 'Thank you for your feedback! Our team will review it shortly.'
+            'message' => 'Thank you for your message! Our admin team will review it shortly.'
         ]);
     } else {
         throw new Exception("Database execution failed.");
@@ -53,3 +55,4 @@ try {
     error_log('Support submission error: ' . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'Could not save your message. Please try again later.']);
 }
+

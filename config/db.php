@@ -87,6 +87,44 @@ try {
         }
     }
 
+    // ── Real-Time Active Check ─────────────────────────────
+    if (isset($_SESSION['user_id'])) {
+        $stmt = $conn->prepare("SELECT is_active FROM users WHERE id = ?");
+        $stmt->bind_param("i", $_SESSION['user_id']);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        if ($res && $row = $res->fetch_assoc()) {
+            if ($row['is_active'] == 0) {
+                $deactivated_user_id = $_SESSION['user_id'];
+                
+                // Destroy active session
+                $_SESSION = [];
+                if (ini_get("session.use_cookies")) {
+                    $params = session_get_cookie_params();
+                    setcookie(session_name(), '', time() - 42000,
+                        $params["path"], $params["domain"],
+                        $params["secure"], $params["httponly"]
+                    );
+                }
+                session_destroy();
+                session_start(); // Start fresh session for deactivated state
+                $_SESSION['deactivated_user_id'] = $deactivated_user_id;
+                
+                $currentScript = basename($_SERVER['SCRIPT_NAME']);
+                if ($currentScript !== 'deactivated.php') {
+                    if (strpos($_SERVER['REQUEST_URI'], '/api/') !== false) {
+                        header('Content-Type: application/json');
+                        echo json_encode(['success' => false, 'message' => 'Account deactivated.', 'redirect' => getBasePath() . '/public/deactivated.php']);
+                        exit();
+                    }
+                    header('Location: ' . getBasePath() . '/public/deactivated.php');
+                    exit();
+                }
+            }
+        }
+        $stmt->close();
+    }
+
 } catch (mysqli_sql_exception $e) {
     error_log('Database connection failed: ' . $e->getMessage());
     die('Database connection failed. Please try again later.');
