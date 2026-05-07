@@ -24,7 +24,7 @@ $users = getUsersForAdmin($conn);
                         <th>Farmer</th>
                         <th>Location</th>
                         <th>Trust Score</th>
-                        <th>Verification</th>
+
                         <th>Account</th>
                         <th style="text-align: right;">Actions</th>
                     </tr>
@@ -53,13 +53,7 @@ $users = getUsersForAdmin($conn);
                                 <span style="font-weight: 700;"><?= number_format($u['trust_score'] ?? 0, 1) ?></span>
                             </div>
                         </td>
-                        <td>
-                            <?php if ($u['is_verified']): ?>
-                                <span class="admin-status-pill" style="background: rgba(74, 222, 128, 0.1); color: #4ade80;">Verified</span>
-                            <?php else: ?>
-                                <span class="admin-status-pill" style="background: rgba(251, 191, 36, 0.1); color: #fbbf24;">Pending</span>
-                            <?php endif; ?>
-                        </td>
+
                         <td>
                             <?php if (isset($u['is_active']) && $u['is_active'] == 0): ?>
                                 <span class="admin-status-pill" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">Suspended</span>
@@ -69,9 +63,7 @@ $users = getUsersForAdmin($conn);
                         </td>
                         <td style="text-align: right;">
                             <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                                <button class="btn-icon user-action-btn" data-action="toggle-verify" data-id="<?= $u['id'] ?>" title="<?= $u['is_verified'] ? 'Revoke' : 'Verify' ?>">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
-                                </button>
+
                                 <button class="btn-icon user-action-btn" data-action="toggle-active" data-id="<?= $u['id'] ?>" title="<?= ($u['is_active'] ?? 1) ? 'Suspend' : 'Activate' ?>" style="color: <?= ($u['is_active'] ?? 1) ? '#ef4444' : '#4ade80' ?>;">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                                 </button>

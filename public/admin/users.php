@@ -133,12 +133,7 @@ $users = getUsersForAdmin($conn);
                         <td><?= e($u['village']) ?>, <?= e($u['district']) ?></td>
                         <td>
                             <div style="display: flex; gap: 6px; flex-direction: column; align-items: flex-start;">
-                                <?php if ($u['is_verified']): ?>
-                                    <span class="chip chip-success">Verified</span>
-                                <?php else: ?>
-                                    <span class="chip chip-neutral">Unverified</span>
-                                <?php endif; ?>
-                                
+
                                 <?php if (isset($u['is_active']) && $u['is_active'] == 0): ?>
                                     <span class="chip chip-danger">Inactive</span>
                                 <?php else: ?>
@@ -148,16 +143,7 @@ $users = getUsersForAdmin($conn);
                         </td>
                         <td>
                             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                <form method="POST" action="api/verify-user.php" style="margin:0;">
-                                    <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-                                    <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
-                                    <input type="hidden" name="status" value="<?= $u['is_verified'] ? '0' : '1' ?>">
-                                    <?php if ($u['is_verified']): ?>
-                                        <button type="submit" class="btn-action btn-warning" onclick="return confirm('Are you sure you want to revoke verification for this user?');">Revoke Verification</button>
-                                    <?php else: ?>
-                                        <button type="submit" class="btn-action btn-positive">Verify User</button>
-                                    <?php endif; ?>
-                                </form>
+
                                 <form method="POST" action="api/toggle-user-active.php" style="margin:0;">
                                     <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
                                     <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
