@@ -282,6 +282,24 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 
 
 -- ============================================================
+-- TABLE 12: support_messages
+-- User feedback and support requests.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS support_messages (
+    id              INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+    user_id         INT UNSIGNED    NOT NULL,
+    message         TEXT            NOT NULL,
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+    CONSTRAINT fk_support_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================================
 -- VERIFICATION: Show all tables created
 -- ============================================================
 SHOW TABLES;
