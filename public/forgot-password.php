@@ -2,10 +2,8 @@
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../src/Helpers/mail.php';
 
-if (isset($_SESSION['user_id'])) {
-    header('Location: dashboard.php');
-    exit();
-}
+// Removed the block that redirects logged-in users to the dashboard.
+// This allows a logged-in user who forgot their current password to use the OTP flow.
 
 $errors = [];
 $old_email = '';
@@ -134,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="auth-wrapper">
     <a href="login.php" class="btn-back">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        Back to Login
+        Back
     </a>
     <h1>Forgot Password</h1>
     <p>Enter your registered email address. We will send you an OTP to reset your password.</p>

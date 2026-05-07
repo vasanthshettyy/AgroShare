@@ -50,8 +50,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['password'] = 'Password is required.';
     } elseif (strlen($password) < 8) {
         $errors['password'] = 'Min 8 characters required.';
+    } elseif (!preg_match('/[A-Z]/', $password)) {
+        $errors['password'] = 'Must contain at least one uppercase letter.';
+    } elseif (!preg_match('/[a-z]/', $password)) {
+        $errors['password'] = 'Must contain at least one lowercase letter.';
     } elseif (!preg_match('/\d/', $password)) {
         $errors['password'] = 'Must contain at least one number.';
+    } elseif (!preg_match('/[^A-Za-z0-9]/', $password)) {
+        $errors['password'] = 'Must contain at least one special character.';
     }
 
     if ($password !== $confirm_password) {
@@ -795,7 +801,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                     <!-- Strength meter -->
                     <div class="pw-strength"><div class="pw-strength-bar" id="pw-bar"></div></div>
-                    <span class="pw-hint" id="pw-hint">At least 8 characters &amp; 1 number</span>
+                    <span class="pw-hint" id="pw-hint">Min 8 chars, mixed case, number & symbol</span>
                     <?php if (isset($errors['password'])): ?>
                         <span class="error-msg" role="alert"><?= e($errors['password']) ?></span>
                     <?php endif; ?>
@@ -918,12 +924,12 @@ const strengthLevels = [
 function calcStrength(pw) {
     if (pw.length === 0) return -1;
     let score = 0;
-    if (pw.length >= 8)  score++;
-    if (pw.length >= 12) score++;
-    if (/\d/.test(pw))   score++;
-    if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
-    if (/[^A-Za-z0-9]/.test(pw)) score++;
-    return Math.min(score, 4);
+    if (pw.length >= 8)  score++; // Length
+    if (/[A-Z]/.test(pw)) score++; // Uppercase
+    if (/[a-z]/.test(pw)) score++; // Lowercase
+    if (/\d/.test(pw))   score++; // Number
+    if (/[^A-Za-z0-9]/.test(pw)) score++; // Special char
+    return Math.min(score - 1, 4); // Map 1-5 requirements to 0-4 levels
 }
 
 if (pwInput) {

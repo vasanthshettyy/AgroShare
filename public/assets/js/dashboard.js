@@ -399,32 +399,81 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileModal = document.getElementById('profileModal');
     const profileForm = document.getElementById('profileForm');
 
-    // Password Reveal Logic
+    // Password Change Logic (Two-Step Verification)
     const revealBtn = document.getElementById('btn-reveal-password-change');
     const readonlyGroup = document.getElementById('readonly-password-group');
-    const changeFields = document.getElementById('change-password-fields');
+    const verifyStep = document.getElementById('password-verify-step');
+    const verifyBtn = document.getElementById('btn-verify-password');
+    const verifyInput = document.getElementById('prof-verify-current');
+    const changeFieldsWrap = document.getElementById('change-password-fields-wrap');
     
     if (revealBtn) {
         revealBtn.addEventListener('click', () => {
             if (readonlyGroup) readonlyGroup.style.display = 'none';
-            if (changeFields) changeFields.style.display = 'grid'; // Reveal fields
-            const oldPassInput = document.getElementById('prof-old-password');
-            if (oldPassInput) oldPassInput.focus();
+            if (verifyStep) verifyStep.style.display = 'flex'; // Uses flex to maintain row alignment
+            if (verifyInput) verifyInput.focus();
         });
     }
+
+    if (verifyBtn) {
+        verifyBtn.addEventListener('click', async () => {
+            const password = verifyInput.value;
+            if (!password) { alert('Please enter your current password.'); return; }
+
+            verifyBtn.disabled = true;
+            const originalText = verifyBtn.textContent;
+            verifyBtn.textContent = 'Verifying...';
+
+            try {
+                const formData = new FormData();
+                formData.append('password', password);
+                const csrfToken = document.querySelector('input[name="csrf_token"]');
+                if (csrfToken) formData.append('csrf_token', csrfToken.value);
+
+                const apiBase = (window.AgroShare && window.AgroShare.apiUrl) ? window.AgroShare.apiUrl : 'api';
+                const response = await fetch(`${apiBase}/verify-current-password.php`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    if (verifyStep) verifyStep.style.display = 'none';
+                    if (changeFieldsWrap) changeFieldsWrap.style.display = 'block';
+                    const newPwInput = document.getElementById('prof-new-password');
+                    if (newPwInput) newPwInput.focus();
+                } else {
+                    alert(result.message || 'Verification failed.');
+                }
+            } catch (err) {
+                console.error('Verification error:', err);
+                alert('Network error during verification.');
+            } finally {
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = originalText;
+            }
+        });
+    }
+
     // Password Strength Meter Logic
     const newPwInput = document.getElementById('prof-new-password');
     const pwBar = document.getElementById('prof-pw-bar');
     if (newPwInput && pwBar) {
         newPwInput.addEventListener('input', (e) => {
             const val = e.target.value;
-            let strength = 0;
-            if (val.length >= 8) strength += 50;
-            if (/\d/.test(val)) strength += 50;
+            let score = 0;
+            if (val.length >= 8) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[a-z]/.test(val)) score++;
+            if (/\d/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
             
+            const strength = Math.max(0, (score / 5) * 100);
             pwBar.style.width = strength + '%';
+
             if (strength === 0) pwBar.style.background = 'transparent';
-            else if (strength === 50) pwBar.style.background = 'var(--amber)';
+            else if (strength <= 40) pwBar.style.background = 'var(--danger)';
+            else if (strength <= 80) pwBar.style.background = 'var(--amber)';
             else pwBar.style.background = 'var(--primary-action)';
         });
     }
@@ -432,9 +481,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const openProfileModal = async (e) => {
         if (e) e.preventDefault();
 
-        // Reset password fields to hidden state when opening
+        // Reset password fields to default state when opening
         if (readonlyGroup) readonlyGroup.style.display = 'flex';
-        if (changeFields) changeFields.style.display = 'none';
+        if (verifyStep) verifyStep.style.display = 'none';
+        if (changeFieldsWrap) changeFieldsWrap.style.display = 'none';
+        if (verifyInput) verifyInput.value = '';
         if (pwBar) pwBar.style.width = '0';
 
         // Find modal again in case DOM was updated

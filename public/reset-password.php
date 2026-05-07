@@ -1,10 +1,8 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
 
-if (isset($_SESSION['user_id'])) {
-    header('Location: dashboard.php');
-    exit();
-}
+// Removed the block that redirects logged-in users to the dashboard.
+// This allows a logged-in user who forgot their current password to use the OTP flow.
 
 if (!isset($_SESSION['reset_email']) || !($_SESSION['reset_verified'] ?? false)) {
     header('Location: forgot-password.php');

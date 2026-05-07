@@ -301,12 +301,24 @@ body {
 }
 
 /* ── Form Normalization ── */
+/* WebKit browsers often ignore CSS variables inside autofill box-shadow */
+/* Default (Dark Mode) */
 input:-webkit-autofill,
 input:-webkit-autofill:hover, 
 input:-webkit-autofill:focus, 
 input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px var(--surface-color) inset !important;
-    -webkit-text-fill-color: var(--text-main) !important;
+    -webkit-box-shadow: 0 0 0 30px #13201a inset !important;
+    -webkit-text-fill-color: #e6ebe0 !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Light Mode */
+[data-theme="light"] input:-webkit-autofill,
+[data-theme="light"] input:-webkit-autofill:hover, 
+[data-theme="light"] input:-webkit-autofill:focus, 
+[data-theme="light"] input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+    -webkit-text-fill-color: #252d33 !important;
     transition: background-color 5000s ease-in-out 0s;
 }
 

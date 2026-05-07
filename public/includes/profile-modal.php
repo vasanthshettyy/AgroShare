@@ -97,29 +97,43 @@
                     Security
                 </h2>
                 <div class="form-grid">
-                    <!-- Read-Only View -->
-                    <div class="form-group full-width" id="readonly-password-group" style="display: flex; gap: 10px; align-items: flex-end;">
-                        <div style="flex-grow: 1;">
+                    <!-- Read-Only View (Perfect Flex Alignment) -->
+                    <div class="form-group full-width" id="readonly-password-group" style="flex-direction: row; align-items: flex-end; gap: 1rem;">
+                        <div style="flex: 1;">
                             <label class="form-label">Current Password</label>
                             <input type="password" value="••••••••••••" class="form-input" readonly disabled style="color: var(--text-muted); background: var(--bg-color); letter-spacing: 2px;">
                         </div>
-                        <button type="button" class="btn-secondary" id="btn-reveal-password-change" style="height: 44px; white-space: nowrap; padding: 0 1.5rem;">Change Password</button>
+                        <button type="button" class="btn-secondary" id="btn-reveal-password-change" style="height: 40px; white-space: nowrap; padding: 0 1.5rem;">Change Password</button>
                     </div>
-                    <!-- Hidden Change Password Form -->
-                    <div id="change-password-fields" style="display: none; width: 100%; grid-column: 1 / -1; gap: 1rem; grid-template-columns: 1fr 1fr;">
-                        <div class="form-group full-width" id="old-password-group" style="grid-column: 1 / -1;">
-                            <label for="prof-old-password" class="form-label">Verify Current Password</label>
-                            <input type="password" name="old_password" id="prof-old-password" class="form-input" placeholder="Enter current password to verify">
+
+                    <!-- Step 1: Verification (Perfect Flex Alignment) -->
+                    <div class="form-group full-width" id="password-verify-step" style="display: none; flex-direction: row; align-items: flex-end; gap: 1rem;">
+                        <div style="flex: 1;">
+                            <label for="prof-verify-current" class="form-label">Verify Current Password</label>
+                            <input type="password" id="prof-verify-current" class="form-input" placeholder="Enter current password to continue">
                         </div>
-                        <div class="form-group">
-                            <label for="prof-new-password" class="form-label">New Password</label>
-                            <input type="password" name="new_password" id="prof-new-password" class="form-input" placeholder="Min 8 chars, 1 number">
-                            <div class="pw-strength" style="height: 3px; border-radius: 4px; background: var(--border-color); margin-top: 6px; overflow: hidden;"><div id="prof-pw-bar" style="height: 100%; width: 0; transition: all 0.3s ease;"></div></div>
-                            <span class="pw-hint" style="font-size: 0.7rem; color: var(--text-subtle);">At least 8 characters & 1 number</span>
-                        </div>
-                        <div class="form-group">
-                            <label for="prof-confirm-password" class="form-label">Confirm New Password</label>
-                            <input type="password" name="confirm_password" id="prof-confirm-password" class="form-input" placeholder="Repeat new password">
+                        <button type="button" class="btn-primary" id="btn-verify-password" style="height: 40px; white-space: nowrap; padding: 0 1.5rem;">Verify</button>
+                    </div>
+
+                    <!-- Step 2: Hidden Change Password Form -->
+                    <div id="change-password-fields-wrap" style="display: none; grid-column: 1 / -1; width: 100%;">
+                        <div class="form-grid" style="gap: 1.25rem;">
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <div style="padding: 10px; background: var(--primary-10); border: 1px solid var(--primary-action); border-radius: 8px; color: var(--primary-action); font-size: 0.85rem; display: flex; align-items: center; gap: 10px;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                    Password verified. You can now set a new one.
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="prof-new-password" class="form-label">New Password</label>
+                                <input type="password" name="new_password" id="prof-new-password" class="form-input" placeholder="Min 8 chars, mixed case, number & symbol">
+                                <div class="pw-strength" style="height: 3px; border-radius: 4px; background: var(--border-color); margin-top: 6px; overflow: hidden;"><div id="prof-pw-bar" style="height: 100%; width: 0; transition: all 0.3s ease;"></div></div>
+                                <span class="pw-hint" style="font-size: 0.7rem; color: var(--text-subtle);">Min 8 chars, mixed case, number & symbol</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="prof-confirm-password" class="form-label">Confirm New Password</label>
+                                <input type="password" name="confirm_password" id="prof-confirm-password" class="form-input" placeholder="Repeat new password">
+                            </div>
                         </div>
                     </div>
                     <div class="form-group full-width" style="margin-top: 0.5rem;">
