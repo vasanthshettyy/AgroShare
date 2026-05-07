@@ -67,7 +67,9 @@ function getEquipmentForAdmin(mysqli $conn): array
 
 function getBookingsForAdmin(mysqli $conn): array
 {
-    $sql = "SELECT b.*, e.title as equipment_title, r.full_name as renter_name, o.full_name as owner_name 
+    $sql = "SELECT b.*, e.title as equipment_title, 
+                   r.full_name as renter_name, r.phone as renter_phone, r.email as renter_email,
+                   o.full_name as owner_name, o.phone as owner_phone, o.email as owner_email
             FROM bookings b
             JOIN equipment e ON b.equipment_id = e.id
             JOIN users r ON b.renter_id = r.id
@@ -108,11 +110,23 @@ function getAuditLogs(mysqli $conn): array
 function getPoolingCampaignsForAdmin(mysqli $conn): array
 {
     $sql = "SELECT c.*, u.full_name as creator_name,
-            (SELECT COUNT(*) FROM pledges WHERE campaign_id = c.id) as pledge_count,
-            (SELECT SUM(quantity) FROM pledges WHERE campaign_id = c.id) as current_quantity
-            FROM campaigns c
+            (SELECT COUNT(*) FROM pooling_pledges WHERE campaign_id = c.id) as pledge_count
+            FROM pooling_campaigns c
             JOIN users u ON c.creator_id = u.id
             ORDER BY c.created_at DESC";
+    $res = $conn->query($sql);
+    return $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
+}
+
+/**
+ * Fetch all support messages with sender names.
+ */
+function getSupportMessages(mysqli $conn): array
+{
+    $sql = "SELECT s.*, u.full_name as sender_name 
+            FROM support_messages s
+            JOIN users u ON s.user_id = u.id
+            ORDER BY s.created_at DESC";
     $res = $conn->query($sql);
     return $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
 }

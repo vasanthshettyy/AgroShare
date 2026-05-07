@@ -52,6 +52,10 @@ $greeting = "Welcome, Admin";
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                 <span>Bookings</span>
             </a>
+            <a href="support.php" class="nav-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <span>Support</span>
+            </a>
             <a href="settings.php" class="nav-link">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                 <span>Settings</span>
@@ -88,30 +92,61 @@ $greeting = "Welcome, Admin";
             </div>
         </div>
 
-        <h2>Recent Audit Logs</h2>
-        <div class="table-container" style="background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin-top: 16px;">
-            <?php if (empty($stats['recent_logs'])): ?>
-                <p>No recent activity.</p>
-            <?php else: ?>
-                <table style="width: 100%; text-align: left; border-collapse: collapse;">
-                    <thead>
-                        <tr style="border-bottom: 1px solid var(--border-color);">
-                            <th style="padding: 8px;">Time</th>
-                            <th style="padding: 8px;">Action</th>
-                            <th style="padding: 8px;">Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($stats['recent_logs'] as $log): ?>
-                        <tr style="border-bottom: 1px solid var(--border-color);">
-                            <td style="padding: 8px;"><?= e($log['created_at']) ?></td>
-                            <td style="padding: 8px;"><?= e($log['action_type']) ?></td>
-                            <td style="padding: 8px;"><?= e($log['description']) ?></td>
-                        </tr>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 32px;">
+            <section>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h2 style="margin: 0;">Recent Support</h2>
+                    <a href="support.php" style="color: var(--primary-action); font-size: 0.85rem; font-weight: 600;">View All →</a>
+                </div>
+                <div class="table-container" style="background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px;">
+                    <?php 
+                    $recentMessages = array_slice(getSupportMessages($conn), 0, 5); 
+                    if (empty($recentMessages)): 
+                    ?>
+                        <p style="color: var(--text-subtle); font-size: 0.9rem;">No messages.</p>
+                    <?php else: ?>
+                        <?php foreach ($recentMessages as $m): ?>
+                            <div style="padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--border-color);">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <strong style="font-size: 0.9rem; color: var(--text-main);"><?= e($m['sender_name']) ?></strong>
+                                    <span style="font-size: 0.75rem; color: var(--text-subtle);"><?= date('M d', strtotime($m['created_at'])) ?></span>
+                                </div>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    <?= e($m['message']) ?>
+                                </p>
+                            </div>
                         <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+            </section>
+
+            <section>
+                <h2 style="margin-bottom: 16px;">Recent Audit Logs</h2>
+                <div class="table-container" style="background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px;">
+                    <?php if (empty($stats['recent_logs'])): ?>
+                        <p style="color: var(--text-subtle); font-size: 0.9rem;">No recent activity.</p>
+                    <?php else: ?>
+                        <table style="width: 100%; text-align: left; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                    <th style="padding: 8px;">Time</th>
+                                    <th style="padding: 8px;">Action</th>
+                                    <th style="padding: 8px;">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach (array_slice($stats['recent_logs'], 0, 5) as $log): ?>
+                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                    <td style="padding: 8px; font-size: 0.8rem;"><?= date('M d, H:i', strtotime($log['created_at'])) ?></td>
+                                    <td style="padding: 8px; font-size: 0.8rem;"><?= e($log['action_type']) ?></td>
+                                    <td style="padding: 8px; font-size: 0.8rem;"><?= e($log['description']) ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    <?php endif; ?>
+                </div>
+            </section>
         </div>
     </main>
 </div>
