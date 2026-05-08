@@ -6,15 +6,18 @@ requireAuth();
 
 $userId = (int)$_SESSION['user_id'];
 
-// Ensure full_name is in session (fallback: fetch from DB)
-if (empty($_SESSION['full_name'])) {
-    $stmt = $conn->prepare("SELECT full_name FROM users WHERE id = ?");
+// Ensure full_name and profile_photo are in session (fallback: fetch from DB)
+if (empty($_SESSION['full_name']) || !isset($_SESSION['profile_photo'])) {
+    $stmt = $conn->prepare("SELECT full_name, profile_photo FROM users WHERE id = ?");
     $stmt->bind_param('i', $userId);
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
     $stmt->close();
     $_SESSION['full_name'] = $row['full_name'] ?? 'Farmer';
+    $_SESSION['profile_photo'] = $row['profile_photo'] ?? null;
 }
+
+$userPhoto = $_SESSION['profile_photo'] ?? null;
 
 // Fetch KPI data
 $totalEquipment = getUserEquipmentCount($conn, $userId);
@@ -86,21 +89,8 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
         </div>
 
         <div class="topbar-right" style="position: relative;">
-            <!-- Theme Toggle -->
-            <button class="btn-icon theme-toggle" id="themeToggleBtn" aria-label="Toggle light/dark mode" title="Toggle theme">
-                <svg class="theme-icon sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="5"/>
-                    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </svg>
-                <svg class="theme-icon moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-            </button>
+            <!-- Theme Toggle (Pill) -->
+            <?php include __DIR__ . '/includes/theme-toggle-btn.php'; ?>
 
             <!-- Notifications -->
             <button class="btn-icon" id="notifBtn" aria-label="Notifications" title="Notifications">
@@ -120,11 +110,20 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 </div>
             </div>
 
-            <!-- Avatar -->
-            <div class="avatar" id="avatar-btn" role="button" tabindex="0"
-                 title="Profile — <?= e($fullName) ?>" aria-label="Open profile">
-                <?= e($initials) ?>
-            </div>
+            <!-- Avatar / Sign In -->
+            <?php if (isGuest()): ?>
+                <a href="login.php" class="btn-primary" style="padding: 0.6rem 1.2rem; font-size: 0.85rem; border-radius: 10px; text-decoration: none; font-weight: 700;">Sign In</a>
+            <?php else: ?>
+                <div class="avatar" id="avatar-btn" role="button" tabindex="0"
+                     title="Profile — <?= e($_SESSION['full_name']) ?>" aria-label="Open profile"
+                     style="<?= !empty($userPhoto) ? 'padding: 0; overflow: hidden;' : '' ?>">
+                    <?php if (!empty($userPhoto)): ?>
+                        <img src="<?= e($userPhoto) ?>" alt="<?= e($_SESSION['full_name']) ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                    <?php else: ?>
+                        <?= e($initials) ?>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
         </div>
     </header>
 
@@ -178,8 +177,8 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
 
             <span class="nav-section-label">Community</span>
 
+            <!-- 
             <a href="pooling-browse.php" class="nav-link">
-                <!-- users icon -->
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -188,6 +187,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 </svg>
                 <span>Pooling</span>
             </a>
+            -->
 
             <a href="equipment-browse.php" class="nav-link">
                 <!-- search icon -->
@@ -198,6 +198,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 <span>Browse</span>
             </a>
 
+            <?php if (!isGuest()): ?>
             <span class="nav-section-label">Account</span>
 
             <a href="javascript:void(0)" class="nav-link" id="profile-btn">
@@ -219,9 +220,10 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 </svg>
                 <span>Send Feedback</span>
             </a>
+            <?php endif; ?>
         </nav>
 
-        <!-- Logout -->
+        <!-- Logout / Exit -->
         <div class="sidebar-footer">
             <a href="logout.php" class="nav-link danger">
                 <!-- log-out icon -->
@@ -231,7 +233,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                     <polyline points="16 17 21 12 16 7"/>
                     <line x1="21" y1="12" x2="9" y2="12"/>
                 </svg>
-                <span>Log Out</span>
+                <span><?= isGuest() ? 'Exit Demo' : 'Log Out' ?></span>
             </a>
         </div>
     </aside>
@@ -320,7 +322,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 </div>
             </a>
 
-            <!-- KPI 3 — Pool Campaigns -->
+            <!-- KPI 3 — Pool Campaigns 
             <a href="pooling-browse.php" class="kpi-card" style="text-decoration: none; display: block; cursor: pointer;">
                 <div class="kpi-header">
                     <span class="kpi-label">Pool Campaigns</span>
@@ -338,7 +340,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                          stroke-linecap="round" aria-hidden="true">
                         <line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
-                    Joined
+                    Total joined
                 </div>
                 <div class="kpi-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -348,6 +350,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                     </svg>
                 </div>
             </a>
+            -->
 
             <!-- KPI 4 — Trust Score -->
             <a href="javascript:void(0)" class="kpi-card" id="trust-score-card" style="text-decoration: none; display: block; cursor: pointer;">
@@ -519,6 +522,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 </div>
             </a>
 
+            <!-- 
             <a href="pooling-browse.php" class="action-card">
                 <div class="action-icon-wrap amber" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -541,6 +545,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                     </div>
                 </div>
             </a>
+            -->
 
             <a href="javascript:void(0)" class="action-card" id="edit-profile-quick-action">
                 <div class="action-icon-wrap purple" aria-hidden="true">
@@ -596,11 +601,9 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         <label for="eq-category" class="form-label">Category</label>
                         <select name="category" id="eq-category" class="form-input form-select" required>
                             <option value="">Select category…</option>
-                            <option value="tractor">Tractor</option>
-                            <option value="harvester">Harvester</option>
-                            <option value="seeder">Seeder</option>
-                            <option value="sprayer">Sprayer</option>
-                            <option value="other">Other</option>
+                            <?php foreach (['tractor','harvester','seeder','sprayer','plough','chain_saw','rotavator','cultivator','thresher','water_pump','earth_auger','baler','trolley','brush_cutter','power_tiller','chaff_cutter','other'] as $cat): ?>
+                                <option value="<?= $cat ?>"><?= ucfirst(str_replace('_', ' ', $cat)) ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="form-group">
@@ -701,6 +704,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
 <?php require_once __DIR__ . '/includes/viewer-reviews-modal.php'; ?>
 <?php require_once __DIR__ . '/includes/user-public-profile-modal.php'; ?>
 <script src="assets/js/theme-toggle.js?v=<?= time() ?>" defer></script>
+<script src="assets/js/equipment.js?v=<?= time() ?>" defer></script>
 <script src="assets/js/dashboard.js?v=<?= time() ?>" defer></script>
 <script src="assets/js/dashboard-stats.js?v=<?= time() ?>" defer></script>
 </body>

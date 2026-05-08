@@ -361,20 +361,8 @@ $is_creator = ($campaign['creator_id'] === $userId);
 
         <div class="topbar-right" style="position: relative;">
             <!-- Theme Toggle -->
-            <button class="btn-icon theme-toggle" id="themeToggleBtn" aria-label="Toggle light/dark mode" title="Toggle theme">
-                <svg class="theme-icon sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="5"/>
-                    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </svg>
-                <svg class="theme-icon moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-            </button>
+            <!-- Theme Toggle (Pill) -->
+            <?php include __DIR__ . '/includes/theme-toggle-btn.php'; ?>
 
             <!-- Notifications -->
             <button class="btn-icon" id="notifBtn" aria-label="Notifications" title="Notifications">
@@ -412,9 +400,12 @@ $is_creator = ($campaign['creator_id'] === $userId);
             <a href="my-bookings.php" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg><span>My Bookings</span></a>
             
             <span class="nav-section-label">Community</span>
+            <!--
             <a href="pooling-browse.php" class="nav-link active"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Pooling</span></a>
+            -->
             <a href="equipment-browse.php" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>Browse</span></a>
 
+            <?php if (!isGuest()): ?>
             <span class="nav-section-label">Account</span>
             <a href="javascript:void(0)" class="nav-link" id="profile-btn">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -434,13 +425,14 @@ $is_creator = ($campaign['creator_id'] === $userId);
                 </svg>
                 <span>Send Feedback</span>
             </a>
+            <?php endif; ?>
             </nav>
         <div class="sidebar-footer">
             <a href="logout.php" class="nav-link danger">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
                 </svg>
-                <span>Log Out</span>
+                <span><?= isGuest() ? 'Exit Demo' : 'Log Out' ?></span>
             </a>
         </div>
     </aside>
@@ -644,14 +636,20 @@ $is_creator = ($campaign['creator_id'] === $userId);
                             <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-main);">Help Reach Goal</h3>
                             <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Contribute your excess supply to help this farmer reach their target.</p>
                             
-                            <div class="form-group" style="margin-bottom: 1.25rem;">
-                                <label class="form-label" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Quantity (<?= e($campaign['unit']) ?>)</label>
-                                <input type="number" id="pledgeQty" class="form-input" min="1" placeholder="Enter quantity..." style="background: rgba(0,0,0,0.2); border-radius: 10px; height: 50px;">
-                            </div>
+                            <?php if (isGuest()): ?>
+                                <a href="login.php" class="btn-primary" style="width: 100%; height: 52px; font-size: 0.95rem; font-weight: 700; border-radius: 12px; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                                    Sign in to Contribute
+                                </a>
+                            <?php else: ?>
+                                <div class="form-group" style="margin-bottom: 1.25rem;">
+                                    <label class="form-label" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Quantity (<?= e($campaign['unit']) ?>)</label>
+                                    <input type="number" id="pledgeQty" class="form-input" min="1" placeholder="Enter quantity..." style="background: rgba(0,0,0,0.2); border-radius: 10px; height: 50px;">
+                                </div>
 
-                            <button type="button" class="btn-primary" id="pledgeBtn" style="width: 100%; height: 52px; font-size: 0.95rem; font-weight: 700; border-radius: 12px;">
-                                Contribute Supply
-                            </button>
+                                <button type="button" class="btn-primary" id="pledgeBtn" style="width: 100%; height: 52px; font-size: 0.95rem; font-weight: 700; border-radius: 12px;">
+                                    Contribute Supply
+                                </button>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
 
@@ -669,7 +667,7 @@ $is_creator = ($campaign['creator_id'] === $userId);
                             <div class="creator-avatar-init"><?= e($creatorInitials) ?></div>
                             <div class="creator-info-text">
                                 <span class="creator-name-premium"><?= e($campaign['creator_name']) ?></span>
-                                <span class="creator-since">Verified Farmer</span>
+                                <span class="creator-since">Farmer Member</span>
                             </div>
                             <button class="btn-contact-creator" title="Contact Creator">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>

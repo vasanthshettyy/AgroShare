@@ -4,13 +4,21 @@ require_once __DIR__ . '/../src/Controllers/EquipmentController.php';
 
 $isLoggedIn = isset($_SESSION['user_id']);
 
-if (isset($_GET['mine']) && $_GET['mine'] === '1' && !$isLoggedIn) {
-    header('Location: login.php');
-    exit();
-}
-
 // —— Common layout data ─────────────────────────────────────
 $fullName  = trim($_SESSION['full_name'] ?? '');
+$userPhoto = $_SESSION['profile_photo'] ?? null;
+$userId    = $_SESSION['user_id'] ?? null;
+
+if ($userId && !isset($_SESSION['profile_photo'])) {
+    $uStmt = $conn->prepare("SELECT profile_photo FROM users WHERE id = ?");
+    $uStmt->bind_param('i', $userId);
+    $uStmt->execute();
+    $uRes = $uStmt->get_result()->fetch_assoc();
+    $userPhoto = $uRes['profile_photo'] ?? null;
+    $_SESSION['profile_photo'] = $userPhoto;
+    $uStmt->close();
+}
+
 $nameParts = explode(' ', $fullName);
 $initials  = !empty($nameParts[0]) ? strtoupper(substr($nameParts[0], 0, 1)) : '?';
 if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
@@ -24,15 +32,17 @@ if (!empty($_GET['district']))     $filters['district']     = $_GET['district'];
 if (!empty($_GET['max_price']))    $filters['max_price']    = $_GET['max_price'];
 if (!empty($_GET['search']))       $filters['search']       = $_GET['search'];
 if (!empty($_GET['has_operator'])) $filters['has_operator'] = true;
-if (isset($_GET['mine']) && $_GET['mine'] === '1') {
+
+$isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
+
+if ($isMyEquipment && !isGuest()) {
     $filters['owner_id'] = $_SESSION['user_id'];
     $filters['show_all'] = true; // Show unavailable too for the owner
 }
 
 $page    = max(1, (int)($_GET['page'] ?? 1));
-$results = browseEquipment($conn, $filters, $page);
+$results = browseEquipment($conn, $filters, $page, 15);
 $items   = $results['items'];
-$isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -82,20 +92,8 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
 
         <div class="topbar-right" style="position: relative;">
             <!-- Theme Toggle -->
-            <button class="btn-icon theme-toggle" id="themeToggleBtn" aria-label="Toggle light/dark mode" title="Toggle theme">
-                <svg class="theme-icon sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="5"/>
-                    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </svg>
-                <svg class="theme-icon moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-            </button>
+            <!-- Theme Toggle (Pill) -->
+            <?php include __DIR__ . '/includes/theme-toggle-btn.php'; ?>
 
             <?php if ($isLoggedIn): ?>
             <button class="btn-icon" id="notifBtn" aria-label="Notifications" title="Notifications">
@@ -115,8 +113,13 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
             </div>
 
             <div class="avatar" id="avatar-btn" role="button" tabindex="0"
-                 title="Profile — <?= e($fullName) ?>" aria-label="Open profile">
-                <?= e($initials) ?>
+                 title="Profile — <?= e($fullName) ?>" aria-label="Open profile"
+                 style="<?= !empty($userPhoto) ? 'padding: 0; overflow: hidden;' : '' ?>">
+                <?php if (!empty($userPhoto)): ?>
+                    <img src="<?= e($userPhoto) ?>" alt="<?= e($fullName) ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                <?php else: ?>
+                    <?= e($initials) ?>
+                <?php endif; ?>
             </div>
             <?php else: ?>
             <a href="login.php" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: 8px; text-decoration: none;">Log In</a>
@@ -140,7 +143,6 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
         <nav class="sidebar-nav" aria-label="Site navigation">
             <span class="nav-section-label">Main</span>
 
-            <?php if ($isLoggedIn): ?>
             <a href="dashboard.php" class="nav-link">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -165,19 +167,19 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
                 </svg>
                 <span>My Bookings</span>
             </a>
-            <?php endif; ?>
 
             <span class="nav-section-label">Community</span>
-<a href="pooling-browse.php" class="nav-link">
-    <!-- users icon -->
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-        <circle cx="9" cy="7" r="4"/>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
-    </svg>
-    <span>Pooling</span>
-</a>
+            <!--
+            <a href="pooling-browse.php" class="nav-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <span>Pooling</span>
+            </a>
+            -->
 
             <a href="equipment-browse.php" class="nav-link <?= !$isMyEquipment ? 'active' : '' ?>" <?= !$isMyEquipment ? 'aria-current="page"' : '' ?>>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -187,9 +189,9 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
                 <span>Browse</span>
             </a>
 
+            <?php if (!isGuest()): ?>
             <span class="nav-section-label">Account</span>
 
-            <?php if ($isLoggedIn): ?>
             <a href="javascript:void(0)" class="nav-link" id="profile-btn">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -219,7 +221,7 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
                     <polyline points="16 17 21 12 16 7"/>
                     <line x1="21" y1="12" x2="9" y2="12"/>
                 </svg>
-                <span>Log Out</span>
+                <span><?= isGuest() ? 'Exit Demo' : 'Log Out' ?></span>
             </a>
         </div>
         <?php endif; ?>
@@ -244,7 +246,7 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
                 <h1><?= $isMyEquipment ? 'My Equipment' : 'Browse Equipment' ?></h1>
                 <p><?= $isMyEquipment ? 'Manage your listed equipment below.' : 'Find tools and machinery available near you.' ?></p>
             </div>
-            <?php if ($isMyEquipment): ?>
+            <?php if (!isGuest()): ?>
             <button type="button" class="btn-primary listEquipmentBtn" role="button">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
@@ -254,6 +256,17 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
             </button>
             <?php endif; ?>
         </div>
+
+        <?php if ($isMyEquipment && isGuest()): ?>
+            <div class="guest-lock-card" style="background:var(--surface-color); border:1px solid var(--border-color); border-radius:var(--radius); padding:4rem 2rem; text-align:center; max-width:500px; margin:4rem auto; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+                <div class="lock-icon" style="color:var(--primary-action); margin-bottom:2rem;">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11V5h9l3 6m0 0H3m12 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m14 0h2a2 2 0 0 1 2 2v4h-3.5"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/></svg>
+                </div>
+                <h2 style="font-size:1.75rem; font-weight:800; margin-bottom:1rem; color:var(--text-main);">Login to My Equipment</h2>
+                <p style="color:var(--text-muted); margin-bottom:2.5rem; font-weight:500; line-height:1.6;">You are currently in Demo Mode. Please sign in to list your own equipment and manage your inventory.</p>
+                <a href="login.php" class="btn-primary" style="display:inline-block; padding:1rem 3.5rem; border-radius:50px; font-weight:700; text-decoration:none; font-size:1rem; box-shadow:0 4px 15px rgba(76, 175, 120, 0.3);">Sign In</a>
+            </div>
+        <?php else: ?>
 
         <!-- —— Filter Bar ────────────────────────────────────────── -->
         <?php if (!$isMyEquipment): ?>
@@ -397,19 +410,35 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
 
                 <div class="eq-card-footer">
                     <div class="eq-card-owner">
+                        <?php if (!empty($eq['owner_photo'])): ?>
+                            <img src="<?= e($eq['owner_photo']) ?>" alt="<?= e($eq['owner_name']) ?>" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
+                        <?php else: ?>
+                            <div class="owner-initial-small" style="width: 24px; height: 24px; border-radius: 50%; background: var(--primary-10); color: var(--primary-action); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 800; border: 1px solid var(--border-color);">
+                                <?= strtoupper(substr($eq['owner_name'], 0, 1)) ?>
+                            </div>
+                        <?php endif; ?>
                         <span class="eq-card-owner-name"><?= e($eq['owner_name']) ?></span>
+                    </div>
+
+                    <div class="eq-card-footer-right">
                         <?php if ($eq['owner_trust'] > 0): ?>
                         <span class="eq-card-trust">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--amber)" stroke="none" aria-hidden="true">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                             </svg>
                             <?= number_format($eq['owner_trust'], 1) ?>
                         </span>
                         <?php endif; ?>
+
+                        <?php if ($eq['includes_operator']): ?>
+                        <span class="eq-card-operator-badge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
+                            </svg>
+                            Operator
+                        </span>
+                        <?php endif; ?>
                     </div>
-                    <?php if ($eq['includes_operator']): ?>
-                    <span class="eq-card-operator-badge">+ Operator</span>
-                    <?php endif; ?>
                 </div>
             </a>
             <?php endforeach; ?>
@@ -445,6 +474,7 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
         </nav>
         <?php endif; ?>
         <?php endif; ?>
+        <?php endif; ?>
     </main>
 </div><!-- /.app-layout -->
 <div id="equipmentModal" class="modal-overlay">
@@ -474,11 +504,9 @@ $isMyEquipment = isset($_GET['mine']) && $_GET['mine'] === '1';
                         <label for="eq-category" class="form-label">Category</label>
                         <select name="category" id="eq-category" class="form-input form-select" required>
                             <option value="">Select category…</option>
-                            <option value="tractor">Tractor</option>
-                            <option value="harvester">Harvester</option>
-                            <option value="seeder">Seeder</option>
-                            <option value="sprayer">Sprayer</option>
-                            <option value="other">Other</option>
+                            <?php foreach (['tractor','harvester','seeder','sprayer','plough','chain_saw','rotavator','cultivator','thresher','water_pump','earth_auger','baler','trolley','brush_cutter','power_tiller','chaff_cutter','other'] as $cat): ?>
+                                <option value="<?= $cat ?>"><?= ucfirst(str_replace('_', ' ', $cat)) ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="form-group">
