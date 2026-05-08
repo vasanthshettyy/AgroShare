@@ -3,7 +3,7 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../src/Controllers/GoogleAuthController.php';
 
 // Redirect if already logged in
-if (isset($_SESSION['user_id'])) {
+if (isset($_SESSION['user_id']) && !isGuest()) {
     $redirect = (isset($_SESSION['role']) && $_SESSION['role'] === 'admin')
         ? getBasePath() . '/public/admin/dashboard.php'
         : 'dashboard.php';
@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (empty($errors)) {
-            $stmt = $conn->prepare("SELECT id, full_name, password_hash, role, is_active FROM users WHERE phone = ? OR email = ?");
+            $stmt = $conn->prepare("SELECT id, full_name, password_hash, role, is_active, profile_photo FROM users WHERE phone = ? OR email = ?");
             $stmt->bind_param('ss', $identifier, $identifier);
             $stmt->execute();
             $user = $stmt->get_result()->fetch_assoc();
@@ -66,9 +66,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     exit();
                 } else {
                     session_regenerate_id(true);
+                    unset($_SESSION['is_guest']);
                     $_SESSION['user_id']       = $user['id'];
                     $_SESSION['role']          = $user['role'];
                     $_SESSION['full_name']     = $user['full_name'];
+                    $_SESSION['profile_photo'] = $user['profile_photo'];
                     $_SESSION['persist']       = $remember;
                     $_SESSION['last_activity'] = time();
 
@@ -1628,14 +1630,14 @@ $_SESSION['captcha_code'] = $captcha_code;
                              stroke-width="2" stroke-linecap="round">
                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                         </svg>
-                        Verified farmer trust scores
+                        Farmer community trust scores
                     </div>
                 </div>
             </div>
 
             <div class="content-signup">
                 <h2>Join the AgroShare network.</h2>
-                <p>Thousands of Indian farmers already rent, share, and bulk-buy together. It takes less than 2 minutes to get started.</p>
+                <p>Thousands of Indian farmers already rent <!-- , share, and bulk-buy together -->. It takes less than 2 minutes to get started.</p>
 
                 <div class="steps-indicator">
                     <div class="step-item">
@@ -1650,10 +1652,12 @@ $_SESSION['captcha_code'] = $captcha_code;
                         <div class="step-num">3</div>
                         <span class="step-text">List or rent equipment</span>
                     </div>
+                    <!-- 
                     <div class="step-item">
                         <div class="step-num">4</div>
                         <span class="step-text">Join community pooling</span>
                     </div>
+                    -->
                 </div>
             </div>
         </div>

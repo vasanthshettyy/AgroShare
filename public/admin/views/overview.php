@@ -30,11 +30,7 @@ $stats = getAdminDashboardStats($conn);
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                 </div>
             </div>
-            <?php if ($stats['unverified_users'] > 0): ?>
-                <p style="font-size: 0.75rem; color: var(--warning-color); margin-top: 12px; font-weight: 600;"><?= e($stats['unverified_users']) ?> pending verification</p>
-            <?php else: ?>
-                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 12px; font-weight: 600;">All users verified</p>
-            <?php endif; ?>
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 12px; font-weight: 600;">Platform participants</p>
         </div>
 
         <div class="admin-card kpi-card">

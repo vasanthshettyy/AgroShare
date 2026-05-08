@@ -20,6 +20,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     themeBtn.addEventListener('click', (e) => {
+        // Add a ripple effect on click
+        const thumb = themeBtn.querySelector('.theme-pill-thumb');
+        if (thumb) {
+            thumb.style.transform = 'scale(0.85)';
+            setTimeout(() => { thumb.style.transform = ''; }, 150);
+        }
+
         // Add a temporary class to enable CSS transitions for theme change
         document.documentElement.classList.add('theme-transitioning');
 

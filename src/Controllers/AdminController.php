@@ -7,7 +7,6 @@ function getAdminDashboardStats(mysqli $conn): array
 {
     $stats = [
         'users_count' => 0,
-        'unverified_users' => 0,
         'equipment_count' => 0,
         'pending_equipment' => 0,
         'bookings_count' => 0,
@@ -18,9 +17,6 @@ function getAdminDashboardStats(mysqli $conn): array
 
     $res = $conn->query("SELECT COUNT(*) FROM users WHERE role = 'farmer'");
     if ($res) $stats['users_count'] = (int)$res->fetch_column();
-
-    $res = $conn->query("SELECT COUNT(*) FROM users WHERE role = 'farmer' AND is_verified = 0");
-    if ($res) $stats['unverified_users'] = (int)$res->fetch_column();
 
     $res = $conn->query("SELECT COUNT(*) FROM equipment");
     if ($res) $stats['equipment_count'] = (int)$res->fetch_column();

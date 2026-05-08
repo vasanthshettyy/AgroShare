@@ -304,7 +304,7 @@ function getEquipmentById(mysqli $conn, int $id): ?array
 {
     $sql = "SELECT e.*, u.full_name AS owner_name, u.trust_score AS owner_trust, 
                    u.is_verified AS owner_verified, u.village AS owner_village,
-                   u.district AS owner_district
+                   u.district AS owner_district, u.profile_photo AS owner_photo
             FROM equipment e
             JOIN users u ON e.owner_id = u.id
             WHERE e.id = ?";
@@ -322,7 +322,7 @@ function getEquipmentById(mysqli $conn, int $id): ?array
  * Browse equipment with filters.
  * Returns ['items' => [...], 'total' => int, 'page' => int, 'totalPages' => int]
  */
-function browseEquipment(mysqli $conn, array $filters = [], int $page = 1, int $perPage = 12): array
+function browseEquipment(mysqli $conn, array $filters = [], int $page = 1, int $perPage = 15): array
 {
     $where   = ['1=1'];
     $types   = '';
@@ -378,7 +378,7 @@ function browseEquipment(mysqli $conn, array $filters = [], int $page = 1, int $
     $whereClause = implode(' AND ', $where);
 
     // Count total results
-    $countSql  = "SELECT COUNT(*) AS total FROM equipment e WHERE {$whereClause}";
+    $countSql  = "SELECT COUNT(DISTINCT e.id) AS total FROM equipment e WHERE {$whereClause}";
     $countStmt = $conn->prepare($countSql);
     if ($types !== '' && !empty($params)) {
         $countStmt->bind_param($types, ...$params);
@@ -392,7 +392,7 @@ function browseEquipment(mysqli $conn, array $filters = [], int $page = 1, int $
     $offset     = ($page - 1) * $perPage;
 
     // Fetch page of results
-    $sql  = "SELECT e.*, u.full_name AS owner_name, u.trust_score AS owner_trust, u.is_verified AS owner_verified
+    $sql  = "SELECT DISTINCT e.*, u.full_name AS owner_name, u.trust_score AS owner_trust, u.is_verified AS owner_verified, u.profile_photo AS owner_photo
              FROM equipment e
              JOIN users u ON e.owner_id = u.id
              WHERE {$whereClause}

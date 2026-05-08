@@ -228,7 +228,7 @@ async function showUserReviews(userId) {
     // Reset/Loading state
     const reviewsContainer = document.getElementById('pub-reviews-container');
     reviewsContainer.innerHTML = '<div class="notif-empty"><div class="loading-spinner" style="border-top-color:var(--primary-action);"></div><p style="margin-top:10px;">Loading profile...</p></div>';
-    document.getElementById('pub-verified-badge').style.display = 'none';
+
 
     // Show modal
     modal.style.display = 'flex';
@@ -247,7 +247,14 @@ async function showUserReviews(userId) {
         const user = result.data;
 
         // Populate Static Fields
-        document.getElementById('pub-avatar').textContent = user.initials;
+        const avatarEl = document.getElementById('pub-avatar');
+        if (user.profile_photo) {
+            avatarEl.innerHTML = `<img src="${user.profile_photo}" alt="${user.name}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+            avatarEl.style.padding = '0';
+        } else {
+            avatarEl.textContent = user.initials;
+            avatarEl.style.padding = '';
+        }
         document.getElementById('pub-name').textContent = user.name;
         document.getElementById('pub-location-text').textContent = user.location;
         document.getElementById('pub-trust-val').textContent = user.trust_score.toFixed(1);
@@ -263,9 +270,7 @@ async function showUserReviews(userId) {
         document.getElementById('pub-email-text').textContent = user.email;
         document.getElementById('pub-email-btn').href = `mailto:${user.email}`;
 
-        if (user.is_verified) {
-            document.getElementById('pub-verified-badge').style.display = 'block';
-        }
+
 
         // Render Recent Reviews
         if (user.recent_reviews.length === 0) {

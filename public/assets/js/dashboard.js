@@ -308,7 +308,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = ''; // Restore scroll
         if (equipmentForm) {
             equipmentForm.reset();
-            if (typeof window.clearImagePreviews === 'function') window.clearImagePreviews();
+            const previewGrid = document.getElementById('imagePreviewGrid');
+            if (previewGrid) previewGrid.innerHTML = '';
+            const placeholder = document.getElementById('uploadPlaceholder');
+            if (placeholder) placeholder.style.display = '';
+            const zone = document.getElementById('imageUploadZone');
+            if (zone) zone.classList.remove('drag-over');
         }
     }
 
@@ -534,12 +539,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const badgeContainer = document.getElementById('prof-badges');
                 if (badgeContainer) {
                     badgeContainer.innerHTML = '';
-                    if (parseInt(user.is_verified)) {
-                        const vBadge = document.createElement('span');
-                        vBadge.className = 'profile-trust-badge verified';
-                        vBadge.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Verified Farmer`;
-                        badgeContainer.appendChild(vBadge);
-                    }
                     const tBadge = document.createElement('span');
                     tBadge.className = 'profile-trust-badge';
                     tBadge.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> ${user.trust_score} Trust`;
@@ -662,86 +661,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Image upload preview (adapted from equipment.js)
-const imageUploadZone = document.getElementById('imageUploadZone');
-const imagePreviewGrid = document.getElementById('imagePreviewGrid');
-const imageInput = document.getElementById('eq-images');
 
-function clearImagePreviews() {
-    if (imagePreviewGrid) imagePreviewGrid.innerHTML = '';
-    if (imageUploadZone) imageUploadZone.classList.remove('dragover');
-}
-window.clearImagePreviews = clearImagePreviews;
-
-if (imageUploadZone && imageInput) {
-    imageUploadZone.addEventListener('click', () => imageInput.click());
-
-    imageUploadZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        imageUploadZone.classList.add('dragover');
-    });
-
-    imageUploadZone.addEventListener('dragleave', () => {
-        imageUploadZone.classList.remove('dragover');
-    });
-
-    imageUploadZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        imageUploadZone.classList.remove('dragover');
-
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            const dt = new DataTransfer();
-            for (let i = 0; i < files.length; i++) {
-                dt.items.add(files[i]);
-            }
-            imageInput.files = dt.files;
-            // Trigger change event to update previews
-            imageInput.dispatchEvent(new Event('change'));
-        }
-    });
-
-    imageInput.addEventListener('change', (e) => {
-        const files = e.target.files;
-        if (files.length > 5) {
-            alert('You can upload a maximum of 5 images.');
-            imageInput.value = '';
-            return;
-        }
-
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            if (!file.type.startsWith('image/')) {
-                alert('Only image files are allowed.');
-                imageInput.value = '';
-                return;
-            }
-            if (file.size > 2 * 1024 * 1024) {
-                alert(`File ${file.name} exceeds 2MB limit.`);
-                imageInput.value = '';
-                return;
-            }
-        }
-
-        // Clear previous previews
-        clearImagePreviews();
-
-        // Create previews
-        Array.from(files).forEach((file, index) => {
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.style.width = '60px';
-                    img.style.height = '60px';
-                    img.style.objectFit = 'cover';
-                    img.style.borderRadius = '4px';
-                    img.style.margin = '4px';
-                    imagePreviewGrid.appendChild(img);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    });
-}

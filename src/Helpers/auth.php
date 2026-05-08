@@ -7,6 +7,22 @@
  */
 
 // ── Authentication Guards ──────────────────────────────────
+/**
+ * Check if the user is logged in.
+ * Returns true if user_id is set in session.
+ */
+function isLoggedIn(): bool
+{
+    return isset($_SESSION['user_id']) || (isset($_SESSION['is_guest']) && $_SESSION['is_guest'] === true);
+}
+
+/**
+ * Check if the current user is a Guest/Demo user.
+ */
+function isGuest(): bool
+{
+    return isset($_SESSION['is_guest']) && $_SESSION['is_guest'] === true;
+}
 
 /**
  * Require an authenticated session. Redirects to login if not logged in.
@@ -14,8 +30,8 @@
  */
 function requireAuth(): void
 {
-    if (!isset($_SESSION['user_id'])) {
-        setFlash('error', 'Please log in to access this page.');
+    if (!isset($_SESSION['user_id']) && !isGuest()) {
+        setFlash('error', 'Please log in or enter as guest to access this page.');
         header('Location: ' . getBasePath() . '/public/login.php');
         exit();
     }

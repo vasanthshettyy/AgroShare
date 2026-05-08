@@ -24,11 +24,6 @@ if ($bookingId > 0) {
         $stmt->execute();
         
         if ($stmt->affected_rows > 0) {
-            // Free up equipment
-            $eqStmt = $conn->prepare("UPDATE equipment SET is_available = 1 WHERE id = (SELECT equipment_id FROM bookings WHERE id = ?)");
-            $eqStmt->bind_param('i', $bookingId);
-            $eqStmt->execute();
-
             logAuditEvent($conn, 'admin_cancel_booking', $bookingId, "Admin forcibly cancelled booking $bookingId", null, $_SESSION['user_id']);
             setFlash('success', "Booking forcibly cancelled.");
         } else {

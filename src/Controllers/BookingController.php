@@ -90,6 +90,7 @@ function getRentalsForUser(mysqli $conn, int $userId): array
     $sql = "SELECT b.*, e.title as equipment_title, e.images as equipment_images, 
                    u.full_name as owner_name, u.phone as owner_phone, u.trust_score as owner_trust,
                    u.upi_id as owner_upi_id, u.upi_qr_path as owner_upi_qr_path,
+                   u.profile_photo AS owner_photo,
                    r.id AS review_id
             FROM bookings b
             JOIN equipment e ON b.equipment_id = e.id
@@ -114,6 +115,7 @@ function getRequestsForOwner(mysqli $conn, int $userId): array
                    u.full_name as renter_name, u.phone as renter_phone, u.email as renter_email,
                    u.village as renter_village, u.district as renter_district,
                    u.trust_score as renter_trust, u.is_verified as renter_verified,
+                   u.profile_photo AS renter_photo,
                    r.id AS review_id
             FROM bookings b
             JOIN equipment e ON b.equipment_id = e.id
@@ -250,3 +252,22 @@ function getMonthlyDashboardTrend(mysqli $conn, int $userId): array
     }
     return $counts;
 }
+
+/**
+ * Fetch all upcoming confirmed or active dates for a piece of equipment.
+ */
+function getBlockedDatesForEquipment(mysqli $conn, int $equipmentId): array 
+{
+    $now = date('Y-m-d H:i:s');
+    $sql = "SELECT start_datetime, end_datetime 
+            FROM bookings 
+            WHERE equipment_id = ? 
+            AND status IN ('pending', 'confirmed', 'active')
+            AND end_datetime > ?
+            ORDER BY start_datetime ASC";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('is', $equipmentId, $now);
+    $stmt->execute();
+    return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+}
+

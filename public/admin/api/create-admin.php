@@ -57,10 +57,10 @@ try {
     $district = 'System';
     $state = 'System';
     $role = 'admin';
-    $isVerified = 1;
+    $role = 'admin';
 
-    $stmt = $conn->prepare("INSERT INTO users (full_name, phone, password_hash, role, village, district, state, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param('sssssssi', $fullName, $phone, $hash, $role, $village, $district, $state, $isVerified);
+    $stmt = $conn->prepare("INSERT INTO users (full_name, phone, password_hash, role, village, district, state) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param('sssssss', $fullName, $phone, $hash, $role, $village, $district, $state);
     
     if ($stmt->execute()) {
         $newAdminId = $stmt->insert_id;

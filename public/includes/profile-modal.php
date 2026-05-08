@@ -29,16 +29,16 @@
                 </h2>
                 <div class="form-grid">
                     <div class="form-group full-width">
-                        <label for="prof-name" class="form-label">Full Name</label>
+                        <label for="prof-name" class="form-label">Full Name <span style="color: var(--status-rejected);">*</span></label>
                         <input type="text" name="full_name" id="prof-name" class="form-input" required>
                     </div>
                     <div class="form-group">
-                        <label for="prof-phone" class="form-label">Phone Number</label>
-                        <input type="text" id="prof-phone" class="form-input" disabled title="Phone number cannot be changed.">
+                        <label for="prof-phone" class="form-label">Phone Number <span style="color: var(--status-rejected);">*</span></label>
+                        <input type="text" name="phone" id="prof-phone" class="form-input" required pattern="[0-9]{10}">
                     </div>
                     <div class="form-group">
-                        <label for="prof-email" class="form-label">Email Address</label>
-                        <input type="email" name="email" id="prof-email" class="form-input">
+                        <label for="prof-email" class="form-label">Email Address <span style="color: var(--status-rejected);">*</span></label>
+                        <input type="email" name="email" id="prof-email" class="form-input" required>
                     </div>
                 </div>
             </div>

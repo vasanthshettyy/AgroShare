@@ -10,11 +10,8 @@
             <div class="profile-main-meta">
                 <div class="profile-avatar-large" id="pub-avatar">?</div>
                 <div class="profile-identity">
-                    <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
                         <h2 id="pub-name">User Name</h2>
-                        <span id="pub-verified-badge" class="verified-badge-premium" style="display: none;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1.707-6.293l6.364-6.364-1.414-1.414-4.95 4.95-2.121-2.122-1.414 1.414 3.535 3.536z"/></svg>
-                        </span>
                     </div>
                     <p class="pub-location"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> <span id="pub-location-text">Village, District</span></p>
                 </div>
@@ -109,7 +106,7 @@
     .profile-identity h2 { font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin: 0; }
     .pub-location { font-size: 0.85rem; color: var(--text-muted); margin-top: 5px; display: flex; align-items: center; gap: 6px; }
 
-    .verified-badge-premium { color: var(--secondary-action); display: flex; align-items: center; }
+
 
     .profile-stats-row {
         display: flex;

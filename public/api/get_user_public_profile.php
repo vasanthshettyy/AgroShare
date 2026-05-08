@@ -6,10 +6,7 @@ require_once __DIR__ . '/../../config/db.php';
 
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-    exit();
-}
+// Public endpoint: No login required
 
 $targetUserId = (int)($_GET['user_id'] ?? 0);
 
@@ -21,7 +18,7 @@ if ($targetUserId <= 0) {
 try {
     // 1. Fetch User Base Info
     $userStmt = $conn->prepare("
-        SELECT id, full_name, email, phone, village, district, trust_score, is_verified, created_at 
+        SELECT id, full_name, email, phone, village, district, trust_score, created_at, profile_photo 
         FROM users 
         WHERE id = ?
     ");
@@ -73,8 +70,9 @@ try {
             'phone'        => $user['phone'],
             'email'        => $user['email'],
             'trust_score'  => (float)$user['trust_score'],
-            'is_verified'  => (bool)$user['is_verified'],
+
             'joined'       => date('M Y', strtotime($user['created_at'])),
+            'profile_photo'=> $user['profile_photo'],
             'total_deals'  => $stats['total'],
             'recent_reviews' => $recentReviews
         ]

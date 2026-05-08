@@ -29,10 +29,11 @@ $village  = trim($_POST['village'] ?? '');
 $district = trim($_POST['district'] ?? '');
 $state    = trim($_POST['state'] ?? '');
 $upiId    = trim($_POST['upi_id'] ?? '');
+$phone    = trim($_POST['phone'] ?? '');
 
 // Simple validation
-if (empty($fullName) || empty($village) || empty($district) || empty($state)) {
-    echo json_encode(['success' => false, 'message' => 'Please fill in all required fields.']);
+if (empty($fullName) || empty($email) || empty($phone) || empty($village) || empty($district) || empty($state)) {
+    echo json_encode(['success' => false, 'message' => 'Please fill in all required fields including email and phone number.']);
     exit();
 }
 
@@ -41,9 +42,21 @@ if (!empty($email)) {
     $stmt = $conn->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
     $stmt->bind_param('si', $email, $userId);
     $stmt->execute();
-    $stmt->store_result();
-    if ($stmt->num_rows > 0) {
+    if ($stmt->get_result()->num_rows > 0) {
         echo json_encode(['success' => false, 'message' => 'This email address is already registered to another account.']);
+        $stmt->close();
+        exit();
+    }
+    $stmt->close();
+}
+
+// Check for duplicate phone
+if (!empty($phone)) {
+    $stmt = $conn->prepare("SELECT id FROM users WHERE phone = ? AND id != ?");
+    $stmt->bind_param('si', $phone, $userId);
+    $stmt->execute();
+    if ($stmt->get_result()->num_rows > 0) {
+        echo json_encode(['success' => false, 'message' => 'This phone number is already registered to another account.']);
         $stmt->close();
         exit();
     }
@@ -135,9 +148,9 @@ try {
     }
 
     // Build SQL
-    $query = "UPDATE users SET full_name = ?, email = ?, village = ?, district = ?, state = ?, upi_id = ?";
-    $params = [$fullName, $email, $village, $district, $state, $upiId];
-    $types = "ssssss";
+    $query = "UPDATE users SET full_name = ?, email = ?, phone = ?, village = ?, district = ?, state = ?, upi_id = ?";
+    $params = [$fullName, $email, $phone, $village, $district, $state, $upiId];
+    $types = "sssssss";
 
     if ($photoPath) {
         $query .= ", profile_photo = ?";
@@ -159,13 +172,21 @@ try {
 
     if ($stmt->execute()) {
         $_SESSION['full_name'] = $fullName;
-        echo json_encode(['success' => true, 'message' => 'Profile updated successfully!', 'full_name' => $fullName]);
+        $_SESSION['email']     = $email;
+        $_SESSION['phone']     = $phone;
+        if ($photoPath) {
+            $_SESSION['profile_photo'] = $photoPath;
+        }
+        echo json_encode(['success' => true, 'message' => 'Profile updated successfully', 'full_name' => $fullName]);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Failed to update database.']);
+        echo json_encode(['success' => false, 'message' => 'Failed to update profile']);
     }
-    $stmt->close();
-
 } catch (Exception $e) {
-    logError('Profile update error: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'An unexpected server error occurred. Please try again later.']);
+    if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+        echo json_encode(['success' => false, 'message' => 'Email or phone number already in use.']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+    }
+} finally {
+    if (isset($stmt)) $stmt->close();
 }

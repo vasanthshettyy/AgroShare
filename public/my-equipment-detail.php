@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../src/Controllers/EquipmentController.php';
+require_once __DIR__ . '/../src/Controllers/BookingController.php';
 
 requireAuth(); // Owner must be logged in
 
@@ -8,6 +9,18 @@ $userId = (int)$_SESSION['user_id'];
 
 // —— Common layout data ─────────────────────────────────────
 $fullName  = trim($_SESSION['full_name'] ?? '');
+$userPhoto = $_SESSION['profile_photo'] ?? null;
+
+if ($userId && !isset($_SESSION['profile_photo'])) {
+    $uStmt = $conn->prepare("SELECT profile_photo FROM users WHERE id = ?");
+    $uStmt->bind_param('i', $userId);
+    $uStmt->execute();
+    $uRes = $uStmt->get_result()->fetch_assoc();
+    $userPhoto = $uRes['profile_photo'] ?? null;
+    $_SESSION['profile_photo'] = $userPhoto;
+    $uStmt->close();
+}
+
 $nameParts = explode(' ', $fullName);
 $initials  = !empty($nameParts[0]) ? strtoupper(substr($nameParts[0], 0, 1)) : '?';
 if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
@@ -36,6 +49,7 @@ if ((int)$eq['owner_id'] !== $userId) {
 }
 
 $images = $eq['images'] ? json_decode($eq['images'], true) : [];
+$blockedDates = getBlockedDatesForEquipment($conn, $equipmentId);
 
 // —— Handle delete ──────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
@@ -332,20 +346,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         </div>
         <div class="topbar-right" style="position: relative;">
             <!-- Theme Toggle -->
-            <button class="btn-icon theme-toggle" id="themeToggleBtn" aria-label="Toggle light/dark mode" title="Toggle theme">
-                <svg class="theme-icon sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="5"/>
-                    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </svg>
-                <svg class="theme-icon moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-            </button>
+            <!-- Theme Toggle (Pill) -->
+            <?php include __DIR__ . '/includes/theme-toggle-btn.php'; ?>
 
             <button class="btn-icon" id="notifBtn" aria-label="Notifications" title="Notifications">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -359,8 +361,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 <div class="notif-header">Notifications</div>
                 <div class="notif-list" id="notifList"><div class="notif-empty">Loading...</div></div>
             </div>
-            <div class="avatar" id="avatar-btn" role="button" tabindex="0" title="Profile — <?= e($_SESSION['full_name']) ?>" aria-label="Open profile"><?= e($initials) ?></div>
-        </div>
+            <div class="avatar" id="avatar-btn" role="button" tabindex="0"
+                 title="Profile — <?= e($fullName) ?>" aria-label="Open profile"
+                 style="<?= !empty($userPhoto) ? 'padding: 0; overflow: hidden;' : '' ?>">
+                <?php if (!empty($userPhoto)): ?>
+                    <img src="<?= e($userPhoto) ?>" alt="<?= e($fullName) ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                <?php else: ?>
+                    <?= e($initials) ?>
+                <?php endif; ?>
+            </div>
     </header>
 
     <!-- -- SIDEBAR ------------------------------------------- -->
@@ -397,6 +406,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             </a>
 
             <span class="nav-section-label">Community</span>
+            <!-- 
             <a href="pooling-browse.php" class="nav-link">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -405,6 +415,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 </svg>
                 <span>Pooling</span>
             </a>
+            -->
             <a href="equipment-browse.php" class="nav-link">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -493,8 +504,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     <div class="manage-spec-card">
                         <span class="manage-spec-label">Status</span>
                         <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="<?= $eq['is_available'] ? 'var(--secondary-action)' : 'var(--danger)' ?>" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            <span class="manage-spec-value" style="font-size: 0.95rem; color: <?= $eq['is_available'] ? 'var(--secondary-action)' : 'var(--danger)' ?>;">
+                            <svg id="manageStatusSvg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="<?= $eq['is_available'] ? 'var(--secondary-action)' : 'var(--danger)' ?>" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <span id="manageStatusValue" class="manage-spec-value" style="font-size: 0.95rem; color: <?= $eq['is_available'] ? 'var(--secondary-action)' : 'var(--danger)' ?>;">
                                 <?= $eq['is_available'] ? 'Active' : 'Offline' ?>
                             </span>
                         </div>
@@ -591,12 +602,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                                 <span class="side-card-title">Availability</span>
                             </div>
                             <div class="status-dot-row">
-                                <div class="dot-ping"></div>
-                                Available for rent
+                                <div id="sidebarStatusDot" class="dot-ping" style="background: <?= $eq['is_available'] ? 'var(--secondary-action)' : 'var(--danger)' ?>; box-shadow: 0 0 10px <?= $eq['is_available'] ? 'var(--secondary-action)' : 'var(--danger)' ?>;"></div>
+                                <span id="sidebarStatusText"><?= $eq['is_available'] ? 'Available for rent' : 'Currently offline' ?></span>
                             </div>
                             <div style="margin-top: 1.25rem; padding: 0.75rem; background: rgba(76, 175, 120, 0.08); border-radius: 10px; border: 1px solid rgba(76, 175, 120, 0.2);">
-                                <span style="display:block; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Blocked Dates</span>
-                                <span style="font-size: 0.8rem; color: var(--text-muted);">No dates currently blocked</span>
+                                <span style="display:block; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Blocked Dates</span>
+                                <?php if (empty($blockedDates)): ?>
+                                    <span style="font-size: 0.8rem; color: var(--text-muted);">No dates currently blocked</span>
+                                <?php else: ?>
+                                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                                        <?php foreach ($blockedDates as $date): ?>
+                                            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-main);">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--primary-action)" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                                                <span><?= date('d M', strtotime($date['start_datetime'])) ?> - <?= date('d M', strtotime($date['end_datetime'])) ?></span>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
 

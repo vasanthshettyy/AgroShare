@@ -18,6 +18,9 @@
 
     if (!zone || !input) return;
 
+    // Click to browse
+    zone.addEventListener('click', () => input.click());
+
     // Drag-and-drop visual feedback
     zone.addEventListener('dragenter', (e) => {
         e.preventDefault();
@@ -53,6 +56,27 @@
             if (placeholder) placeholder.style.display = '';
             return;
         }
+
+        if (files.length > 5) {
+            alert('You can upload a maximum of 5 images.');
+            input.value = '';
+            return;
+        }
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (!file.type.startsWith('image/')) {
+                alert('Only image files are allowed.');
+                input.value = '';
+                return;
+            }
+            if (file.size > 2 * 1024 * 1024) {
+                alert(`File ${file.name} exceeds 2MB limit.`);
+                input.value = '';
+                return;
+            }
+        }
+
         if (placeholder) placeholder.style.display = 'none';
 
         Array.from(files).forEach((file, i) => {
@@ -118,6 +142,12 @@
     const spanEl      = btn.querySelector('span');         // Management page
     const statusBadge = document.getElementById('statusBadge');
     const manageStatus = document.getElementById('manageAvailStatus');
+    
+    // Management page specific elements
+    const manageStatusValue = document.getElementById('manageStatusValue');
+    const manageStatusSvg   = document.getElementById('manageStatusSvg');
+    const sidebarStatusDot  = document.getElementById('sidebarStatusDot');
+    const sidebarStatusText = document.getElementById('sidebarStatusText');
 
     btn.addEventListener('click', async () => {
         btn.disabled = true;
@@ -164,6 +194,25 @@
                 if (manageStatus) {
                     manageStatus.textContent = isNowAvailable ? 'Visible & Active' : 'Hidden from Browse';
                     manageStatus.style.color = isNowAvailable ? 'var(--secondary-action)' : 'var(--danger)';
+                }
+
+                if (manageStatusValue) {
+                    manageStatusValue.textContent = isNowAvailable ? 'Active' : 'Offline';
+                    manageStatusValue.style.color = isNowAvailable ? 'var(--secondary-action)' : 'var(--danger)';
+                }
+
+                if (manageStatusSvg) {
+                    manageStatusSvg.setAttribute('stroke', isNowAvailable ? 'var(--secondary-action)' : 'var(--danger)');
+                }
+
+                if (sidebarStatusDot) {
+                    const color = isNowAvailable ? 'var(--secondary-action)' : 'var(--danger)';
+                    sidebarStatusDot.style.background = color;
+                    sidebarStatusDot.style.boxShadow = `0 0 10px ${color}`;
+                }
+
+                if (sidebarStatusText) {
+                    sidebarStatusText.textContent = isNowAvailable ? 'Available for rent' : 'Currently offline';
                 }
 
                 showToast('success', isNowAvailable ? 'Listing is now active.' : 'Listing is now offline.');

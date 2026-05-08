@@ -8,7 +8,7 @@ $users = getUsersForAdmin($conn);
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <div>
             <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800;">Farmer Management</h3>
-            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 4px 0 0 0;">Manage and verify platform participants.</p>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 4px 0 0 0;">Manage platform participants.</p>
         </div>
         <button class="btn-primary" id="openAddAdminBtn" style="padding: 10px 20px; font-weight: 700;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 6px;"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>

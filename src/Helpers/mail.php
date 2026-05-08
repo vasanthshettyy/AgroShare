@@ -56,7 +56,7 @@ function sendOtpEmail(string $toEmail, string $otp): bool
 
         // Content
         $mail->isHTML(true);
-        $mail->Subject = 'Password Reset OTP — ' . APP_NAME;
+        $mail->Subject = 'Password Reset OTP - ' . APP_NAME;
         
         $body = "
             <div style='font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;'>
