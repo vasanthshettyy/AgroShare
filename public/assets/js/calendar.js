@@ -41,10 +41,58 @@ class BookingCalendar {
                     start: new Date(r.start),
                     end: new Date(r.end)
                 }));
+                this.updateBlockedDatesList();
             }
         } catch (err) {
             console.error('Failed to fetch booked slots:', err);
         }
+    }
+
+    updateBlockedDatesList() {
+        const container = document.getElementById('blocked-dates-list');
+        if (!container) return;
+
+        // Keep the header label
+        const label = container.querySelector('span');
+        container.innerHTML = '';
+        if (label) container.appendChild(label);
+
+        if (this.bookedRanges.length === 0) {
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'no-blocked-dates';
+            emptyDiv.style.cssText = 'display: flex; align-items: center; gap: 8px; color: var(--secondary-action); font-size: 0.82rem; font-weight: 600;';
+            emptyDiv.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Fully Available
+            `;
+            container.appendChild(emptyDiv);
+            return;
+        }
+
+        const itemsDiv = document.createElement('div');
+        itemsDiv.className = 'blocked-dates-items';
+        itemsDiv.style.cssText = 'display: flex; flex-direction: column; gap: 8px;';
+
+        // Sort by start date
+        const sorted = [...this.bookedRanges].sort((a, b) => a.start - b.start);
+
+        sorted.forEach(range => {
+            const item = document.createElement('div');
+            item.className = 'blocked-date-item';
+            item.style.cssText = 'display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--text-main); background: rgba(255,255,255,0.02); padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);';
+            
+            const startStr = range.start.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+            const endStr = range.end.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+
+            item.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><line x1="3" y1="10" x2="21" y2="22" stroke="var(--danger)" stroke-opacity="0.3"/></svg>
+                <span style="font-weight: 600;">${startStr} - ${endStr}</span>
+                <span style="margin-left: auto; font-size: 0.65rem; color: var(--danger); text-transform: uppercase; font-weight: 800;">Booked</span>
+            `;
+            itemsDiv.appendChild(item);
+        });
+
+        container.appendChild(itemsDiv);
     }
 
     bindEvents() {

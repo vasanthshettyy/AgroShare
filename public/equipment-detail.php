@@ -1,11 +1,25 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../src/Controllers/EquipmentController.php';
+require_once __DIR__ . '/../src/Controllers/BookingController.php';
 
 $isLoggedIn = isset($_SESSION['user_id']);
 
 // —— Common layout data ─────────────────────────────────────
 $fullName  = trim($_SESSION['full_name'] ?? '');
+$userPhoto = $_SESSION['profile_photo'] ?? null;
+$userId    = $_SESSION['user_id'] ?? null;
+
+if ($userId && !isset($_SESSION['profile_photo'])) {
+    $uStmt = $conn->prepare("SELECT profile_photo FROM users WHERE id = ?");
+    $uStmt->bind_param('i', $userId);
+    $uStmt->execute();
+    $uRes = $uStmt->get_result()->fetch_assoc();
+    $userPhoto = $uRes['profile_photo'] ?? null;
+    $_SESSION['profile_photo'] = $userPhoto;
+    $uStmt->close();
+}
+
 $nameParts = explode(' ', $fullName);
 $initials  = !empty($nameParts[0]) ? strtoupper(substr($nameParts[0], 0, 1)) : '?';
 if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
@@ -21,6 +35,7 @@ if ($equipmentId <= 0) {
 }
 
 $eq = getEquipmentById($conn, $equipmentId);
+$blockedDates = getBlockedDatesForEquipment($conn, $equipmentId);
 if (!$eq) {
     setFlash('error', 'Equipment not found.');
     header('Location: equipment-browse.php');
@@ -92,20 +107,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         </div>
         <div class="topbar-right" style="position: relative;">
             <!-- Theme Toggle -->
-            <button class="btn-icon theme-toggle" id="themeToggleBtn" aria-label="Toggle light/dark mode" title="Toggle theme">
-                <svg class="theme-icon sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="5"/>
-                    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </svg>
-                <svg class="theme-icon moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-            </button>
+            <!-- Theme Toggle (Pill) -->
+            <?php include __DIR__ . '/includes/theme-toggle-btn.php'; ?>
 
             <?php if ($isLoggedIn): ?>
             <button class="btn-icon" id="notifBtn" aria-label="Notifications" title="Notifications">
@@ -124,7 +127,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 </div>
             </div>
             
-            <div class="avatar" id="avatar-btn" role="button" tabindex="0" title="Profile — <?= e($_SESSION['full_name']) ?>" aria-label="Open profile"><?= e($initials) ?></div>
+            <div class="avatar" id="avatar-btn" role="button" tabindex="0"
+                 title="Profile — <?= e($fullName) ?>" aria-label="Open profile"
+                 style="<?= !empty($userPhoto) ? 'padding: 0; overflow: hidden;' : '' ?>">
+                <?php if (!empty($userPhoto)): ?>
+                    <img src="<?= e($userPhoto) ?>" alt="<?= e($fullName) ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                <?php else: ?>
+                    <?= e($initials) ?>
+                <?php endif; ?>
+            </div>
             <?php else: ?>
             <a href="login.php" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: 8px; text-decoration: none;">Log In</a>
             <?php endif; ?>
@@ -175,16 +186,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             <?php endif; ?>
 
             <span class="nav-section-label">Community</span>
-<a href="pooling-browse.php" class="nav-link">
-    <!-- users icon -->
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-        <circle cx="9" cy="7" r="4"/>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
-    </svg>
-    <span>Pooling</span>
-</a>
+            <!-- 
+            <a href="pooling-browse.php" class="nav-link">
+                <!-- users icon -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <span>Pooling</span>
+            </a>
+            -->
 
             <a href="equipment-browse.php" class="nav-link active" aria-current="page">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -346,7 +359,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     <span class="section-label">About this equipment</span>
                     <p class="description-text"><?= nl2br(e($eq['description'])) ?></p>
                     <div class="pd-feature-badges">
-                        <span class="pd-badge">✓ Verified Local Listing</span>
+
                         <?php if ($eq['includes_operator']): ?>
                             <span class="pd-badge">✓ Operator Included</span>
                         <?php endif; ?>
@@ -355,9 +368,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         <?php elseif ($eq['condition'] === 'good'): ?>
                             <span class="pd-badge">✓ Good Condition</span>
                         <?php endif; ?>
-                        <?php if ($eq['owner_verified']): ?>
-                            <span class="pd-badge">✓ Verified Owner</span>
-                        <?php endif; ?>
+
                     </div>
                 </div>
 
@@ -365,15 +376,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 <div class="pd-row pd-row-owner">
                     <span class="section-label">Owner Details</span>
                     <div class="pd-owner-card">
-                        <div class="owner-initials">
-                            <?= strtoupper(substr(trim($eq['owner_name'] ?? ''), 0, 1)) ?: '?' ?>
+                        <div class="owner-initials" style="<?= !empty($eq['owner_photo']) ? 'padding: 0; overflow: hidden; border: 2px solid var(--primary-action);' : '' ?>">
+                            <?php if (!empty($eq['owner_photo'])): ?>
+                                <img src="<?= e($eq['owner_photo']) ?>" alt="<?= e($eq['owner_name']) ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                            <?php else: ?>
+                                <?= strtoupper(substr(trim($eq['owner_name'] ?? ''), 0, 1)) ?: '?' ?>
+                            <?php endif; ?>
                         </div>
                         <div class="pd-owner-meta">
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
                                 <button type="button" class="owner-name btn-text-link" onclick="showUserReviews(<?= (int)$eq['owner_id'] ?>)"><?= e($eq['owner_name']) ?></button>
-                                <?php if ($eq['owner_verified']): ?>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--secondary-action)" stroke="none" title="Verified Farmer"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <?php endif; ?>
+
                             </div>
                             <span class="owner-loc"><?= e($eq['owner_village']) ?>, <?= e($eq['owner_district']) ?></span>
                         </div>
@@ -416,7 +429,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                             <?php endif; ?>
                             <div class="p-feature">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                <span>Verified Local Listing</span>
+                                <span>Safe Rental Experience</span>
                             </div>
                         </div>
                     </div>
@@ -425,6 +438,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     <div class="booking-widget">
                         <span class="section-label">Select Rental Period</span>
                         
+                        <!-- Blocked Dates List -->
+                        <div id="blocked-dates-list" style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 12px;">
+                            <span style="display:block; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; font-weight: 700; letter-spacing: 0.5px;">Blocked Dates</span>
+                            <?php if (empty($blockedDates)): ?>
+                                <div class="no-blocked-dates" style="display: flex; align-items: center; gap: 8px; color: var(--secondary-action); font-size: 0.82rem; font-weight: 600;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    Fully Available
+                                </div>
+                            <?php else: ?>
+                                <div class="blocked-dates-items" style="display: flex; flex-direction: column; gap: 8px;">
+                                    <?php foreach ($blockedDates as $date): ?>
+                                        <div class="blocked-date-item" style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--text-main); background: rgba(255,255,255,0.02); padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><line x1="3" y1="10" x2="21" y2="22" stroke="var(--danger)" stroke-opacity="0.3"/></svg>
+                                            <span style="font-weight: 600;"><?= date('d M', strtotime($date['start_datetime'])) ?> - <?= date('d M', strtotime($date['end_datetime'])) ?></span>
+                                            <span style="margin-left: auto; font-size: 0.65rem; color: var(--danger); text-transform: uppercase; font-weight: 800;">Booked</span>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
                         <div class="calendar-header">
                             <span class="calendar-month-year" id="calMonthYear">Loading...</span>
                             <div class="calendar-nav">
@@ -473,13 +507,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                             </div>
 
                             <?php if (!$isOwner && $eq['is_available']): ?>
-                                <?php if ($isLoggedIn): ?>
+                                <?php if ($isLoggedIn && !isGuest()): ?>
                                 <button class="btn-primary btn-book-cta" id="btnBookNow" disabled style="width: 100%; margin-top: 1.5rem; border-radius: 12px; padding: 1rem;">
                                     Select dates to book
                                 </button>
                                 <?php else: ?>
                                 <a href="login.php" class="btn-primary btn-book-cta" style="width: 100%; margin-top: 1.5rem; border-radius: 12px; padding: 1rem; text-decoration: none; text-align: center; display: inline-block; box-sizing: border-box;">
-                                    Log in to Book
+                                    <?= isGuest() ? 'Sign in to Book' : 'Log in to Book' ?>
                                 </a>
                                 <?php endif; ?>
                             <?php elseif (!$eq['is_available']): ?>
@@ -499,10 +533,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 <span class="sticky-label">Estimated Total</span>
                 <strong id="sticky-est-total">₹0</strong>
             </div>
-            <?php if ($isLoggedIn): ?>
+            <?php if ($isLoggedIn && !isGuest()): ?>
             <button class="btn-primary" id="stickyBookBtn" disabled>Select dates to book</button>
             <?php else: ?>
-            <a href="login.php" class="btn-primary" style="text-decoration: none; padding: 0.6rem 1.5rem; border-radius: 50px; font-size: 0.85rem; font-weight: 700;">Log in to Book</a>
+            <a href="login.php" class="btn-primary" style="text-decoration: none; padding: 0.6rem 1.5rem; border-radius: 50px; font-size: 0.85rem; font-weight: 700;">
+                <?= isGuest() ? 'Sign in to Book' : 'Log in to Book' ?>
+            </a>
             <?php endif; ?>
         </div>
 
@@ -620,11 +656,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 <?php if ($isLoggedIn): ?>
     <?php require_once __DIR__ . '/includes/profile-modal.php'; ?>
     <?php require_once __DIR__ . '/includes/viewer-reviews-modal.php'; ?>
-    <?php require_once __DIR__ . '/includes/user-public-profile-modal.php'; ?>
 <?php endif; ?>
+<?php require_once __DIR__ . '/includes/user-public-profile-modal.php'; ?>
 <script src="assets/js/theme-toggle.js" defer></script>
 <script src="assets/js/dashboard.js" defer></script>
 <script src="assets/js/equipment.js?v=<?= time() ?>" defer></script>
 <script src="assets/js/calendar.js?v=<?= time() ?>" defer></script>
+<script src="assets/js/reviews.js?v=<?= time() ?>" defer></script>
 </body>
 </html>

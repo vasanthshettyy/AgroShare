@@ -9,6 +9,19 @@ $requests = getRequestsForOwner($conn, $userId);
 
 // Layout Data
 $fullName  = trim($_SESSION['full_name'] ?? '');
+$userPhoto = $_SESSION['profile_photo'] ?? null;
+
+// If logged in but photo not in session, fetch it once
+if ($userId && !isset($_SESSION['profile_photo'])) {
+    $uStmt = $conn->prepare("SELECT profile_photo FROM users WHERE id = ?");
+    $uStmt->bind_param('i', $userId);
+    $uStmt->execute();
+    $uRes = $uStmt->get_result()->fetch_assoc();
+    $userPhoto = $uRes['profile_photo'] ?? null;
+    $_SESSION['profile_photo'] = $userPhoto;
+    $uStmt->close();
+}
+
 $nameParts = explode(' ', $fullName);
 $initials  = !empty($nameParts[0]) ? strtoupper(substr($nameParts[0], 0, 1)) : '?';
 if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
@@ -246,20 +259,58 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
         .card-footer {
             margin-top: 0;
             display: flex;
-            flex-direction: row; /* Use row for actions to save vertical space */
+            flex-direction: row; 
             align-items: center;
             justify-content: flex-end;
             padding: 0;
             gap: 12px;
-            min-width: 180px; 
+            min-width: 220px; 
             position: relative;
         }
 
         .actions-wrap {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.6rem;
             align-items: center;
             justify-content: flex-end;
+            width: 100%;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .status-confirmed, .status-active {
+            background: rgba(76, 175, 80, 0.1);
+            border-color: rgba(76, 175, 80, 0.3);
+            color: #4CAF50;
+        }
+
+        .status-pending {
+            background: rgba(251, 191, 36, 0.1);
+            border-color: rgba(251, 191, 36, 0.3);
+            color: #fbbf24;
+        }
+
+        .status-cancelled {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .status-completed {
+            background: rgba(30, 136, 229, 0.1);
+            border-color: rgba(30, 136, 229, 0.3);
+            color: #1e88e5;
         }
 
         /* 3-Dot Menu Styles */
@@ -522,20 +573,8 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 
         <div class="topbar-right" style="position: relative;">
             <!-- Theme Toggle -->
-            <button class="btn-icon theme-toggle" id="themeToggleBtn" aria-label="Toggle light/dark mode" title="Toggle theme">
-                <svg class="theme-icon sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="5"/>
-                    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </svg>
-                <svg class="theme-icon moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-            </button>
+            <!-- Theme Toggle (Pill) -->
+            <?php include __DIR__ . '/includes/theme-toggle-btn.php'; ?>
 
             <!-- Notifications -->
             <button class="btn-icon" id="notifBtn" aria-label="Notifications" title="Notifications">
@@ -557,8 +596,13 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 
             <!-- Avatar -->
             <div class="avatar" id="avatar-btn" role="button" tabindex="0"
-                 title="Profile — <?= e($_SESSION['full_name']) ?>" aria-label="Open profile">
-                <?= e($initials) ?>
+                 title="Profile — <?= e($_SESSION['full_name']) ?>" aria-label="Open profile"
+                 style="<?= !empty($userPhoto) ? 'padding: 0; overflow: hidden;' : '' ?>">
+                <?php if (!empty($userPhoto)): ?>
+                    <img src="<?= e($userPhoto) ?>" alt="<?= e($fullName) ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                <?php else: ?>
+                    <?= e($initials) ?>
+                <?php endif; ?>
             </div>
         </div>
     </header>
@@ -613,8 +657,8 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 
             <span class="nav-section-label">Community</span>
 
+            <!--
             <a href="pooling-browse.php" class="nav-link">
-                <!-- users icon -->
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -623,6 +667,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                 </svg>
                 <span>Pooling</span>
             </a>
+            -->
 
             <a href="equipment-browse.php" class="nav-link">
                 <!-- search icon -->
@@ -633,6 +678,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                 <span>Browse</span>
             </a>
 
+            <?php if (!isGuest()): ?>
             <span class="nav-section-label">Account</span>
 
             <a href="javascript:void(0)" class="nav-link" id="profile-btn">
@@ -653,6 +699,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                 </svg>
                 <span>Send Feedback</span>
             </a>
+            <?php endif; ?>
         </nav>
 
         <!-- Logout -->
@@ -665,7 +712,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                     <polyline points="16 17 21 12 16 7"/>
                     <line x1="21" y1="12" x2="9" y2="12"/>
                 </svg>
-                <span>Log Out</span>
+                <span><?= isGuest() ? 'Exit Demo' : 'Log Out' ?></span>
             </a>
         </div>
     </aside>
@@ -675,9 +722,21 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 
     <main class="main-content">
         <div class="bookings-container">
+            <?php if (isGuest()): ?>
+                <div class="guest-lock-card" style="background:var(--surface-color); border:1px solid var(--border-color); border-radius:var(--radius); padding:4rem 2rem; text-align:center; max-width:500px; margin:4rem auto; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+                    <div class="lock-icon" style="color:var(--primary-action); margin-bottom:2rem;">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
+                    </div>
+                    <h2 style="font-size:1.75rem; font-weight:800; margin-bottom:1rem; color:var(--text-main);">Login to My Bookings</h2>
+                    <p style="color:var(--text-muted); margin-bottom:2.5rem; font-weight:500; line-height:1.6;">You are currently in Demo Mode. Please sign in to view your equipment rental history and pending requests.</p>
+                    <a href="login.php" class="btn-primary" style="display:inline-block; padding:1rem 3.5rem; border-radius:50px; font-weight:700; text-decoration:none; font-size:1rem; box-shadow:0 4px 15px rgba(76, 175, 120, 0.3);">Sign In</a>
+                </div>
+            <?php else: ?>
+
+            <!-- Main Tabs -->
             <div class="bookings-tabs">
-                <button class="tab-btn active" data-tab="rentals">Equipment I Rented</button>
-                <button class="tab-btn" data-tab="requests">Requests for My Equipment</button>
+                <button class="tab-btn active" data-tab="rentals">Your Rentals</button>
+                <button class="tab-btn" data-tab="requests">Equipment Requests</button>
             </div>
 
             <!-- Status Capsules -->
@@ -700,157 +759,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                 <?php else: foreach ($rentals as $b): 
                     $images = !empty($b['equipment_images']) ? json_decode($b['equipment_images'], true) : [];
                     $thumb = !empty($images) ? e($images[0]) : 'assets/img/placeholder.png';
-                ?>
-                    <div class="booking-card" id="booking-<?= $b['id'] ?>" data-status="<?= $b['status'] ?>">
-                        <div class="card-thumb">
-                            <?php if (!empty($images)): ?>
-                                <img src="<?= e($images[0]) ?>" alt="<?= e($b['equipment_title']) ?>" onerror="this.parentElement.innerHTML='<div class=\'eq-card-placeholder\' style=\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.03);\'><svg width=\'32\' height=\'32\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.5\' stroke-linecap=\'round\'><path d=\'M3 11V5h9l3 6m0 0H3m12 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m14 0h2a2 2 0 0 1 2 2v4h-3.5\'/><circle cx=\'7\' cy=\'19\' r=\'2\'/><circle cx=\'17\' cy=\'19\' r=\'2\'/></svg></div>'">
-                            <?php else: ?>
-                                <div class="eq-card-placeholder" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.03);">
-                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-                                        <path d="M3 11V5h9l3 6m0 0H3m12 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m14 0h2a2 2 0 0 1 2 2v4h-3.5"/>
-                                        <circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/>
-                                    </svg>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-
-                        <div class="card-actions" style="position: relative; z-index: 5;">
-                            <div class="card-header">
-                                <h3 class="eq-title"><?= e($b['equipment_title']) ?></h3>
-                                <div style="text-align: right;">
-                                    <span class="price-tag">₹<?= number_format($b['total_price'] + $b['deposit_amount'], 0) ?></span>
-                                    <?php if ($b['deposit_amount'] > 0): ?>
-                                        <div style="font-size: 0.6rem; color: var(--text-subtle); margin-top: 2px;">
-                                            (includes ₹<?= number_format($b['deposit_amount'], 0) ?> Deposit)
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="info-row">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                                    <span class="info-label">Dates:</span> <span><?= date('d M', strtotime($b['start_datetime'])) ?> - <?= date('d M', strtotime($b['end_datetime'])) ?></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card-actions" style="position: relative; z-index: 5;">
-                            <div class="person-avatar-wrap">
-                                <div class="person-avatar"><?= strtoupper(substr($b['owner_name'], 0, 1)) ?></div>
-                                <button type="button" class="person-name btn-text-link" onclick="showUserReviews(<?= (int)$b['owner_id'] ?>)"><?= e($b['owner_name']) ?></button>
-                            </div>
-                            <div class="person-trust">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                                <span><?= !empty($b['owner_trust']) ? number_format($b['owner_trust'], 1) : '-' ?></span>
-                                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">Trust</span>
-                            </div>
-                            <div class="person-phone">
-                                <?= e($b['owner_phone']) ?>
-                            </div>
-                        </div>
-
-                        <div class="card-footer">
-                            <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
-                            <div class="actions-wrap">
-                                <?php
-                                    $bData = [
-                                        'id' => $b['id'],
-                                        'title' => $b['equipment_title'],
-                                        'status' => $b['status'],
-                                        'start' => date('d M Y', strtotime($b['start_datetime'])),
-                                        'end' => date('d M Y', strtotime($b['end_datetime'])),
-                                        'rental_fee' => $b['total_price'],
-                                        'deposit' => $b['deposit_amount'],
-                                        'total' => $b['total_price'] + $b['deposit_amount'],
-                                        'image' => $thumb,
-                                        'party_name' => $b['owner_name'] ?? $b['renter_name'] ?? '—',
-                                        'party_id' => $b['owner_id'] ?? $b['renter_id'] ?? 0,
-                                        'party_trust' => $b['owner_trust'] ?? $b['renter_trust'] ?? 0.0,
-                                        'party_phone' => $b['owner_phone'] ?? $b['renter_phone'] ?? '—',
-                                        'party_type' => isset($b['owner_name']) ? 'Owner' : 'Renter',
-                                        'upi_id' => $b['owner_upi_id'] ?? null,
-                                        'upi_qr' => $b['owner_upi_qr_path'] ?? null
-                                    ];
-                                ?>
-                                <button type="button" class="btn-sm btn-secondary view-booking-details" data-booking="<?= htmlspecialchars(json_encode($bData)) ?>">View Details</button>
-                                
-                                <?php if ($b['status'] === 'confirmed' && isset($b['owner_name'])): ?>
-                                    <?php if (!empty($b['owner_upi_id'])): ?>
-                                        <!-- AgroPay Payment Trigger -->
-                                        <button class="btn-primary btn-sm view-payment-btn" 
-                                                data-booking="<?= htmlspecialchars(json_encode($bData)) ?>"
-                                                style="background: linear-gradient(135deg, #fbbf24, #d97706); color: #000; border: none; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);">
-                                            <span>💳</span> View Payment Details
-                                        </button>
-                                    <?php else: ?>
-                                        <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); background: rgba(255, 255, 255, 0.05); padding: 0.45rem 0.8rem; border-radius: 8px; border: 1px solid var(--border-color); display: inline-flex; align-items: center; gap: 6px;" title="Owner hasn't set up UPI yet. Please contact them.">
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                                            Payment Pending Setup
-                                        </div>
-                                        <a href="tel:<?= e($b['owner_phone'] ?? '') ?>" class="btn-primary btn-sm contact-link" style="text-decoration: none; gap: 5px; display: inline-flex; align-items: center;">
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                                            Contact Owner
-                                        </a>
-                                    <?php endif; ?>
-                                <?php elseif ($b['status'] === 'pending' && isset($b['owner_name'])): ?>
-                                    <div style="font-size: 0.72rem; font-weight: 700; color: #fbbf24; background: rgba(251, 191, 36, 0.1); padding: 0.45rem 0.8rem; border-radius: 8px; border: 1px solid rgba(251, 191, 36, 0.2); display: inline-flex; align-items: center; gap: 6px;">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                        Waiting for Owner Approval
-                                    </div>
-                                <?php elseif ($b['status'] === 'completed' && empty($b['review_id'])): ?>
-                                    <!-- Dedicated Review Button (Replaces Contact) -->
-                                    <button class="btn-primary btn-sm" 
-                                            style="background: var(--primary-action); gap: 5px; display: inline-flex; align-items: center;"
-                                            data-review-booking="<?= (int)$b['id'] ?>"
-                                            data-review-reviewee="<?= (int)($b['owner_id'] ?? 0) ?>">
-                                        ⭐ Leave a Review
-                                    </button>
-                                <?php else: ?>
-                                    <!-- Default Contact Button -->
-                                    <a href="tel:<?= e($b['owner_phone'] ?? '') ?>" class="btn-primary btn-sm contact-link" style="text-decoration: none; gap: 5px; display: inline-flex; align-items: center;">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                                        <?= e($b['owner_phone'] ?: 'Contact') ?>
-                                    </a>
-                                <?php endif; ?>
-                                
-                                <?php 
-                                    $hasRenterActions = in_array($b['status'], ['pending', 'confirmed', 'active', 'completed']);
-                                ?>
-                                <?php if ($hasRenterActions): ?>
-                                <div class="dots-container">
-                                    <button class="btn-sm btn-icon dots-trigger" aria-label="More actions">⋮</button>
-                                    <div class="dots-menu">
-                                        <?php if (in_array($b['status'], ['pending', 'confirmed'])): ?>
-                                            <button class="btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="cancelled" style="color: var(--danger);">Cancel Booking</button>
-                                        <?php endif; ?>
-                                        
-                                        <?php if ($b['status'] === 'active'): ?>
-                                            <button class="btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="completed">Mark Completed</button>
-                                        <?php endif; ?>
-                                        
-                                        <?php if ($b['status'] === 'completed'): ?>
-                                            <button class="btn-sm btn-danger btn-dispute" data-id="<?= $b['id'] ?>">Raise Dispute</button>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; endif; ?>
-            </div>
-
-            <!-- Requests Grid -->
-            <div class="booking-grid" id="requests">
-                <?php if (empty($requests)): ?>
-                    <div class="empty-state">
-                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--border-color)" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                        <p>No incoming booking requests yet.</p>
-                    </div>
-                <?php else: foreach ($requests as $b): 
-                    $images = !empty($b['equipment_images']) ? json_decode($b['equipment_images'], true) : [];
-                    $thumb = !empty($images) ? e($images[0]) : 'assets/img/placeholder.png';
+                    $isOver = strtotime($b['end_datetime']) < time();
                 ?>
                     <div class="booking-card" id="booking-<?= $b['id'] ?>" data-status="<?= $b['status'] ?>">
                         <div class="card-thumb">
@@ -887,23 +796,30 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                         </div>
 
                         <div class="card-person">
+                            <span class="person-role">Owner</span>
                             <div class="person-avatar-wrap">
-                                <div class="person-avatar"><?= strtoupper(substr($b['renter_name'], 0, 1)) ?></div>
-                                <button type="button" class="person-name btn-text-link" onclick="showUserReviews(<?= (int)$b['renter_id'] ?>)"><?= e($b['renter_name']) ?></button>
+                                <div class="person-avatar" style="<?= !empty($b['owner_photo']) ? 'padding: 0; overflow: hidden; border: 1px solid var(--primary-action);' : '' ?>">
+                                    <?php if (!empty($b['owner_photo'])): ?>
+                                        <img src="<?= e($b['owner_photo']) ?>" alt="<?= e($b['owner_name']) ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                                    <?php else: ?>
+                                        <?= strtoupper(substr($b['owner_name'] ?? 'U', 0, 1)) ?>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="person-info">
+                                    <button type="button" class="person-name btn-text-link" onclick="showUserReviews(<?= (int)($b['owner_id'] ?? 0) ?>)"><?= e($b['owner_name'] ?? 'Unknown') ?></button>
+                                </div>
                             </div>
                             <div class="person-trust">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                                <span><?= !empty($b['renter_trust']) ? number_format($b['renter_trust'], 1) : '-' ?></span>
+                                <span><?= !empty($b['owner_trust']) ? number_format($b['owner_trust'], 1) : '-' ?></span>
                                 <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">Trust</span>
                             </div>
-                            <div class="person-phone">
-                                <?= e($b['renter_phone']) ?>
-                            </div>
+                            <div class="person-phone"><?= e($b['owner_phone'] ?? '—') ?></div>
                         </div>
 
                         <div class="card-footer">
-                            <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
                             <div class="actions-wrap">
+                                <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
                                 <?php
                                     $bData = [
                                         'id' => $b['id'],
@@ -920,56 +836,34 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                         'party_trust' => $b['owner_trust'] ?? $b['renter_trust'] ?? 0.0,
                                         'party_phone' => $b['owner_phone'] ?? $b['renter_phone'] ?? '—',
                                         'party_type' => isset($b['owner_name']) ? 'Owner' : 'Renter',
+                                        'party_photo' => $b['owner_photo'] ?? $b['renter_photo'] ?? null,
                                         'upi_id' => $b['owner_upi_id'] ?? null,
                                         'upi_qr' => $b['owner_upi_qr_path'] ?? null
                                     ];
                                 ?>
-                                <button type="button" class="btn-sm btn-secondary view-booking-details" data-booking="<?= htmlspecialchars(json_encode($bData)) ?>">View Details</button>
+                                <button type="button" class="btn-sm btn-secondary view-booking-details" data-booking="<?= htmlspecialchars(json_encode($bData)) ?>">Details</button>
                                 
-                                <?php
-                                    $btnData = 'data-id="' . $b['id'] . '"'
-                                             . ' data-renter="' . e($b['renter_name']) . '"'
-                                             . ' data-dates="' . date('d M Y', strtotime($b['start_datetime'])) . ' — ' . date('d M Y', strtotime($b['end_datetime'])) . '"'
-                                             . ' data-price="₹' . number_format($b['total_price'] + $b['deposit_amount'], 0) . '"'
-                                             . ' data-equipment="' . e($b['equipment_title']) . '"';
-                                ?>
-
-                                <?php if ($b['status'] === 'pending'): ?>
-                                    <button class="btn-primary btn-sm status-action" <?= $btnData ?> data-status="confirmed" style="background: var(--primary-action);">Accept Request</button>
-                                    <button class="btn-secondary btn-sm status-action" <?= $btnData ?> data-status="cancelled" style="color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);">Decline</button>
-                                <?php elseif ($b['status'] === 'confirmed'): ?>
-                                    <div style="font-size: 0.72rem; font-weight: 700; color: #4CAF50; background: rgba(76, 175, 80, 0.1); padding: 0.45rem 0.8rem; border-radius: 8px; border: 1px solid rgba(76, 175, 80, 0.2); display: inline-flex; align-items: center; gap: 6px;">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                                        Confirmed & Waiting for Payment
-                                    </div>
-                                <?php elseif ($b['status'] === 'completed' && empty($b['review_id'])): ?>
-                                    <!-- Dedicated Review Button (Replaces Contact) -->
+                                <?php if (empty($b['review_id']) && in_array($b['status'], ['confirmed', 'active', 'completed'])): ?>
                                     <button class="btn-primary btn-sm" 
                                             style="background: var(--primary-action); gap: 5px; display: inline-flex; align-items: center;"
                                             data-review-booking="<?= (int)$b['id'] ?>"
-                                            data-review-reviewee="<?= (int)($b['renter_id'] ?? 0) ?>">
-                                        ⭐ Leave a Review
+                                            data-review-reviewee="<?= (int)($b['owner_id'] ?? 0) ?>">
+                                        ⭐ Review
                                     </button>
-                                <?php else: ?>
-                                    <!-- Default Contact Button -->
-                                    <a href="tel:<?= e($b['renter_phone'] ?? '') ?>" class="btn-primary btn-sm contact-link" style="text-decoration: none; gap: 5px; display: inline-flex; align-items: center;">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                                        <?= e($b['renter_phone'] ?: 'Contact') ?>
-                                    </a>
                                 <?php endif; ?>
-
-                                <?php 
-                                    $hasOwnerActions = in_array($b['status'], ['pending', 'confirmed']);
-                                ?>
-                                <?php if ($hasOwnerActions): ?>
-                                <div class="dots-container" style="position: relative; z-index: 10;">
+                                
+                                <?php if (in_array($b['status'], ['pending', 'confirmed', 'active', 'completed'])): ?>
+                                <div class="dots-container">
                                     <button class="btn-sm btn-icon dots-trigger" aria-label="More actions">⋮</button>
-                                    <div class="dots-menu" style="z-index: 100;">
-                                        <?php if ($b['status'] === 'confirmed'): ?>
-                                            <button class="btn-sm status-action" <?= $btnData ?> data-status="completed">Mark Completed</button>
-                                            <button class="btn-sm status-action" <?= $btnData ?> data-status="cancelled" style="color: var(--danger);">Cancel Booking</button>
-                                        <?php elseif ($b['status'] === 'pending'): ?>
-                                            <button class="btn-sm status-action" <?= $btnData ?> data-status="cancelled" style="color: var(--danger);">Decline Request</button>
+                                    <div class="dots-menu">
+                                        <?php if (in_array($b['status'], ['pending', 'confirmed'])): ?>
+                                            <button class="btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="cancelled" style="color: var(--danger);">Cancel</button>
+                                        <?php endif; ?>
+                                        <?php if ($b['status'] === 'active'): ?>
+                                            <button class="btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="completed">Complete</button>
+                                        <?php endif; ?>
+                                        <?php if ($b['status'] === 'completed'): ?>
+                                            <button class="btn-sm btn-danger btn-dispute" data-id="<?= $b['id'] ?>">Dispute</button>
                                         <?php endif; ?>
                                     </div>
                                 </div>
@@ -979,6 +873,134 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                     </div>
                 <?php endforeach; endif; ?>
             </div>
+
+            <!-- Requests Grid -->
+            <div class="booking-grid" id="requests">
+                <?php if (empty($requests)): ?>
+                    <div class="empty-state">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--border-color)" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        <p>No incoming booking requests yet.</p>
+                    </div>
+                <?php else: foreach ($requests as $b): 
+                    $images = !empty($b['equipment_images']) ? json_decode($b['equipment_images'], true) : [];
+                    $thumb = !empty($images) ? e($images[0]) : 'assets/img/placeholder.png';
+                    $isOver = strtotime($b['end_datetime']) < time();
+                ?>
+                    <div class="booking-card" id="booking-<?= $b['id'] ?>" data-status="<?= $b['status'] ?>">
+                        <div class="card-thumb">
+                            <?php if (!empty($images)): ?>
+                                <img src="<?= e($images[0]) ?>" alt="<?= e($b['equipment_title']) ?>" onerror="this.parentElement.innerHTML='<div class=\'eq-card-placeholder\' style=\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.03);\'><svg width=\'32\' height=\'32\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.5\' stroke-linecap=\'round\'><path d=\'M3 11V5h9l3 6m0 0H3m12 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m14 0h2a2 2 0 0 1 2 2v4h-3.5\'/><circle cx=\'7\' cy=\'19\' r=\'2\'/><circle cx=\'17\' cy=\'19\' r=\'2\'/></svg></div>'">
+                            <?php else: ?>
+                                <div class="eq-card-placeholder" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.03);">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                                        <path d="M3 11V5h9l3 6m0 0H3m12 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6m14 0h2a2 2 0 0 1 2 2v4h-3.5"/>
+                                        <circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/>
+                                    </svg>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="card-details">
+                            <div class="card-header">
+                                <h3 class="eq-title"><?= e($b['equipment_title']) ?></h3>
+                                <div style="text-align: right;">
+                                    <span class="price-tag">₹<?= number_format($b['total_price'] + $b['deposit_amount'], 0) ?></span>
+                                    <?php if ($b['deposit_amount'] > 0): ?>
+                                        <div style="font-size: 0.6rem; color: var(--text-subtle); margin-top: 2px;">
+                                            (includes ₹<?= number_format($b['deposit_amount'], 0) ?> Deposit)
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="info-row">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                                    <span class="info-label">Dates:</span> <span><?= date('d M', strtotime($b['start_datetime'])) ?> - <?= date('d M', strtotime($b['end_datetime'])) ?></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-person">
+                            <span class="person-role">Renter</span>
+                            <div class="person-avatar-wrap">
+                                <div class="person-avatar" style="<?= !empty($b['renter_photo']) ? 'padding: 0; overflow: hidden; border: 1px solid var(--primary-action);' : '' ?>">
+                                    <?php if (!empty($b['renter_photo'])): ?>
+                                        <img src="<?= e($b['renter_photo']) ?>" alt="<?= e($b['renter_name']) ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                                    <?php else: ?>
+                                        <?= strtoupper(substr($b['renter_name'] ?? 'U', 0, 1)) ?>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="person-info">
+                                    <button type="button" class="person-name btn-text-link" onclick="showUserReviews(<?= (int)($b['renter_id'] ?? 0) ?>)"><?= e($b['renter_name'] ?? 'Unknown') ?></button>
+                                </div>
+                            </div>
+                            <div class="person-trust">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                                <span><?= !empty($b['renter_trust']) ? number_format($b['renter_trust'], 1) : '-' ?></span>
+                                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">Trust</span>
+                            </div>
+                            <div class="person-phone"><?= e($b['renter_phone'] ?? '—') ?></div>
+                        </div>
+
+                        <div class="card-footer">
+                            <div class="actions-wrap">
+                                <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
+                                <?php
+                                    $bData = [
+                                        'id' => $b['id'],
+                                        'title' => $b['equipment_title'],
+                                        'status' => $b['status'],
+                                        'start' => date('d M Y', strtotime($b['start_datetime'])),
+                                        'end' => date('d M Y', strtotime($b['end_datetime'])),
+                                        'rental_fee' => $b['total_price'],
+                                        'deposit' => $b['deposit_amount'],
+                                        'total' => $b['total_price'] + $b['deposit_amount'],
+                                        'image' => $thumb,
+                                        'party_name' => $b['owner_name'] ?? $b['renter_name'] ?? '—',
+                                        'party_id' => $b['owner_id'] ?? $b['renter_id'] ?? 0,
+                                        'party_trust' => $b['owner_trust'] ?? $b['renter_trust'] ?? 0.0,
+                                        'party_phone' => $b['owner_phone'] ?? $b['renter_phone'] ?? '—',
+                                        'party_type' => isset($b['owner_name']) ? 'Owner' : 'Renter',
+                                        'party_photo' => $b['owner_photo'] ?? $b['renter_photo'] ?? null,
+                                        'upi_id' => $b['owner_upi_id'] ?? null,
+                                        'upi_qr' => $b['owner_upi_qr_path'] ?? null
+                                    ];
+                                ?>
+                                <button type="button" class="btn-sm btn-secondary view-booking-details" data-booking="<?= htmlspecialchars(json_encode($bData)) ?>">Details</button>
+                                
+                                <?php if ($b['status'] === 'pending'): ?>
+                                    <button class="btn-primary btn-sm status-action" 
+                                            data-id="<?= $b['id'] ?>" data-status="confirmed" 
+                                            data-renter="<?= e($b['renter_name'] ?? '') ?>"
+                                            data-dates="<?= date('d M Y', strtotime($b['start_datetime'])) ?> — <?= date('d M Y', strtotime($b['end_datetime'])) ?>"
+                                            data-price="₹<?= number_format($b['total_price'] + $b['deposit_amount'], 0) ?>"
+                                            data-equipment="<?= e($b['equipment_title']) ?>"
+                                            style="background: var(--primary-action);">Accept</button>
+                                <?php elseif (empty($b['review_id']) && in_array($b['status'], ['confirmed', 'active', 'completed'])): ?>
+                                    <button class="btn-primary btn-sm" 
+                                            style="background: var(--primary-action); gap: 5px; display: inline-flex; align-items: center;"
+                                            data-review-booking="<?= (int)$b['id'] ?>"
+                                            data-review-reviewee="<?= (int)($b['renter_id'] ?? 0) ?>">
+                                        ⭐ Review
+                                    </button>
+                                <?php endif; ?>
+
+                                <?php if (in_array($b['status'], ['pending', 'confirmed'])): ?>
+                                <div class="dots-container" style="position: relative; z-index: 10;">
+                                    <button class="btn-sm btn-icon dots-trigger" aria-label="More actions">⋮</button>
+                                    <div class="dots-menu">
+                                        <button class="btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="cancelled" style="color: var(--danger);">Decline</button>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; endif; ?>
+            </div>
+
+
+            <?php endif; ?>
         </div>
     </main>
 </div>
@@ -1341,11 +1363,12 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 <?php require_once __DIR__ . '/includes/viewer-reviews-modal.php'; ?>
 <?php require_once __DIR__ . '/includes/booking-detail-modal.php'; ?>
 <?php require_once __DIR__ . '/includes/user-public-profile-modal.php'; ?>
-<?php require_once __DIR__ . '/includes/payment-modal.php'; ?>
+<?php // require_once __DIR__ . '/includes/payment-modal.php'; ?>
 <script src="assets/js/theme-toggle.js" defer></script>
 <script src="assets/js/dashboard.js" defer></script>
 <script src="assets/js/reviews.js" defer></script>
 <script>
+    /* 
     // --- AgroPay Payment Modal Logic ---
     const paymentModal = document.getElementById('paymentModal');
     
@@ -1382,13 +1405,13 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
         }, 400);
     };
 
-    document.getElementById('paymentModalCloseBtn').addEventListener('click', closePaymentModal);
-    document.getElementById('paymentModalCloseAction').addEventListener('click', closePaymentModal);
-    paymentModal.addEventListener('click', (e) => {
+    document.getElementById('paymentModalCloseBtn')?.addEventListener('click', closePaymentModal);
+    document.getElementById('paymentModalCloseAction')?.addEventListener('click', closePaymentModal);
+    paymentModal?.addEventListener('click', (e) => {
         if (e.target === paymentModal) closePaymentModal();
     });
     
-    document.getElementById('copyUpiBtn').addEventListener('click', () => {
+    document.getElementById('copyUpiBtn')?.addEventListener('click', () => {
         const upiId = document.getElementById('payment-upi-id').innerText;
         if (upiId === 'Not Provided') return;
         
@@ -1408,6 +1431,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             if (window.showToast) window.showToast('success', 'UPI ID copied to clipboard!');
         });
     });
+    */
 
     // --- Dynamic Statistics & Filtering ---
     function updateCapsuleCounts(activeTabId) {
@@ -1583,13 +1607,18 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                     const badge = card.querySelector('.status-badge');
                     const actions = card.querySelector('.actions-wrap');
 
-                    // Update Badge UI
+                    // Update Card Data & Badge UI
+                    card.dataset.status = newStatus;
                     badge.className = `status-badge status-${newStatus}`;
                     badge.textContent = newStatus;
                     
                     // Hide buttons smoothly
                     actions.style.opacity = '0';
-                    setTimeout(() => actions.remove(), 300);
+                    setTimeout(() => {
+                        actions.remove();
+                        // Re-apply filter and update counts after removal
+                        applyCapsuleFilter();
+                    }, 300);
 
                     // Show visual success feedback
                     if (window.showToast) {
@@ -1645,17 +1674,18 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                 const data = await res.json();
 
                 if (data.success) {
-                    const card = document.getElementById(`booking-${bookingId}`);
-                    const badge = card.querySelector('.status-badge');
-                    const actions = card.querySelector('.actions-wrap');
-
+                    card.dataset.status = 'disputed';
                     badge.className = 'status-badge status-disputed';
                     badge.textContent = 'disputed';
                     badge.style.background = 'rgba(255, 87, 34, 0.15)';
                     badge.style.color = '#FF5722';
                     badge.style.border = '1px solid rgba(255, 87, 34, 0.2)';
 
-                    actions.remove();
+                    actions.style.opacity = '0';
+                    setTimeout(() => {
+                        actions.remove();
+                        applyCapsuleFilter();
+                    }, 300);
                     showInlineToast('success', data.message);
                 } else {
                     showInlineToast('error', data.message);
