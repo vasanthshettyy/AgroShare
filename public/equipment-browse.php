@@ -610,6 +610,7 @@ $items   = $results['items'];
     <?php require_once __DIR__ . '/includes/user-public-profile-modal.php'; ?>
 <?php endif; ?>
 <script src="assets/js/theme-toggle.js" defer></script>
+<script src="assets/js/reviews.js?v=<?= time() ?>" defer></script>
 <script src="assets/js/dashboard.js" defer></script>
 <script src="assets/js/equipment.js?v=<?= time() ?>" defer></script>
 </body>

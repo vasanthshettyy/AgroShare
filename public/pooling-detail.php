@@ -725,7 +725,12 @@ $is_creator = ($campaign['creator_id'] === $userId);
     </main>
 </div>
 
+<?php require_once __DIR__ . '/includes/profile-modal.php'; ?>
+<?php require_once __DIR__ . '/includes/viewer-reviews-modal.php'; ?>
+<?php require_once __DIR__ . '/includes/user-public-profile-modal.php'; ?>
+
 <script src="assets/js/theme-toggle.js" defer></script>
+<script src="assets/js/reviews.js?v=<?= time() ?>" defer></script>
 <script src="assets/js/dashboard.js" defer></script>
 <script>
 'use strict';

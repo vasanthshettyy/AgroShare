@@ -71,44 +71,45 @@
     --transition-base: all 0.3s var(--ease-out);
 }
 
-/* ── Light Mode (Emerald Harvest Hybrid) ───────────────── */
+/* ── Light Mode (Emerald Sage Design) ───────────────── */
 [data-theme="light"] {
-    --bg-color: hsl(140, 20%, 98%);          /* Near-white background */
-    --surface-color: hsl(145, 30%, 94%);     /* Soft mint surface */
-    --text-main: hsl(160, 40%, 12%);         /* Deep forest charcoal for high contrast */
-    --text-muted: hsl(160, 20%, 35%);
-    --text-subtle: hsl(160, 15%, 50%);
-    --border-color: hsl(145, 25%, 88%); 
+    --bg-color: hsl(40, 20%, 97%);           /* Warm pearl-white with subtle ivory tint */
+    --surface-color: hsl(150, 40%, 88%);     /* Seafoam green surface */
+    --text-main: hsl(160, 60%, 15%);         /* Deep forest green for high contrast */
+    --text-muted: hsl(160, 40%, 30%);
+    --text-subtle: hsl(160, 30%, 45%);
+    --border-color: hsl(150, 30%, 80%); 
 
     /* Enhanced Agro-Tokens */
-    --bg-main: hsl(140, 20%, 98%);
-    --bg-surface: hsl(145, 35%, 95%);
-    --bg-card: hsl(145, 40%, 96%);           /* Very light mint green for cards */
-    --bg-sidebar: hsl(150, 30%, 93%);        /* Slightly deeper sage for sidebar */
+    --bg-main: hsl(40, 20%, 97%);            /* Main webpage background */
+    --bg-surface: hsl(150, 35%, 85%);
+    --bg-card: hsl(150, 35%, 88%);           /* Semi-transparent greenish for cards */
+    --bg-sidebar: hsl(155, 35%, 35%);        /* Solid elegant Sage-green for sidebar */
     --accent-light: hsla(150, 50%, 45%, 0.12);
-    --border-agro: hsl(145, 30%, 86%);
+    --border-agro: hsl(150, 30%, 75%);
 
-    --primary-action: hsl(155, 60%, 32%);    /* Vibrant emerald for CTAs */
-    --secondary-action: hsl(171, 45%, 40%);
-    --accent-soft: hsl(150, 25%, 90%);
-    --accent-dark: hsl(155, 50%, 28%);
+    --primary-action: hsl(155, 70%, 28%);    /* Vibrant emerald for CTAs */
+    --secondary-action: hsl(171, 55%, 35%);
+    --accent-soft: hsl(150, 30%, 80%);
+    --accent-dark: hsl(155, 60%, 22%);
 
     --primary-10: rgba(16, 185, 129, 0.08);
-    --primary-15: rgba(16, 185, 129, 0.12);
-    --secondary-10: rgba(20, 184, 166, 0.08);
-    --nav-hover-bg: hsla(155, 50%, 45%, 0.08);
+    --primary-15: rgba(16, 185, 129, 0.15);
+    --secondary-10: rgba(20, 184, 166, 0.10);
+    --nav-hover-bg: hsla(0, 0%, 100%, 0.1);
 
-    --glass-bg: rgba(255, 255, 255, 0.65);
-    --glass-bg-heavy: rgba(255, 255, 255, 0.85);
-    --glass-border: rgba(16, 185, 129, 0.15);
-    --glass-blur: 12px;
+    /* Glassmorphism for Cards */
+    --glass-bg: hsla(150, 40%, 90%, 0.65);
+    --glass-bg-heavy: hsla(150, 40%, 88%, 0.85);
+    --glass-border: rgba(16, 185, 129, 0.25);
+    --glass-blur: 16px;
 
-    --shadow-sm: 0 1px 3px rgba(16, 185, 129, 0.04);
-    --shadow-md: 0 4px 14px rgba(16, 185, 129, 0.06);
-    --shadow-lg: 0 10px 30px rgba(16, 185, 129, 0.08);
-    --shadow-hover: 0 12px 28px rgba(16, 185, 129, 0.12);
-    --shadow-card: 0 0 0 1px hsla(155, 30%, 30%, 0.05), 0 2px 8px rgba(0, 0, 0, 0.04);
-    --glow-primary: 0 0 20px rgba(16, 185, 129, 0.12);
+    --shadow-sm: 0 1px 3px rgba(16, 185, 129, 0.06);
+    --shadow-md: 0 4px 14px rgba(16, 185, 129, 0.08);
+    --shadow-lg: 0 10px 30px rgba(16, 185, 129, 0.10);
+    --shadow-hover: 0 12px 28px rgba(16, 185, 129, 0.15);
+    --shadow-card: 0 0 0 1px hsla(155, 30%, 30%, 0.08), 0 2px 8px rgba(0, 0, 0, 0.06);
+    --glow-primary: 0 0 20px rgba(16, 185, 129, 0.15);
 
     --danger: #DC2626;
     --amber: #D97706;
@@ -119,6 +120,7 @@
 [data-theme="light"] body { background: var(--bg-main) !important; }
 
 [data-theme="light"] .sidebar,
+[data-theme="light"] .topbar,
 [data-theme="light"] .kpi-card,
 [data-theme="light"] .bento-card,
 [data-theme="light"] .action-card,
@@ -131,17 +133,27 @@
 /* ── Light Mode — Sidebar visibility boost ─────────────── */
 [data-theme="light"] .sidebar {
     background: var(--bg-sidebar) !important;
-    border-color: var(--border-color);
+    border-color: hsla(0, 0%, 100%, 0.15);
 }
 
+[data-theme="light"] .topbar,
 [data-theme="light"] .kpi-card,
 [data-theme="light"] .bento-card,
 [data-theme="light"] .action-card,
 [data-theme="light"] .booking-card,
-[data-theme="light"] .listing-card {
-    background: var(--bg-card) !important;
-    border: 1.5px solid var(--border-agro) !important;
+[data-theme="light"] .listing-card,
+[data-theme="light"] .activity-table th {
+    background: var(--bg-sidebar) !important;
+    border: 1px solid hsla(0, 0%, 100%, 0.15) !important;
     box-shadow: var(--shadow-sm);
+    color: #ffffff;
+    
+    /* Override local variables for dark background */
+    --text-main: #ffffff;
+    --text-muted: hsla(0, 0%, 100%, 0.75);
+    --text-subtle: hsla(0, 0%, 100%, 0.55);
+    --border-color: hsla(0, 0%, 100%, 0.15);
+    --glass-border: hsla(0, 0%, 100%, 0.15);
 }
 
 /* ── Light Mode — Global Micro-interactions ────────────── */
@@ -186,56 +198,64 @@
 }
 
 [data-theme="light"] .sidebar:hover {
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.15);
 }
 
 [data-theme="light"] .nav-link {
-    color: hsl(210, 15%, 35%);
+    color: hsla(0, 0%, 100%, 0.75);
 }
 
 [data-theme="light"] .nav-link svg {
-    color: hsl(210, 10%, 50%);
+    color: hsla(0, 0%, 100%, 0.65);
 }
 
 [data-theme="light"] .nav-link::before {
-    background: rgba(46, 140, 87, 0.12);
+    background: hsla(0, 0%, 100%, 0.1);
 }
 
 [data-theme="light"] .nav-link:hover {
-    color: hsl(150, 50%, 28%);
+    color: #ffffff;
 }
 
 [data-theme="light"] .nav-link:hover svg {
-    color: hsl(150, 55%, 35%);
+    color: #ffffff;
 }
 
 [data-theme="light"] .nav-link.active {
-    color: hsl(150, 55%, 32%);
-    background: rgba(46, 140, 87, 0.14);
+    color: #ffffff;
+    background: hsla(0, 0%, 100%, 0.15);
 }
 
 [data-theme="light"] .nav-link.active svg {
-    color: hsl(150, 55%, 32%);
+    color: #ffffff;
+}
+
+[data-theme="light"] .nav-section-label {
+    color: hsla(0, 0%, 100%, 0.5) !important;
 }
 
 [data-theme="light"] .nav-section-label::before {
-    background-color: hsl(210, 10%, 75%);
+    background-color: hsla(0, 0%, 100%, 0.3);
 }
 
 [data-theme="light"] .sidebar-brand {
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid hsla(0, 0%, 100%, 0.15);
+}
+
+[data-theme="light"] .brand-name {
+    color: #ffffff !important;
 }
 
 [data-theme="light"] .sidebar-footer {
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid hsla(0, 0%, 100%, 0.15);
 }
 
 [data-theme="light"] .nav-link.danger {
-    color: #DC2626;
+    color: #ff8a8a;
 }
 
 [data-theme="light"] .nav-link.danger:hover svg {
-    color: #DC2626;
+    color: #ff8a8a;
 }
 
 /* ── Theme Toggle Button (Pill Style) ─────────────────── */
