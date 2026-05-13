@@ -320,24 +320,40 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             z-index: 100; /* Ensure menu is above other card elements */
         }
         .dots-trigger {
-            width: 32px;
-            height: 32px;
-            display: flex;
+            width: 34px !important;
+            height: 34px !important;
+            min-width: 34px !important;
+            min-height: 34px !important;
+            display: flex !important;
             align-items: center;
             justify-content: center;
             border-radius: 8px;
-            background: var(--primary-10);
-            color: var(--primary-action);
-            border: 1px solid transparent;
+            background: var(--primary-10) !important;
+            color: var(--primary-action) !important;
+            border: 1px solid var(--border-color) !important;
             cursor: pointer;
             transition: all 0.2s;
-            font-size: 1.2rem;
-            padding: 0;
+            font-size: 1.3rem;
+            padding: 0 !important;
             line-height: 1;
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+            flex-shrink: 0;
         }
         .dots-trigger:hover {
-            background: var(--primary-20);
-            border-color: var(--primary-action);
+            background: var(--primary-20) !important;
+            border-color: var(--primary-action) !important;
+            transform: scale(1.05);
+        }
+        [data-theme="light"] .dots-trigger {
+            background: #f0fdf4 !important;
+            color: #166534 !important;
+            border-color: #bbf7d0 !important;
+        }
+        [data-theme="light"] .dots-trigger:hover {
+            background: #dcfce7 !important;
+            border-color: #4ade80 !important;
         }
         .dots-menu {
             position: absolute;
