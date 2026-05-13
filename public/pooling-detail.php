@@ -514,10 +514,10 @@ $is_creator = ($campaign['creator_id'] === $userId);
                     <div class="specs-strip">
                         <div class="spec-strip-item">
                             <span class="spec-strip-label">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                                Category
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                Pledgers
                             </span>
-                            <span class="spec-strip-value">Agriculture</span>
+                            <span class="spec-strip-value"><?= count($pledges) ?></span>
                         </div>
                         <div class="spec-strip-item">
                             <span class="spec-strip-label">

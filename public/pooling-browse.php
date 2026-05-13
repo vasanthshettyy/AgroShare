@@ -387,6 +387,10 @@ $campaigns = getCampaigns($conn, $filters);
                 <input type="radio" name="status" value="threshold_met" style="display: none;" onchange="this.form.submit()" <?= $status_filter === 'threshold_met' ? 'checked' : '' ?>>
                 Goal Reached
             </label>
+            <label class="filter-capsule <?= $status_filter === 'closed' ? 'active' : '' ?>">
+                <input type="radio" name="status" value="closed" style="display: none;" onchange="this.form.submit()" <?= $status_filter === 'closed' ? 'checked' : '' ?>>
+                Closed
+            </label>
 
             <div class="filter-divider"></div>
 
@@ -401,6 +405,18 @@ $campaigns = getCampaigns($conn, $filters);
                 <a href="pooling-browse.php" class="btn-clear-premium" style="margin-left: 0.5rem;">Clear</a>
             <?php endif; ?>
         </form>
+
+        <details style="background: rgba(251, 191, 36, 0.03); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;">
+            <summary style="cursor: pointer; font-weight: 700; color: var(--text-main); font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem; outline: none; list-style: none;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                New here? Learn how bulk-buying works
+            </summary>
+            <div style="margin-top: 1.25rem; color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; display: flex; flex-direction: column; gap: 0.75rem;">
+                <div><strong style="color: var(--text-main);">1.</strong> A farmer posts what they need and sets a buying price</div>
+                <div><strong style="color: var(--text-main);">2.</strong> Other farmers pledge their available supply</div>
+                <div><strong style="color: var(--text-main);">3.</strong> Once the goal is met, the creator arranges pickup and pays everyone</div>
+            </div>
+        </details>
 
         <?php if (empty($campaigns)): ?>
             <div class="empty-state" style="padding: 4rem 2rem; text-align: center;">
