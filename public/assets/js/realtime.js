@@ -12,14 +12,15 @@ const RealtimeEngine = (function() {
      * Silent Fetcher: Calls the API and triggers the callback on success.
      * Silently ignores errors to avoid polluting the user console or UI.
      */
-    async function fetchData(endpoint, callback) {
+    async function fetchData(endpoint, callback, isUniversal = false) {
         if (isFetching || document.hidden) return;
         
         isFetching = true;
         try {
-            const response = await fetch(endpoint, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
+            const headers = { 'X-Requested-With': 'XMLHttpRequest' };
+            if (isUniversal) headers['X-AgroShare-Partial'] = '1';
+
+            const response = await fetch(endpoint, { headers });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             
             const json = await response.json();
@@ -27,7 +28,7 @@ const RealtimeEngine = (function() {
                 callback(json);
             }
         } catch (error) {
-            // Silently catch errors as per requirement
+            // Silently catch errors
         } finally {
             isFetching = false;
         }
@@ -168,6 +169,67 @@ const RealtimeEngine = (function() {
         }
     }
 
+    /**
+     * DOM Manipulation Logic for Pooling Grid.
+     */
+    function updatePoolingGrid(data) {
+        const grid = document.querySelector('.pooling-grid');
+        if (!grid || !data.data) return;
+
+        let html = '';
+        data.data.forEach(camp => {
+            const progress = (camp.target_quantity > 0) ? Math.min(100, Math.round((camp.current_quantity / camp.target_quantity) * 100)) : 0;
+            const statusDisplay = camp.status.replace('_', ' ');
+            const deadlineDate = new Date(camp.deadline);
+            const deadlineStr = deadlineDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+
+            html += `
+                <a href="pooling-detail.php?id=${camp.id}" class="pool-card-premium">
+                    <div class="card-badges-row">
+                        <span class="badge-status status-${camp.status}">${statusDisplay}</span>
+                    </div>
+                    <div class="card-info-stack">
+                        <h3 class="card-title-main">${escapeHtml(camp.title)}</h3>
+                        <div class="card-item-name">${escapeHtml(camp.item_name)}</div>
+                        <div class="card-creator">By ${escapeHtml(camp.creator_name)}</div>
+                    </div>
+                    <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-main);">
+                        Offering: <span style="color: var(--secondary-action);">₹${parseInt(camp.offering_price).toLocaleString()}</span> per ${escapeHtml(camp.unit)}
+                    </div>
+                    <div class="card-meta-row">
+                        <div class="meta-pill">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            ${escapeHtml(camp.district)}
+                        </div>
+                        <div class="meta-pill">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            ${deadlineStr}
+                        </div>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-bar-sleek">
+                            <div class="progress-bar-fill" style="width: ${progress}%;"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; background: var(--primary-10); border: 1px solid var(--border-color); border-radius: 12px; padding: 0.75rem 1rem; margin-top: 1rem;">
+                            <div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 2px;">Committed</div>
+                                <div style="font-size: 1.1rem; font-weight: 800; color: var(--primary-action);">${camp.current_quantity} / ${camp.target_quantity} <small style="font-weight: 600;">${escapeHtml(camp.unit)}</small></div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 2px;">Progress</div>
+                                <div style="font-size: 1.1rem; font-weight: 800; color: var(--text-main);">${progress}%</div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            `;
+        });
+
+        if (grid.innerHTML.trim() !== html.trim()) {
+            grid.innerHTML = html;
+        }
+    }
+
     function escapeHtml(text) {
         if (text === null || text === undefined) return '';
         const div = document.createElement('div');
@@ -175,7 +237,34 @@ const RealtimeEngine = (function() {
         return div.innerHTML;
     }
 
-    return {
+        /**
+         * Universal Poller Logic: Replaces <main> content if hash changed.
+         */
+        updateUniversal: function(data) {
+            if (!data.content || !data.hash) return;
+            const main = document.querySelector('main');
+            if (!main) return;
+
+            // Only update if content hash changed
+            if (main.dataset.contentHash !== data.hash) {
+                // Store scroll position to restore it
+                const scrollPos = window.scrollY;
+                
+                // Update DOM
+                main.innerHTML = data.content;
+                main.dataset.contentHash = data.hash;
+                
+                // Re-init any specific page logic if needed
+                // (e.g. counters, charts)
+                if (typeof window.reinitPageLogic === 'function') {
+                    window.reinitPageLogic();
+                }
+
+                // Restore scroll
+                window.scrollTo(0, scrollPos);
+            }
+        },
+
         /**
          * Initialize polling for a specific page type.
          */
@@ -184,6 +273,7 @@ const RealtimeEngine = (function() {
             
             let endpoint = '';
             let callback = null;
+            let isUniversal = false;
 
             if (pageType === 'dashboard') {
                 endpoint = 'api/get-realtime-dashboard.php';
@@ -192,13 +282,22 @@ const RealtimeEngine = (function() {
                 const params = new URLSearchParams(window.location.search);
                 endpoint = `api/get-realtime-equipment.php?${params.toString()}`;
                 callback = updateEquipmentGrid;
+            } else if (pageType === 'pooling') {
+                const params = new URLSearchParams(window.location.search);
+                endpoint = `api/get-realtime-pooling.php?${params.toString()}`;
+                callback = updatePoolingGrid;
+            } else {
+                // Fallback to Universal Poller for all other pages
+                endpoint = window.location.href;
+                callback = this.updateUniversal;
+                isUniversal = true;
             }
 
             if (endpoint && callback) {
                 // Initial fetch
-                fetchData(endpoint, callback);
+                fetchData(endpoint, callback, isUniversal);
                 // Set interval
-                pollingInterval = setInterval(() => fetchData(endpoint, callback), POLLING_RATE);
+                pollingInterval = setInterval(() => fetchData(endpoint, callback, isUniversal), POLLING_RATE);
             }
         },
 
@@ -216,6 +315,10 @@ const RealtimeEngine = (function() {
                 const params = new URLSearchParams(window.location.search);
                 endpoint = `api/get-realtime-equipment.php?${params.toString()}`;
                 callback = updateEquipmentGrid;
+            } else if (pageType === 'pooling') {
+                const params = new URLSearchParams(window.location.search);
+                endpoint = `api/get-realtime-pooling.php?${params.toString()}`;
+                callback = updatePoolingGrid;
             }
 
             if (endpoint && callback) {
@@ -230,9 +333,16 @@ const RealtimeEngine = (function() {
  */
 document.addEventListener('DOMContentLoaded', () => {
     const path = window.location.pathname;
-    if (path.includes('dashboard.php')) {
+    if (path.includes('/admin/')) {
+        RealtimeEngine.init('universal');
+    } else if (path.includes('dashboard.php')) {
         RealtimeEngine.init('dashboard');
     } else if (path.includes('equipment-browse.php')) {
         RealtimeEngine.init('equipment');
+    } else if (path.includes('pooling-browse.php')) {
+        RealtimeEngine.init('pooling');
+    } else {
+        // Universal init for all other pages (including Admin fallback if needed)
+        RealtimeEngine.init('universal');
     }
 });

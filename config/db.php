@@ -11,6 +11,28 @@
  *        (adjust path based on file location)
  */
 
+// ── Universal Realtime Interceptor (Phase 4) ────────────────
+if (isset($_SERVER['HTTP_X_AGROSHARE_PARTIAL'])) {
+    ob_start();
+    register_shutdown_function(function() {
+        $html = ob_get_clean();
+        
+        // Extract content within <main> tag
+        if (preg_match('/<main[^>]*>(.*)<\/main>/is', $html, $matches)) {
+            $content = $matches[1];
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'content' => $content,
+                'hash' => md5(trim($content))
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Main content not found']);
+        }
+        exit();
+    });
+}
+
 // Load credentials
 require_once __DIR__ . '/constants.php';
 

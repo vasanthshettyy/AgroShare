@@ -46,7 +46,7 @@ $campaigns = getCampaigns($conn, $filters);
         .header-title-main {
             font-size: 2.25rem;
             font-weight: 800;
-            color: #fff;
+            color: var(--text-main);
             letter-spacing: -0.02em;
         }
         .header-subtitle {
@@ -200,7 +200,7 @@ $campaigns = getCampaigns($conn, $filters);
         .card-title-main {
             font-size: 1.35rem;
             font-weight: 800;
-            color: #fff;
+            color: var(--text-main);
             line-height: 1.2;
         }
         .card-item-name {
@@ -233,11 +233,11 @@ $campaigns = getCampaigns($conn, $filters);
         }
         .progress-bar-sleek {
             height: 6px;
-            background: rgba(255,255,255,0.05);
+            background: var(--bg-color);
             border-radius: 10px;
             overflow: hidden;
             margin-bottom: 0.75rem;
-            border: 1px solid rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
         }
         .progress-bar-fill {
             height: 100%;
@@ -253,7 +253,7 @@ $campaigns = getCampaigns($conn, $filters);
             color: var(--text-muted);
         }
         .stat-val-bold {
-            color: #fff;
+            color: var(--text-main);
             font-weight: 800;
         }
     </style>
@@ -427,7 +427,7 @@ $campaigns = getCampaigns($conn, $filters);
                             <div class="card-creator">By <?= e($camp['creator_name']) ?></div>
                         </div>
 
-                        <div style="font-size: 0.95rem; font-weight: 700; color: #fff;">
+                        <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-main);">
                             Offering: <span style="color: var(--secondary-action);">₹<?= number_format($camp['offering_price'], 0) ?></span> per <?= e($camp['unit']) ?>
                         </div>
 
@@ -446,7 +446,7 @@ $campaigns = getCampaigns($conn, $filters);
                             <div class="progress-bar-sleek">
                                 <div class="progress-bar-fill" style="width: <?= $progress ?>%;"></div>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(76, 175, 120, 0.08); border: 1px solid rgba(76, 175, 120, 0.2); border-radius: 12px; padding: 0.75rem 1rem; margin-top: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--primary-10); border: 1px solid var(--border-color); border-radius: 12px; padding: 0.75rem 1rem; margin-top: 1rem;">
                                 <div>
                                     <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Target Needed</div>
                                     <div style="font-size: 1.15rem; font-weight: 800; color: var(--text-main);"><?= number_format($camp['target_quantity']) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($camp['unit']) ?></span></div>
@@ -554,6 +554,7 @@ $campaigns = getCampaigns($conn, $filters);
 
 <script src="assets/js/theme-toggle.js" defer></script>
 <script src="assets/js/reviews.js?v=<?= time() ?>" defer></script>
+<script src="assets/js/realtime.js?v=<?= time() ?>" defer></script>
 <script src="assets/js/dashboard.js" defer></script>
 <script>
 'use strict';
