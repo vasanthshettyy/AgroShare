@@ -45,7 +45,7 @@ $campaigns = getPoolingCampaignsForAdmin($conn);
                                     <span><?= (int)$c['current_quantity'] ?>/<?= (int)$c['target_quantity'] ?></span>
                                     <span><?= round($percent) ?>%</span>
                                 </div>
-                                <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden;">
+                                <div style="height: 6px; background: var(--bg-color); border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color);">
                                     <div style="height: 100%; width: <?= $percent ?>%; background: var(--admin-accent);"></div>
                                 </div>
                             </div>
@@ -56,12 +56,12 @@ $campaigns = getPoolingCampaignsForAdmin($conn);
                                 if ($isExpired && $status === 'open') $status = 'expired';
                                 
                                 $statusClass = [
-                                    'open' => 'background: rgba(59, 130, 246, 0.1); color: #3b82f6;',
-                                    'threshold_met' => 'background: rgba(74, 222, 128, 0.1); color: #4ade80;',
+                                    'open' => 'background: var(--primary-10); color: var(--primary-action);',
+                                    'threshold_met' => 'background: hsla(160, 60%, 40%, 0.15); color: var(--secondary-action);',
                                     'completed' => 'background: var(--primary-10); color: var(--admin-accent);',
-                                    'expired' => 'background: rgba(239, 68, 68, 0.1); color: #ef4444;',
-                                    'failed' => 'background: rgba(255,255,255,0.05); color: var(--text-muted);'
-                                ][$status] ?? 'background: rgba(255,255,255,0.05); color: var(--text-main);';
+                                    'expired' => 'background: hsla(0, 100%, 50%, 0.1); color: #ef4444;',
+                                    'failed' => 'background: var(--bg-color); color: var(--text-muted);'
+                                ][$status] ?? 'background: var(--bg-color); color: var(--text-main);';
                             ?>
                             <span class="admin-status-pill" style="<?= $statusClass ?>"><?= e(ucfirst(str_replace('_', ' ', $status))) ?></span>
                         </td>

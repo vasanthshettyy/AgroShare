@@ -107,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
-<div class="auth-wrapper">
+<main class="main-content auth-wrapper">
     <h1>Set New Password</h1>
     <p>Choose a strong password with at least 8 characters.</p>
 
@@ -146,6 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <button type="submit" class="btn-submit">Reset Password</button>
     </form>
-</div>
+</main>
+<script src="assets/js/realtime.js?v=<?= time() ?>" defer></script>
 </body>
 </html>

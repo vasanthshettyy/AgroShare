@@ -200,6 +200,48 @@
     color: hsl(160, 30%, 45%) !important;
 }
 
+/* ── Light Mode — Mint Cream Modal Theme (Solid & Clean) ─────────────── */
+[data-theme="light"] .modal-content,
+[data-theme="light"] .profile-modal-content,
+[data-theme="light"] .payment-modal-content,
+[data-theme="light"] .booking-premium-modal,
+[data-theme="light"] .booking-success-card,
+[data-theme="light"] .booking-gateway-modal,
+[data-theme="light"] .notif-dropdown {
+    background: hsl(150, 45%, 96%) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid hsl(150, 30%, 82%) !important;
+    color: hsl(160, 60%, 15%) !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12) !important;
+}
+
+[data-theme="light"] .modal-header,
+[data-theme="light"] .modal-footer {
+    border-color: hsl(150, 30%, 85%) !important;
+    background: transparent !important;
+}
+
+[data-theme="light"] .modal-header h2,
+[data-theme="light"] .modal-header h3,
+[data-theme="light"] .modal-title,
+[data-theme="light"] .success-title {
+    color: hsl(160, 60%, 15%) !important;
+}
+
+[data-theme="light"] .modal-close {
+    background: hsl(150, 35%, 88%) !important;
+    color: hsl(160, 60%, 15%) !important;
+    border: 1px solid hsl(150, 30%, 80%) !important;
+    opacity: 1 !important;
+}
+
+[data-theme="light"] .modal-close:hover {
+    background: var(--danger) !important;
+    color: #ffffff !important;
+    border-color: var(--danger) !important;
+}
+
 
 /* Specific text color fixes for dark background components in light mode */
 [data-theme="light"] .topbar .topbar-greeting strong,

@@ -694,7 +694,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php include __DIR__ . '/includes/theme-toggle-btn.php'; ?>
 </div>
 
-<div class="auth-wrapper">
+<main class="main-content auth-wrapper">
 
     <!-- ══ LEFT — Brand Panel ════════════════════════════════ -->
     <div class="auth-panel" aria-hidden="true">
@@ -1063,5 +1063,6 @@ if (emailInput && emailStatus) {
 }
 </script>
 <script src="assets/js/theme-toggle.js"></script>
+<script src="assets/js/realtime.js?v=<?= time() ?>" defer></script>
 </body>
 </html>

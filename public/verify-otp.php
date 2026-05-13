@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
-<div class="auth-wrapper">
+<main class="main-content auth-wrapper">
     <a href="forgot-password.php" class="btn-back">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         Back
@@ -130,5 +130,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="submit" class="btn-submit">Verify & Continue</button>
     </form>
 </div>
+<script src="assets/js/realtime.js?v=<?= time() ?>" defer></script>
 </body>
 </html>

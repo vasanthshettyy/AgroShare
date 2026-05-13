@@ -90,9 +90,9 @@ $is_creator = ($campaign['creator_id'] === $userId);
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
-        .status-badge-premium.status-open { background: rgba(76, 175, 120, 0.1); color: var(--primary-action); }
-        .status-badge-premium.status-threshold_met { background: rgba(76, 175, 120, 0.2); color: #4ade80; }
-        .status-badge-premium.status-closed { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+        .status-badge-premium.status-open { background: var(--primary-10); color: var(--primary-action); }
+        .status-badge-premium.status-threshold_met { background: hsla(160, 60%, 40%, 0.15); color: var(--secondary-action); }
+        .status-badge-premium.status-closed { background: var(--bg-color); color: var(--text-muted); }
 
         .metadata-row-premium {
             display: flex;
@@ -224,7 +224,7 @@ $is_creator = ($campaign['creator_id'] === $userId);
 
         .pooling-progress-wrap {
             height: 12px;
-            background: rgba(255,255,255,0.05);
+            background: var(--bg-color);
             border-radius: 6px;
             overflow: hidden;
             margin: 1.5rem 0;
@@ -243,7 +243,7 @@ $is_creator = ($campaign['creator_id'] === $userId);
             overflow-y: auto;
             border: 1px solid var(--border-color);
             border-radius: 16px;
-            background: rgba(0,0,0,0.1);
+            background: var(--bg-color);
             scrollbar-width: thin;
             scrollbar-color: var(--border-color) transparent;
         }
@@ -269,7 +269,7 @@ $is_creator = ($campaign['creator_id'] === $userId);
         }
         .pledgers-table-premium td {
             padding: 1rem;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
+            border-bottom: 1px solid var(--border-color);
             vertical-align: middle;
         }
         .farmer-cell {
@@ -295,11 +295,11 @@ $is_creator = ($campaign['creator_id'] === $userId);
             font-size: 0.9rem;
         }
         .status-badge-confirmed {
-            background: rgba(74, 222, 128, 0.1);
-            color: #4ade80;
+            background: hsla(160, 60%, 40%, 0.15);
+            color: var(--secondary-action);
             padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 0.65rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
             font-weight: 700;
             text-transform: uppercase;
         }
@@ -495,17 +495,17 @@ $is_creator = ($campaign['creator_id'] === $userId);
                             <div class="pooling-progress-fill" style="width: <?= $progress ?>%;"></div>
                         </div>
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem;">
-                            <div style="background: rgba(76, 175, 120, 0.08); border: 1px solid rgba(76, 175, 120, 0.2); border-radius: 12px; padding: 1.25rem; text-align: center;">
+                            <div style="background: var(--primary-10); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; text-align: center;">
                                 <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">1. Target Needed</div>
                                 <div style="color: var(--text-main); font-size: 1.5rem; font-weight: 800; margin-top: 0.25rem;"><?= number_format($campaign['target_quantity']) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($campaign['unit']) ?></span></div>
                             </div>
-                            <div style="background: rgba(76, 175, 120, 0.08); border: 1px solid rgba(76, 175, 120, 0.2); border-radius: 12px; padding: 1.25rem; text-align: center;">
+                            <div style="background: var(--primary-10); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; text-align: center;">
                                 <div style="color: var(--primary-action); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">2. Already Filled</div>
                                 <div style="color: var(--primary-action); font-size: 1.5rem; font-weight: 800; margin-top: 0.25rem;"><?= number_format($campaign['current_quantity']) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($campaign['unit']) ?></span></div>
                             </div>
-                            <div style="background: rgba(255, 152, 0, 0.1); border: 1px solid rgba(255, 152, 0, 0.3); border-radius: 12px; padding: 1.25rem; text-align: center;">
-                                <div style="color: #ff9800; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">3. Still Short By</div>
-                                <div style="color: #ff9800; font-size: 1.5rem; font-weight: 800; margin-top: 0.25rem;"><?= number_format(max(0, $campaign['target_quantity'] - $campaign['current_quantity'])) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($campaign['unit']) ?></span></div>
+                            <div style="background: hsla(38, 100%, 50%, 0.1); border: 1px solid hsla(38, 100%, 50%, 0.3); border-radius: 12px; padding: 1.25rem; text-align: center;">
+                                <div style="color: var(--amber, #ff9800); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">3. Still Short By</div>
+                                <div style="color: var(--amber, #ff9800); font-size: 1.5rem; font-weight: 800; margin-top: 0.25rem;"><?= number_format(max(0, $campaign['target_quantity'] - $campaign['current_quantity'])) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($campaign['unit']) ?></span></div>
                             </div>
                         </div>
                     </div>
@@ -819,5 +819,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+<script src="assets/js/realtime.js?v=<?= time() ?>" defer></script>
 </body>
 </html>

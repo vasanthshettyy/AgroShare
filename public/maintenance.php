@@ -177,7 +177,7 @@ if ($res) {
     </style>
 </head>
 <body>
-    <div class="maintenance-card">
+    <main class="main-content maintenance-card">
         <div class="glow-orb"></div>
         <div class="brand-icon">
             <!-- Clock Icon -->
@@ -206,5 +206,6 @@ if ($res) {
             &copy; <?= date('Y') ?> <?= e(APP_NAME) ?> &bull; SECURE &bull; STABLE &bull; SUSTAINABLE
         </footer>
     </div>
+<script src="assets/js/realtime.js?v=<?= time() ?>" defer></script>
 </body>
 </html>

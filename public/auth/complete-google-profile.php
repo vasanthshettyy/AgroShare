@@ -219,6 +219,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <button type="submit" class="btn">Finish Account Setup</button>
         </form>
-    </div>
+    </main>
+<script src="../assets/js/realtime.js?v=<?= time() ?>" defer></script>
 </body>
+</html>
+ody>
 </html>

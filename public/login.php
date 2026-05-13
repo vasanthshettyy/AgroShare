@@ -1275,7 +1275,7 @@ $_SESSION['captcha_code'] = $captcha_code;
     <?php include __DIR__ . '/includes/theme-toggle-btn.php'; ?>
 </div>
 
-<div id="auth-slider-container" class="auth-slider-container<?= $isSignup ? ' right-panel-active' : '' ?>">
+<main id="auth-slider-container" class="main-content auth-slider-container<?= $isSignup ? ' right-panel-active' : '' ?>">
 
     <div class="login-pane-container">
         <div class="auth-form-panel">
@@ -2088,5 +2088,6 @@ if (captchaRefreshSignupBtn) {
 }
 </script>
 <script src="assets/js/theme-toggle.js"></script>
+<script src="assets/js/realtime.js?v=<?= time() ?>" defer></script>
 </body>
 </html>

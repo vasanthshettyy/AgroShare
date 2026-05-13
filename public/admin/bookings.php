@@ -154,6 +154,6 @@ $bookings = getBookingsForAdmin($conn);
         </div>
     </main>
 </div>
-
+<script src="../assets/js/realtime.js?v=<?= time() ?>" defer></script>
 </body>
 </html>

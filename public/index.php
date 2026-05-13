@@ -74,6 +74,7 @@ if ($stmt) {
     </nav>
 
     <!-- ── Hero Section ─────────────────────────────────────── -->
+    <main class="main-content">
     <section class="hero">
         <!-- Left Content -->
         <div class="hero-left" data-aos="fade-right" data-aos-duration="800">
@@ -304,5 +305,6 @@ if ($stmt) {
             document.querySelector('.nav-links').classList.toggle('active');
         });
     </script>
+<script src="assets/js/realtime.js?v=<?= time() ?>" defer></script>
 </body>
 </html>

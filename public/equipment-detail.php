@@ -660,5 +660,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 <script src="assets/js/equipment.js?v=<?= time() ?>" defer></script>
 <script src="assets/js/calendar.js?v=<?= time() ?>" defer></script>
 <script src="assets/js/reviews.js?v=<?= time() ?>" defer></script>
+<script src="assets/js/realtime.js?v=<?= time() ?>" defer></script>
 </body>
 </html>
