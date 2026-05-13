@@ -24,12 +24,18 @@
     --border-color: hsla(0, 0%, 100%, 0.15);
 }
 
-/* Filter bar stays light/white for readability */
+/* Filter bar stays premium dark green like dashboard topbar */
 [data-theme="light"] .filter-bar {
-    background: #ffffff !important;
-    border: 1px solid var(--border-agro) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    color: #1a1a1a;
+    background: var(--bg-sidebar) !important;
+    border: 1px solid hsla(0, 0%, 100%, 0.15) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    color: #ffffff;
+}
+
+[data-theme="light"] .filter-label,
+[data-theme="light"] .toggle-label,
+[data-theme="light"] .filter-group span {
+    color: #ffffff !important;
 }
 
 [data-theme="light"] .eq-card .eq-title,
@@ -87,10 +93,15 @@
     border-color: var(--primary-action);
 }
 
-/* Operator badge on dark cards */
+/* Operator badge on dark cards - High Visibility */
 [data-theme="light"] .eq-card .eq-card-operator-badge {
-    background: hsla(0, 0%, 100%, 0.15) !important;
-    border-color: hsla(0, 0%, 100%, 0.3) !important;
+    background: hsla(0, 0%, 100%, 0.12) !important;
+    border: 1px solid hsla(0, 0%, 100%, 0.25) !important;
+    color: #ffffff !important;
+    backdrop-filter: blur(4px);
+}
+
+[data-theme="light"] .eq-card .eq-card-operator-badge svg {
     color: #ffffff !important;
 }
 
