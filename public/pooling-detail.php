@@ -496,15 +496,15 @@ $is_creator = ($campaign['creator_id'] === $userId);
                         </div>
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem;">
                             <div style="background: var(--primary-10); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; text-align: center;">
-                                <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">1. Target Needed</div>
+                                <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Goal</div>
                                 <div style="color: var(--text-main); font-size: 1.5rem; font-weight: 800; margin-top: 0.25rem;"><?= number_format($campaign['target_quantity']) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($campaign['unit']) ?></span></div>
                             </div>
                             <div style="background: var(--primary-10); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; text-align: center;">
-                                <div style="color: var(--primary-action); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">2. Already Filled</div>
+                                <div style="color: var(--primary-action); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Pledged</div>
                                 <div style="color: var(--primary-action); font-size: 1.5rem; font-weight: 800; margin-top: 0.25rem;"><?= number_format($campaign['current_quantity']) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($campaign['unit']) ?></span></div>
                             </div>
                             <div style="background: hsla(38, 100%, 50%, 0.1); border: 1px solid hsla(38, 100%, 50%, 0.3); border-radius: 12px; padding: 1.25rem; text-align: center;">
-                                <div style="color: var(--amber, #ff9800); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">3. Still Short By</div>
+                                <div style="color: var(--amber, #ff9800); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Remaining</div>
                                 <div style="color: var(--amber, #ff9800); font-size: 1.5rem; font-weight: 800; margin-top: 0.25rem;"><?= number_format(max(0, $campaign['target_quantity'] - $campaign['current_quantity'])) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($campaign['unit']) ?></span></div>
                             </div>
                         </div>
@@ -538,7 +538,7 @@ $is_creator = ($campaign['creator_id'] === $userId);
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                                 Target Needed
                             </span>
-                            <span class="spec-strip-value"><?= number_format($campaign['target_quantity']) ?></span>
+                            <span class="spec-strip-value"><?= number_format($campaign['target_quantity']) ?> <?= e($campaign['unit']) ?></span>
                         </div>
                         <div class="spec-strip-item">
                             <span class="spec-strip-label">
@@ -550,9 +550,9 @@ $is_creator = ($campaign['creator_id'] === $userId);
                         <div class="spec-strip-item">
                             <span class="spec-strip-label">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                                Offering Price
+                                Buying Price
                             </span>
-                            <span class="spec-strip-value">₹<?= number_format($campaign['offering_price'], 0) ?></span>
+                            <span class="spec-strip-value">₹<?= number_format($campaign['offering_price'], 0) ?> / <?= e($campaign['unit']) ?></span>
                         </div>
                     </div>
 
@@ -634,8 +634,8 @@ $is_creator = ($campaign['creator_id'] === $userId);
                                 </button>
                             </div>
                         <?php else: ?>
-                            <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-main);">Help Reach Goal</h3>
-                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Contribute your excess supply to help this farmer reach their target.</p>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-main);">Join This Bulk-Buy</h3>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Pledge your supply to help reach the goal. You'll be paid ₹<?= number_format($campaign['offering_price'], 0) ?> per <?= e($campaign['unit']) ?> when complete.</p>
                             
                             <?php if (isGuest()): ?>
                                 <a href="login.php" class="btn-primary" style="width: 100%; height: 52px; font-size: 0.95rem; font-weight: 700; border-radius: 12px; text-decoration: none; display: flex; align-items: center; justify-content: center;">
@@ -648,7 +648,7 @@ $is_creator = ($campaign['creator_id'] === $userId);
                                 </div>
 
                                 <button type="button" class="btn-primary" id="pledgeBtn" style="width: 100%; height: 52px; font-size: 0.95rem; font-weight: 700; border-radius: 12px;">
-                                    Contribute Supply
+                                    Join & Pledge
                                 </button>
                             <?php endif; ?>
                         <?php endif; ?>
@@ -687,9 +687,9 @@ $is_creator = ($campaign['creator_id'] === $userId);
                     <div style="padding: 1.5rem; background: rgba(251, 191, 36, 0.03); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 16px; margin-bottom: 1.5rem;">
                         <h4 style="color: #fbbf24; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.75rem;">How Pooling Works</h4>
                         <ul style="font-size: 0.82rem; color: var(--text-muted); list-style: none; display: flex; flex-direction: column; gap: 10px; padding: 0;">
-                            <li style="display: flex; gap: 10px;"><span style="color: #fbbf24; font-weight: 800;">1.</span> A farmer posts what they need and what they will pay.</li>
-                            <li style="display: flex; gap: 10px;"><span style="color: #fbbf24; font-weight: 800;">2.</span> You contribute your excess supply.</li>
-                            <li style="display: flex; gap: 10px;"><span style="color: #fbbf24; font-weight: 800;">3.</span> The creator coordinates pickup/payment once the target is met.</li>
+                            <li style="display: flex; gap: 10px;"><span style="color: #fbbf24; font-weight: 800;">1.</span> A farmer posts what they need and the price they'll pay per unit.</li>
+                            <li style="display: flex; gap: 10px;"><span style="color: #fbbf24; font-weight: 800;">2.</span> You pledge your available supply. No upfront cost.</li>
+                            <li style="display: flex; gap: 10px;"><span style="color: #fbbf24; font-weight: 800;">3.</span> Once the goal is met, the creator arranges pickup & pays everyone.</li>
                         </ul>
                         <a href="#" class="btn-outline-sm">Learn More</a>
                     </div>

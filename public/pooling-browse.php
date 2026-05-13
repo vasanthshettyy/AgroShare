@@ -257,7 +257,6 @@ $campaigns = getCampaigns($conn, $filters);
             font-weight: 800;
         }
     </style>
-    </style>
 </head>
 <body>
 
@@ -386,7 +385,7 @@ $campaigns = getCampaigns($conn, $filters);
             </label>
             <label class="filter-capsule <?= $status_filter === 'threshold_met' ? 'active' : '' ?>">
                 <input type="radio" name="status" value="threshold_met" style="display: none;" onchange="this.form.submit()" <?= $status_filter === 'threshold_met' ? 'checked' : '' ?>>
-                Threshold Met
+                Goal Reached
             </label>
 
             <div class="filter-divider"></div>
@@ -404,10 +403,16 @@ $campaigns = getCampaigns($conn, $filters);
         </form>
 
         <?php if (empty($campaigns)): ?>
-            <div class="empty-state">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-subtle)" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                <h3>No campaigns found</h3>
-                <p>Try changing your filters or start a new bulk-buy campaign.</p>
+            <div class="empty-state" style="padding: 4rem 2rem; text-align: center;">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--primary-action)" stroke-width="1.5" style="margin-bottom: 1.5rem; opacity: 0.6;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <h3 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 0.5rem;">No active bulk-buys found</h3>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem; max-width: 400px; margin-left: auto; margin-right: auto;">Be the first to start a group purchase in your area. Pool resources with nearby farmers and save money together!</p>
+                <?php if (!isGuest()): ?>
+                <button type="button" class="btn-primary" onclick="document.getElementById('openCreateModalBtn')?.click()" style="padding: 0 2.5rem; border-radius: 50px; height: 50px; font-weight: 700; font-size: 0.95rem;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" style="margin-right: 6px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Start a Bulk-Buy Campaign
+                </button>
+                <?php endif; ?>
             </div>
         <?php else: ?>
             <div class="pooling-grid">
@@ -428,7 +433,7 @@ $campaigns = getCampaigns($conn, $filters);
                         </div>
 
                         <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-main);">
-                            Offering: <span style="color: var(--secondary-action);">₹<?= number_format($camp['offering_price'], 0) ?></span> per <?= e($camp['unit']) ?>
+                            Buying at: <span style="color: var(--secondary-action);">₹<?= number_format($camp['offering_price'], 0) ?></span> / <?= e($camp['unit']) ?>
                         </div>
 
                         <div class="card-meta-row">
@@ -448,11 +453,11 @@ $campaigns = getCampaigns($conn, $filters);
                             </div>
                             <div style="display: flex; justify-content: space-between; align-items: center; background: var(--primary-10); border: 1px solid var(--border-color); border-radius: 12px; padding: 0.75rem 1rem; margin-top: 1rem;">
                                 <div>
-                                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Target Needed</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Goal</div>
                                     <div style="font-size: 1.15rem; font-weight: 800; color: var(--text-main);"><?= number_format($camp['target_quantity']) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($camp['unit']) ?></span></div>
                                 </div>
                                 <div style="text-align: right;">
-                                    <div style="font-size: 0.75rem; color: var(--primary-action); text-transform: uppercase; letter-spacing: 0.5px;">Already Filled</div>
+                                    <div style="font-size: 0.75rem; color: var(--primary-action); text-transform: uppercase; letter-spacing: 0.5px;">Pledged</div>
                                     <div style="font-size: 1.15rem; font-weight: 800; color: var(--primary-action);"><?= number_format($camp['current_quantity']) ?> <span style="font-size: 0.55em; opacity: 0.75; font-weight: 500; text-transform: lowercase; margin-left: 2px;"><?= htmlspecialchars($camp['unit']) ?></span></div>
                                 </div>
                             </div>
@@ -471,8 +476,8 @@ $campaigns = getCampaigns($conn, $filters);
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
         <div class="modal-header">
-            <h2>Create Supply Campaign</h2>
-            <p>Broadcast your need for supplies and set the price you're willing to pay.</p>
+            <h2>Start a Bulk-Buy</h2>
+            <p>Post what you need and the price you're willing to pay. Nearby farmers will pledge their supply.</p>
         </div>
         
         <div id="createError" style="display: none; color: var(--danger); background: rgba(225, 29, 72, 0.05); padding: 1rem; border-radius: 10px; border: 1px solid rgba(225, 29, 72, 0.2); margin-bottom: 1.5rem; font-size: 0.9rem; font-weight: 600;"></div>
@@ -490,12 +495,12 @@ $campaigns = getCampaigns($conn, $filters);
                 
                 <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                     <div class="form-group">
-                        <label class="form-label">Item Name</label>
-                        <input type="text" name="item_name" class="form-input" placeholder="e.g. Needs 50kg of Urea Fertilizer" required>
+                        <label class="form-label">What do you need?</label>
+                        <input type="text" name="item_name" class="form-input" placeholder="e.g. Urea Fertilizer, Wheat Seeds" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Unit</label>
-                        <input type="text" name="unit" id="campUnit" class="form-input" placeholder="e.g. 50kg bag, litre" required>
+                        <label class="form-label">Measurement Unit</label>
+                        <input type="text" name="unit" id="campUnit" class="form-input" placeholder="e.g. kg, bag, litre" required>
                     </div>
                 </div>
 
@@ -510,18 +515,18 @@ $campaigns = getCampaigns($conn, $filters);
                 <h3 class="section-label">Pricing & Threshold</h3>
                 <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                     <div class="form-group">
-                        <label class="form-label">Offering Price per unit (₹)</label>
-                        <input type="number" name="offering_price" class="form-input" min="1" step="1" required placeholder="0">
+                        <label class="form-label">Your Buying Price per unit (₹)</label>
+                        <input type="number" name="offering_price" class="form-input" min="1" step="1" required placeholder="What will you pay per unit?">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Total Target Quantity Needed</label>
+                        <label class="form-label">How much do you need? (total quantity)</label>
                         <input type="number" name="target_quantity" class="form-input" min="1" required placeholder="e.g. 100">
                     </div>
                 </div>
                 <div class="form-group" style="margin-top: 1.25rem;">
-                    <label class="form-label">Minimum contribution per farmer</label>
+                    <label class="form-label">Minimum pledge per farmer</label>
                     <input type="number" name="min_contribution" class="form-input" min="1" value="1" required>
-                    <p style="font-size: 0.75rem; color: var(--text-subtle); margin-top: 6px;">Smallest amount a single person can contribute.</p>
+                    <p style="font-size: 0.75rem; color: var(--text-subtle); margin-top: 6px;">Smallest amount a single person can pledge (in your chosen unit).</p>
                 </div>
             </div>
 
