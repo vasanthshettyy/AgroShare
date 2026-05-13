@@ -7,10 +7,7 @@
     --border-agro: hsl(145, 30%, 82%);
 }
 
-[data-theme="light"] .eq-card,
-[data-theme="light"] .glass-card,
-[data-theme="light"] .premium-section,
-[data-theme="light"] .booking-widget {
+[data-theme="light"] .eq-card {
     border-top: none !important;
     background: var(--bg-card) !important;
     border: 1px solid hsla(0, 0%, 100%, 0.15) !important;
@@ -22,6 +19,82 @@
     --text-muted: hsla(0, 0%, 100%, 0.75);
     --text-subtle: hsla(0, 0%, 100%, 0.55);
     --border-color: hsla(0, 0%, 100%, 0.15);
+}
+
+/* Detail Page Premium Surfaces - Light Mode */
+[data-theme="light"] .booking-sticky-card,
+[data-theme="light"] .premium-section,
+[data-theme="light"] .booking-widget,
+[data-theme="light"] .pd-row {
+    background: #ffffff !important;
+    border: 1px solid var(--border-agro) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04) !important;
+    color: var(--text-main) !important;
+    --text-main: hsl(160, 40%, 12%);
+    --text-muted: hsl(160, 15%, 40%);
+    --text-subtle: hsl(160, 10%, 55%);
+    --border-color: var(--border-agro);
+}
+
+[data-theme="light"] .pricing-hero {
+    background: hsla(155, 30%, 98%, 0.6) !important;
+    border-bottom: 1px solid var(--border-agro) !important;
+    margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+    padding: 2rem 1.5rem 1.5rem;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+}
+
+[data-theme="light"] .price-display .val,
+[data-theme="light"] .price-display .curr {
+    color: var(--primary-action) !important;
+}
+
+[data-theme="light"] .payment-notice-box {
+    background: #fffbeb !important;
+    border-color: #fef3c7 !important;
+    box-shadow: none !important;
+}
+
+[data-theme="light"] .payment-notice-box div,
+[data-theme="light"] .payment-notice-box strong {
+    color: #92400e !important;
+}
+
+[data-theme="light"] .no-blocked-dates {
+    color: var(--primary-action) !important;
+    font-weight: 700 !important;
+}
+
+[data-theme="light"] .calendar-nav-btn {
+    background: #f8fafc !important;
+    border-color: var(--border-agro) !important;
+    color: var(--text-muted) !important;
+}
+
+[data-theme="light"] .calendar-availability-hint {
+    background: hsla(155, 30%, 96%, 1) !important;
+    border: 1px solid var(--border-agro) !important;
+    color: var(--primary-action) !important;
+}
+
+[data-theme="light"] .blocked-date-item {
+    background: #f8fafc !important;
+    border-color: var(--border-agro) !important;
+}
+
+[data-theme="light"] .sticky-booking-bar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-top: 1px solid var(--border-agro) !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="light"] .sticky-price strong {
+    color: var(--primary-action) !important;
+}
+
+[data-theme="light"] .btn-book-cta {
+    box-shadow: none !important;
 }
 
 /* Filter bar stays premium dark green like dashboard topbar */
