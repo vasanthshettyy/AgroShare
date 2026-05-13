@@ -541,6 +541,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     preview.src = user.profile_photo;
                 }
 
+                // UPI QR preview
+                const qrPreview = document.getElementById('prof-qr-preview');
+                const qrContainer = document.getElementById('qr-preview-container');
+                if (qrPreview && qrContainer && user.upi_qr_image) {
+                    qrPreview.src = user.upi_qr_image;
+                    qrContainer.style.display = 'block';
+                } else if (qrContainer) {
+                    qrContainer.style.display = 'none';
+                }
+
                 // Badges
                 const badgeContainer = document.getElementById('prof-badges');
                 if (badgeContainer) {
@@ -592,7 +602,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Photo preview change
     document.addEventListener('change', (e) => {
         if (e.target.id === 'prof-photo-input') {
             const file = e.target.files[0];
@@ -601,6 +610,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 reader.onload = (ev) => {
                     const preview = document.getElementById('prof-photo-preview');
                     if (preview) preview.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        } else if (e.target.id === 'prof-upi-qr-input') {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const preview = document.getElementById('prof-qr-preview');
+                    const container = document.getElementById('qr-preview-container');
+                    if (preview && container) {
+                        preview.src = ev.target.result;
+                        container.style.display = 'block';
+                    }
                 };
                 reader.readAsDataURL(file);
             }
