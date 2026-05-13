@@ -2,7 +2,7 @@
 [data-theme="light"] {
     --bg-main: hsl(140, 20%, 96%);
     --bg-surface: hsl(140, 25%, 93%);
-    --bg-card: #ffffff;
+    --bg-card: hsl(155, 35%, 35%);
     --accent-light: hsla(145, 45%, 45%, 0.1);
     --border-agro: hsl(145, 30%, 82%);
 }
@@ -14,16 +14,36 @@
 [data-theme="light"] .booking-widget {
     border-top: none !important;
     background: var(--bg-card) !important;
-    border-left: 1px solid var(--border-agro);
-    border-right: 1px solid var(--border-agro);
-    border-bottom: 1px solid var(--border-agro);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid hsla(0, 0%, 100%, 0.15) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    color: #ffffff;
+
+    /* Override local text variables for dark background */
+    --text-main: #ffffff;
+    --text-muted: hsla(0, 0%, 100%, 0.75);
+    --text-subtle: hsla(0, 0%, 100%, 0.55);
+    --border-color: hsla(0, 0%, 100%, 0.15);
+}
+
+[data-theme="light"] .eq-card .eq-title,
+[data-theme="light"] .eq-card .eq-category,
+[data-theme="light"] .eq-card .eq-location,
+[data-theme="light"] .eq-card .eq-price {
+    color: #ffffff !important;
+}
+
+[data-theme="light"] .eq-card .eq-category {
+    color: #a7f3d0 !important;
+}
+
+[data-theme="light"] .eq-card .eq-location {
+    color: hsla(0, 0%, 100%, 0.7) !important;
 }
 
 [data-theme="light"] .form-input,
 [data-theme="light"] .filter-input,
 [data-theme="light"] .filter-select {
-    background: var(--bg-card) !important;
+    background: #ffffff !important;
     border: 1.5px solid var(--border-agro) !important;
     color: var(--text-primary, #111827) !important;
 }
@@ -41,12 +61,18 @@
 }
 
 [data-theme="light"] .eq-card-image {
-    border-bottom: 1px solid var(--border-agro);
+    border-bottom: 1px solid hsla(0, 0%, 100%, 0.15);
 }
 
 [data-theme="light"] .eq-card-footer {
-    background: var(--bg-surface) !important;
-    border-top: 1px solid var(--border-agro);
+    background: hsla(155, 35%, 30%, 0.5) !important;
+    border-top: 1px solid hsla(0, 0%, 100%, 0.15);
+    color: #ffffff;
+}
+
+[data-theme="light"] .eq-card-footer .person-name,
+[data-theme="light"] .eq-card-footer .trust-score {
+    color: #ffffff !important;
 }
 
 [data-theme="light"] .btn-toggle-avail.is-available {
