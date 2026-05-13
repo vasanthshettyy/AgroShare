@@ -8,7 +8,6 @@
 }
 
 [data-theme="light"] .eq-card,
-[data-theme="light"] .filter-bar,
 [data-theme="light"] .glass-card,
 [data-theme="light"] .premium-section,
 [data-theme="light"] .booking-widget {
@@ -23,6 +22,14 @@
     --text-muted: hsla(0, 0%, 100%, 0.75);
     --text-subtle: hsla(0, 0%, 100%, 0.55);
     --border-color: hsla(0, 0%, 100%, 0.15);
+}
+
+/* Filter bar stays light/white for readability */
+[data-theme="light"] .filter-bar {
+    background: #ffffff !important;
+    border: 1px solid var(--border-agro) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    color: #1a1a1a;
 }
 
 [data-theme="light"] .eq-card .eq-title,
@@ -78,6 +85,13 @@
 [data-theme="light"] .btn-toggle-avail.is-available {
     background: var(--accent-light) !important;
     border-color: var(--primary-action);
+}
+
+/* Operator badge on dark cards */
+[data-theme="light"] .eq-card .eq-card-operator-badge {
+    background: hsla(0, 0%, 100%, 0.15) !important;
+    border-color: hsla(0, 0%, 100%, 0.3) !important;
+    color: #ffffff !important;
 }
 
 /* ══════════════════════════════════════════════════════════
