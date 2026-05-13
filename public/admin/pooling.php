@@ -4,44 +4,46 @@ require_once __DIR__ . '/../../src/Controllers/AdminController.php';
 
 requireRole('admin');
 
-$messages = getSupportMessages($conn);
+// We'll load the pooling view logic here or rely on the view file
+$campaigns = getPoolingCampaignsForAdmin($conn);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Support — <?= e(APP_NAME) ?></title>
+    <title>Manage Pooling — <?= e(APP_NAME) ?></title>
     <link rel="stylesheet" href="../assets/css/dashboard.css?v=<?= time() ?>">
     <style>
-        .message-card { 
-            background: var(--surface-color); 
-            padding: 20px; 
-            border-radius: 12px; 
-            border: 1px solid var(--border-color); 
-            margin-bottom: 16px;
-            transition: transform 0.2s ease, border-color 0.2s ease;
+        .table-container { background: var(--surface-color); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 12px; border-bottom: 1px solid var(--border-color); }
+        th { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
+        td { color: var(--text-main); font-size: 0.9rem; }
+        
+        .admin-status-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
         }
-        .message-card:hover {
-            border-color: var(--primary-action);
-            transform: translateY(-2px);
+        
+        .btn-icon {
+            background: var(--primary-10);
+            color: var(--primary-action);
+            border: 1px solid var(--border-color);
+            padding: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
-        .message-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
-        }
-        .sender-info h3 { margin: 0; font-size: 1rem; color: var(--text-main); }
-        .sender-info span { font-size: 0.75rem; color: var(--text-muted); }
-        .message-date { font-size: 0.75rem; color: var(--text-subtle); }
-        .message-content {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            line-height: 1.5;
-            white-space: pre-wrap;
+        
+        .btn-icon:hover {
+            background: var(--primary-action);
+            color: white;
         }
     </style>
 </head>
@@ -75,11 +77,11 @@ $messages = getSupportMessages($conn);
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                 <span>Bookings</span>
             </a>
-            <a href="pooling.php" class="nav-link">
+            <a href="pooling.php" class="nav-link active">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                 <span>Pooling</span>
             </a>
-            <a href="support.php" class="nav-link active">
+            <a href="support.php" class="nav-link">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                 <span>Support</span>
             </a>
@@ -100,32 +102,14 @@ $messages = getSupportMessages($conn);
 
     <main class="main-content">
         <header style="margin-bottom: 24px;">
-            <h1>Customer Support</h1>
-            <p style="color: var(--text-muted)">User feedback and support requests.</p>
+            <h1>Manage Pooling</h1>
         </header>
 
         <?= renderFlash() ?>
 
-        <?php if (empty($messages)): ?>
-            <div class="message-card" style="text-align: center; padding: 40px;">
-                <p style="color: var(--text-subtle);">No support messages yet.</p>
-            </div>
-        <?php else: ?>
-            <?php foreach ($messages as $m): ?>
-                <div class="message-card">
-                    <div class="message-header">
-                        <div class="sender-info">
-                            <h3><?= e($m['sender_name']) ?></h3>
-                            <span>User ID: #<?= (int)$m['user_id'] ?></span>
-                        </div>
-                        <div class="message-date">
-                            <?= date('M j, Y — g:i A', strtotime($m['created_at'])) ?>
-                        </div>
-                    </div>
-                    <div class="message-content"><?= e($m['message']) ?></div>
-                </div>
-            <?php endforeach; ?>
-        <?php endif; ?>
+        <div class="table-container">
+            <?php require_once __DIR__ . '/views/pooling.php'; ?>
+        </div>
     </main>
 </div>
 

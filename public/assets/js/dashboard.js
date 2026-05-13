@@ -232,7 +232,7 @@ function renderAreaChart(containerId) {
     const gridLines = [0.25, 0.5, 0.75, 1].map(t => {
         const yy = PAD.top + chartH - t * chartH;
         return `<line x1="${PAD.left}" y1="${yy}" x2="${PAD.left + chartW}" y2="${yy}"
-                      stroke="var(--border-color)" stroke-width="1" stroke-dasharray="4 4"/>`;
+                      stroke="var(--chart-grid, var(--border-color))" stroke-width="1" stroke-dasharray="4 4"/>`;
     }).join('');
 
     // Y labels
@@ -240,21 +240,21 @@ function renderAreaChart(containerId) {
         const val = Math.round(t * maxVal);
         const yy = PAD.top + chartH - t * chartH + 4;
         return `<text x="${PAD.left - 6}" y="${yy}" text-anchor="end"
-                      font-size="9" fill="var(--text-subtle)">${val}</text>`;
+                      font-size="9" fill="var(--chart-label, var(--text-subtle))">${val}</text>`;
     }).join('');
 
     // Dot points
     const dots = rawData.map((v, i) =>
         `<circle cx="${px(i)}" cy="${py(v)}" r="3.5"
-                 fill="var(--primary-action)" stroke="var(--surface-color)" stroke-width="2"/>`
+                 fill="var(--chart-line, var(--primary-action))" stroke="var(--surface-color)" stroke-width="2"/>`
     ).join('');
 
     wrap.innerHTML = `
 <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
   <defs>
     <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%"   stop-color="var(--primary-action)" stop-opacity="0.25"/>
-      <stop offset="100%" stop-color="var(--primary-action)" stop-opacity="0"/>
+      <stop offset="0%"   stop-color="var(--chart-line, var(--primary-action))" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="var(--chart-line, var(--primary-action))" stop-opacity="0"/>
     </linearGradient>
   </defs>
   ${gridLines}
@@ -262,7 +262,7 @@ function renderAreaChart(containerId) {
   <path d="${dArea}" fill="url(#areaGrad)"/>
   <path d="${dLine}"
         fill="none"
-        stroke="var(--primary-action)"
+        stroke="var(--chart-line, var(--primary-action))"
         stroke-width="2.5"
         stroke-linejoin="round"
         stroke-linecap="round"/>
@@ -368,9 +368,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         const csrfInput = document.getElementById('csrfToken');
                         if (csrfInput) csrfInput.value = result.new_csrf;
                     }
-                    alert(result.message);
+                    showToast('success', result.message);
                     closeModal();
-                    window.location.reload();
+                    // Trigger real-time engine instead of reload
+                    if (window.RealtimeEngine) {
+                        window.RealtimeEngine.triggerUpdate('dashboard');
+                    }
                 } else if (result.errors) {
                     for (const [field, msg] of Object.entries(result.errors)) {
                         const input = document.getElementsByName(field)[0];
@@ -500,7 +503,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-            try {
+        // Ensure visible
+        modal.style.display = 'flex';
+        
+        try {
                 const apiBase = (window.AgroShare && window.AgroShare.apiUrl) ? window.AgroShare.apiUrl : 'api';
                 const response = await fetch(`${apiBase}/get-profile.php`);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -556,10 +562,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Use event delegation or multiple listeners for triggers
+    // Use event delegation for all profile modal triggers
     document.addEventListener('click', (e) => {
-        const target = e.target.closest('#profile-btn, #avatar-btn, #edit-profile-quick-action, #trust-score-card');
-        if (target) {
+        const trigger = e.target.closest('#profile-btn, #avatar-btn, #edit-profile-quick-action, #trust-score-card');
+        if (trigger) {
+            e.preventDefault();
+            e.stopPropagation();
             openProfileModal(e);
         }
     });
@@ -568,6 +576,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const modal = document.getElementById('profileModal');
         if (modal) {
             modal.classList.remove('show-modal');
+            setTimeout(() => {
+                if (!modal.classList.contains('show-modal')) {
+                    modal.style.display = 'none';
+                }
+            }, 400);
             document.body.style.overflow = '';
         }
     };
@@ -634,7 +647,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (profileResult.success) {
-                    alert(profileResult.message);
+                    showToast('success', profileResult.message);
                     const greetings = document.querySelectorAll('.topbar-greeting strong');
                     greetings.forEach(el => el.textContent = profileResult.full_name);
                     
@@ -645,8 +658,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                     
                     closeProfileModal();
+                    // Trigger real-time update
+                    if (window.RealtimeEngine) window.RealtimeEngine.triggerUpdate('dashboard');
                 } else {
-                    alert(profileResult.message);
+                    showToast('error', profileResult.message);
                 }
             } catch (error) {
                 console.error('Profile update error:', error);

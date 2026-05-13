@@ -40,7 +40,7 @@ if ($stmt) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AgroShare — #1 Community Equipment Sharing Platform</title>
-    <meta name="description" content="AgroShare connects farmers with shared agricultural equipment. Rent tractors, harvesters, and tools at affordable rates. <!-- Join the community pooling revolution. -->">
+    <meta name="description" content="AgroShare connects farmers with shared agricultural equipment. Rent tractors, harvesters, and tools at affordable rates. Join the community pooling revolution.">
 
     <?php require_once __DIR__ . '/includes/theme-script.php'; ?>
 
@@ -79,7 +79,7 @@ if ($stmt) {
         <div class="hero-left" data-aos="fade-right" data-aos-duration="800">
             <span class="hero-badge"><i class="fas fa-seedling"></i> #1 Community Equipment Sharing Platform</span>
             <h1>Empowering Farmers through <span class="gradient-text">Shared Growth.</span></h1>
-            <p class="hero-desc">Access high-end agricultural machinery without the burden of ownership. <!-- Join the community pooling revolution and --> Maximize your harvest efficiency.</p>
+            <p class="hero-desc">Access high-end agricultural machinery without the burden of ownership. Join the community pooling revolution and maximize your harvest efficiency.</p>
             <div class="hero-btns">
                 <a href="login.php" class="btn-main btn-primary">Get Started Now <i class="fas fa-arrow-right"></i></a>
                 <a href="auth/guest-login.php" class="btn-main btn-outline"><i class="fas fa-search"></i> Explore as Guest</a>
@@ -192,7 +192,6 @@ if ($stmt) {
                 <p>Browse a wide range of tractors, harvesters, and tools from local owners with transparent daily pricing.</p>
                 <a href="auth/guest-login.php" class="feature-link">Explore Equipment <i class="fas fa-arrow-right"></i></a>
             </div>
-            <!-- 
             <div class="feature-card" data-aos="fade-up" data-aos-delay="150">
                 <div class="feature-img-wrap">
                     <img src="assets/images/feature-pooling.png" alt="Community Pooling">
@@ -201,7 +200,6 @@ if ($stmt) {
                 <p>Pool your demand with neighboring farmers to unlock bulk-buy discounts and shared logistics.</p>
                 <a href="auth/guest-login.php" class="feature-link">See Campaigns <i class="fas fa-arrow-right"></i></a>
             </div>
-            -->
             <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
                 <div class="feature-img-wrap">
                     <img src="assets/images/feature-trust.png" alt="Trust System">
@@ -232,7 +230,7 @@ if ($stmt) {
                 <div class="step-number">02</div>
                 <div class="step-icon"><i class="fas fa-handshake"></i></div>
                 <h3>Connect & Book</h3>
-                <p>Book directly <!-- or join a pooling campaign --> to share costs with others in your village.</p>
+                <p>Book directly or join a pooling campaign to share costs with others in your village.</p>
             </div>
             <div class="step-connector" data-aos="fade-up" data-aos-delay="300">
                 <i class="fas fa-chevron-right"></i>

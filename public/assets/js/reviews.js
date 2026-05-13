@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let lockTimeout = null;
 
     if (!modal) {
-        console.error('Review modal not found in DOM.');
+        // Safe return if not on my-bookings page
         return;
     }
 
@@ -216,19 +216,28 @@ document.addEventListener('DOMContentLoaded', () => {
  * showUserReviews — Now acts as the Public Profile trigger.
  */
 async function showUserReviews(userId) {
+    const modal = document.getElementById('userPublicProfileModal');
+    if (!modal) {
+        console.error('User Public Profile Modal not found.');
+        return;
+    }
+
+    // Hide edit profile modal if open
     const profModal = document.getElementById('profileModal');
     if (profModal && profModal.classList.contains('show-modal')) {
         profModal.classList.remove('show-modal');
-        setTimeout(() => profModal.style.display = 'none', 400);
+        setTimeout(() => {
+            if (!profModal.classList.contains('show-modal')) {
+                profModal.style.display = 'none';
+            }
+        }, 400);
     }
-
-    const modal = document.getElementById('userPublicProfileModal');
-    if (!modal) return;
 
     // Reset/Loading state
     const reviewsContainer = document.getElementById('pub-reviews-container');
-    reviewsContainer.innerHTML = '<div class="notif-empty"><div class="loading-spinner" style="border-top-color:var(--primary-action);"></div><p style="margin-top:10px;">Loading profile...</p></div>';
-
+    if (reviewsContainer) {
+        reviewsContainer.innerHTML = '<div class="notif-empty"><div class="loading-spinner" style="border-top-color:var(--primary-action);"></div><p style="margin-top:10px;">Loading profile...</p></div>';
+    }
 
     // Show modal
     modal.style.display = 'flex';
@@ -236,7 +245,8 @@ async function showUserReviews(userId) {
     document.body.style.overflow = 'hidden';
 
     try {
-        const response = await fetch(`api/get_user_public_profile.php?user_id=${userId}`);
+        const apiBase = (window.AgroShare && window.AgroShare.apiUrl) ? window.AgroShare.apiUrl : 'api';
+        const response = await fetch(`${apiBase}/get_user_public_profile.php?user_id=${userId}`);
         const result = await response.json();
 
         if (!result.success) {

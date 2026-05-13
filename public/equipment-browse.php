@@ -67,6 +67,7 @@ $items   = $results['items'];
 
     <link rel="stylesheet" href="assets/css/dashboard.css?v=<?= time() ?>">
     <link rel="stylesheet" href="assets/css/equipment.css?v=<?= time() ?>">
+    <script>window.currentUserId = <?= (int)($_SESSION['user_id'] ?? 0) ?>;</script>
 </head>
 <body>
 
@@ -169,7 +170,6 @@ $items   = $results['items'];
             </a>
 
             <span class="nav-section-label">Community</span>
-            <!--
             <a href="pooling-browse.php" class="nav-link">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -179,7 +179,6 @@ $items   = $results['items'];
                 </svg>
                 <span>Pooling</span>
             </a>
-            -->
 
             <a href="equipment-browse.php" class="nav-link <?= !$isMyEquipment ? 'active' : '' ?>" <?= !$isMyEquipment ? 'aria-current="page"' : '' ?>>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -364,7 +363,7 @@ $items   = $results['items'];
             <?php endif; ?>
         </div>
         <?php else: ?>
-        <div class="equipment-grid" aria-label="Equipment listings">
+        <div class="equipment-grid" id="equipment-grid" aria-label="Equipment listings">
             <?php foreach ($items as $index => $eq):
                 $images    = $eq['images'] ? json_decode($eq['images'], true) : [];
                 $thumbnail = !empty($images) ? e($images[0]) : '';
@@ -612,6 +611,10 @@ $items   = $results['items'];
 <script src="assets/js/theme-toggle.js" defer></script>
 <script src="assets/js/reviews.js?v=<?= time() ?>" defer></script>
 <script src="assets/js/dashboard.js" defer></script>
+<script src="assets/js/realtime.js?v=<?= time() ?>" defer></script>
 <script src="assets/js/equipment.js?v=<?= time() ?>" defer></script>
+</body>
+</html>
+/equipment.js?v=<?= time() ?>" defer></script>
 </body>
 </html>

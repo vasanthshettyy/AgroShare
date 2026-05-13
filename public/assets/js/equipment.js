@@ -306,8 +306,10 @@
                     }
                     showToast('success', result.message);
                     closeModal();
-                    // Reload to show updated data
-                    setTimeout(() => window.location.reload(), 1000);
+                    // Trigger real-time update instead of reload
+                    if (window.RealtimeEngine) {
+                        window.RealtimeEngine.triggerUpdate('equipment');
+                    }
                 } else if (result.errors) {
                     for (const [field, msg] of Object.entries(result.errors)) {
                         const input = document.getElementsByName(field)[0];

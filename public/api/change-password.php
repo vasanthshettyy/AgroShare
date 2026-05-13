@@ -62,6 +62,10 @@ try {
             echo json_encode(['success' => false, 'message' => 'Current password is incorrect.']);
             exit();
         }
+        if (password_verify($newPassword, $user['password_hash'])) {
+            echo json_encode(['success' => false, 'message' => 'New password cannot be the same as the current password.']);
+            exit();
+        }
     }
 
     // 3. Update hash

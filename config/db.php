@@ -40,11 +40,15 @@ if (session_status() === PHP_SESSION_NONE) {
     ini_set('session.cookie_httponly', 1);   // JS cannot read session cookie
     ini_set('session.cookie_samesite', 'Lax');
     ini_set('session.use_strict_mode', 1);   // Reject uninitialized session IDs
+    ini_set('session.use_only_cookies', 1);  // Prevent session ID in URL
     session_start();
 }
 
 // Enforce session idle timeout (1-hour check)
 enforceSessionIdleTimeout();
+
+// Enforce session fingerprinting (prevent hijacking)
+enforceSessionSecurity();
 
 // ── Database Connection (OO mysqli) ────────────────────────
 // Enable strict error reporting BEFORE creating the connection

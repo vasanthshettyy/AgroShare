@@ -35,6 +35,11 @@ function requireAuth(): void
         header('Location: ' . getBasePath() . '/public/login.php');
         exit();
     }
+
+    // Prevent caching of protected pages (so Back button after logout doesn't show sensitive data)
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Cache-Control: post-check=0, pre-check=0', false);
+    header('Pragma: no-cache');
 }
 
 /**
@@ -85,6 +90,40 @@ function enforceSessionIdleTimeout(): void
 
     // Otherwise update activity time
     $_SESSION['last_activity'] = $now;
+}
+
+/**
+ * Enforce session security against hijacking.
+ * Binds the session to the initial User-Agent to detect stolen session cookies.
+ */
+function enforceSessionSecurity(): void
+{
+    if (!isset($_SESSION['user_id'])) {
+        return;
+    }
+
+    $current_agent = md5($_SERVER['HTTP_USER_AGENT'] ?? 'unknown_agent');
+
+    if (!isset($_SESSION['user_agent_hash'])) {
+        // First request after login
+        $_SESSION['user_agent_hash'] = $current_agent;
+    } elseif ($_SESSION['user_agent_hash'] !== $current_agent) {
+        // Hijacking suspected - user agent changed
+        $_SESSION = [];
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params["path"], $params["domain"],
+                $params["secure"], $params["httponly"]
+            );
+        }
+        session_destroy();
+        
+        session_start();
+        setFlash('error', 'Security alert: Invalid session context. Please log in again.');
+        header('Location: ' . getBasePath() . '/public/login.php');
+        exit();
+    }
 }
 
 // ── CSRF Protection ────────────────────────────────────────

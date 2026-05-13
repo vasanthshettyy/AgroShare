@@ -154,6 +154,101 @@
     --text-subtle: hsla(0, 0%, 100%, 0.55);
     --border-color: hsla(0, 0%, 100%, 0.15);
     --glass-border: hsla(0, 0%, 100%, 0.15);
+
+    /* Chart Overrides for dark backgrounds in light mode */
+    --chart-line: #a7f3d0;
+    --chart-grid: hsla(0, 0%, 100%, 0.1);
+    --chart-label: hsla(0, 0%, 100%, 0.6);
+}
+
+[data-theme="light"] .kpi-card.kpi-hero {
+    background: var(--bg-sidebar) !important;
+    background-image: none !important;
+}
+
+/* ── Light Mode — Notification Visibility Boost (Solid, High-Contrast) ───────── */
+[data-theme="light"] .notif-dropdown {
+    background: #ffffff !important;
+    border-color: var(--border-color) !important;
+    color: hsl(160, 60%, 15%) !important; /* Force deep forest green text */
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .notif-header {
+    background: hsl(150, 40%, 94%) !important;
+    color: hsl(160, 60%, 15%) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+[data-theme="light"] .notif-item {
+    color: hsl(160, 40%, 30%) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    background: transparent !important;
+}
+
+[data-theme="light"] .notif-item.unread {
+    background: hsla(155, 35%, 35%, 0.05) !important;
+    color: hsl(160, 60%, 15%) !important;
+}
+
+[data-theme="light"] .notif-item:hover {
+    background: hsla(155, 35%, 35%, 0.1) !important;
+    color: hsl(160, 60%, 15%) !important;
+}
+
+[data-theme="light"] .notif-time {
+    color: hsl(160, 30%, 45%) !important;
+}
+
+
+/* Specific text color fixes for dark background components in light mode */
+[data-theme="light"] .topbar .topbar-greeting strong,
+[data-theme="light"] .topbar .topbar-search input,
+[data-theme="light"] .kpi-card .kpi-value,
+[data-theme="light"] .kpi-card .kpi-trend,
+[data-theme="light"] .kpi-card .card-title,
+[data-theme="light"] .bento-card .card-title,
+[data-theme="light"] .action-card h3,
+[data-theme="light"] .activity-table .eq-name,
+[data-theme="light"] .badge-active {
+    color: #ffffff !important;
+}
+
+[data-theme="light"] .topbar .topbar-greeting,
+[data-theme="light"] .topbar .topbar-search input::placeholder,
+[data-theme="light"] .kpi-card .kpi-label,
+[data-theme="light"] .action-card p,
+[data-theme="light"] .activity-table td,
+[data-theme="light"] .activity-table .eq-cat {
+    color: hsla(0, 0%, 100%, 0.75) !important;
+}
+
+[data-theme="light"] .topbar .btn-icon,
+[data-theme="light"] .kpi-card .kpi-header-link,
+[data-theme="light"] .action-arrow,
+[data-theme="light"] .card-action-link {
+    color: hsla(0, 0%, 100%, 0.8) !important;
+    background: hsla(0, 0%, 100%, 0.1) !important;
+    border-color: hsla(0, 0%, 100%, 0.15) !important;
+}
+
+[data-theme="light"] .topbar .btn-icon:hover,
+[data-theme="light"] .kpi-card .kpi-header-link:hover,
+[data-theme="light"] .action-arrow:hover,
+[data-theme="light"] .card-action-link:hover {
+    color: #ffffff !important;
+    background: hsla(0, 0%, 100%, 0.2) !important;
+}
+
+[data-theme="light"] .action-icon-wrap,
+[data-theme="light"] .eq-icon,
+[data-theme="light"] .kpi-trend {
+    background: hsla(0, 0%, 100%, 0.15) !important;
+    color: #ffffff !important;
+}
+
+[data-theme="light"] .kpi-card.kpi-hero {
+    background: linear-gradient(135deg, hsla(0, 0%, 100%, 0.15) 0%, hsla(0, 0%, 100%, 0.05) 100%) !important;
 }
 
 /* ── Light Mode — Global Micro-interactions ────────────── */
@@ -810,7 +905,7 @@ img {
     font-weight: 700;
     color: var(--text-main);
     border-bottom: 1px solid var(--border-color);
-    background: var(--glass-bg-heavy);
+    background: var(--surface-color); /* Solid background, no glass */
 }
 
 .notif-list {
@@ -824,7 +919,7 @@ img {
 
 .notif-item {
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--border-color); /* Use solid border */
     cursor: pointer;
     transition: background 0.2s;
     font-size: 0.85rem;
@@ -1002,6 +1097,10 @@ img {
     transition: color 0.3s ease;
 }
 
+.sidebar:not(:hover) .nav-section-label {
+    color: transparent !important;
+}
+
 .nav-section-label::before {
     content: '';
     position: absolute;
@@ -1028,8 +1127,8 @@ img {
 .nav-link {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem;
+    gap: 0; /* No gap when collapsed to keep icon centered */
+    padding: 0.75rem 1.4375rem; /* Equal padding for centered bubble */
     justify-content: flex-start;
     border-radius: var(--radius-sm);
     font-size: 0.86rem;
@@ -1038,7 +1137,12 @@ img {
     position: relative;
     overflow: hidden;
     white-space: nowrap;
-    transition: all 0.25s var(--ease-out);
+    transition: all 0.3s var(--ease-out);
+}
+
+.sidebar:hover .nav-link {
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
 }
 
 /* Animated background slide on hover */
@@ -1085,7 +1189,7 @@ img {
     height: 18px;
     flex-shrink: 0;
     display: block;
-    transform: translateX(11px);
+    transform: none; /* No translation needed since flex centers it */
     transition: color 0.25s var(--ease-out), transform 0.25s var(--ease-out);
     color: var(--text-subtle);
 }
@@ -1098,12 +1202,15 @@ img {
     font-size: 0.88rem;
     font-weight: 500;
     opacity: 0;
+    max-width: 0;
+    display: inline-block;
     transform: translateX(-15px);
-    transition: opacity 0.35s ease, transform 0.35s var(--ease-out);
+    transition: max-width 0.3s ease, opacity 0.35s ease, transform 0.35s var(--ease-out);
 }
 
 .sidebar:hover .nav-link span {
     opacity: 1;
+    max-width: 200px;
     transform: translateX(0);
     transition-delay: 0.1s;
 }

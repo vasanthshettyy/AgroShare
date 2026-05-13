@@ -64,6 +64,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
     <?php endif; ?>
 
     <link rel="stylesheet" href="assets/css/dashboard.css?v=<?= time() ?>">
+    <script>window.currentUserId = <?= (int)$_SESSION['user_id'] ?>;</script>
 </head>
 <body>
 
@@ -177,7 +178,6 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
 
             <span class="nav-section-label">Community</span>
 
-            <!-- 
             <a href="pooling-browse.php" class="nav-link">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -187,7 +187,6 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 </svg>
                 <span>Pooling</span>
             </a>
-            -->
 
             <a href="equipment-browse.php" class="nav-link">
                 <!-- search icon -->
@@ -266,7 +265,7 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
         <section class="kpi-grid" aria-label="Key performance indicators">
 
             <!-- KPI 1 — Hero card (dark green) -->
-            <a href="equipment-browse.php?mine=1" class="kpi-card kpi-hero" style="text-decoration: none; display: block; cursor: pointer;">
+            <a href="equipment-browse.php?mine=1" class="kpi-card" style="text-decoration: none; display: block; cursor: pointer;">
                 <div class="kpi-header">
                     <span class="kpi-label">Total Equipment</span>
                     <div class="kpi-header-link" aria-hidden="true">
@@ -322,10 +321,10 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 </div>
             </a>
 
-            <!-- KPI 3 — Pool Campaigns 
-            <a href="pooling-browse.php" class="kpi-card" style="text-decoration: none; display: block; cursor: pointer;">
+            <!-- KPI 3 — Total Earnings -->
+            <a href="my-bookings.php" class="kpi-card" style="text-decoration: none; display: block; cursor: pointer;">
                 <div class="kpi-header">
-                    <span class="kpi-label">Pool Campaigns</span>
+                    <span class="kpi-label">Total Earnings</span>
                     <div class="kpi-header-link" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -334,23 +333,21 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                         </svg>
                     </div>
                 </div>
-                <div class="kpi-value" id="kpi-pool-count"><?= e($poolCount) ?></div>
-                <div class="kpi-trend neutral">
+                <div class="kpi-value" id="kpi-total-earnings">₹0</div>
+                <div class="kpi-trend positive">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                          stroke-linecap="round" aria-hidden="true">
-                        <line x1="5" y1="12" x2="19" y2="12"/>
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                        <polyline points="17 6 23 6 23 12"/>
                     </svg>
-                    Total joined
+                    Lifetime
                 </div>
                 <div class="kpi-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                     </svg>
                 </div>
             </a>
-            -->
 
             <!-- KPI 4 — Trust Score -->
             <a href="javascript:void(0)" class="kpi-card" id="trust-score-card" style="text-decoration: none; display: block; cursor: pointer;">
@@ -522,7 +519,6 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                 </div>
             </a>
 
-            <!-- 
             <a href="pooling-browse.php" class="action-card">
                 <div class="action-icon-wrap amber" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -545,7 +541,6 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
                     </div>
                 </div>
             </a>
-            -->
 
             <a href="javascript:void(0)" class="action-card" id="edit-profile-quick-action">
                 <div class="action-icon-wrap purple" aria-hidden="true">
@@ -706,7 +701,12 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
 <script src="assets/js/theme-toggle.js?v=<?= time() ?>" defer></script>
 <script src="assets/js/equipment.js?v=<?= time() ?>" defer></script>
 <script src="assets/js/reviews.js?v=<?= time() ?>" defer></script>
+<script src="assets/js/realtime.js?v=<?= time() ?>" defer></script>
 <script src="assets/js/dashboard.js?v=<?= time() ?>" defer></script>
-<script src="assets/js/dashboard-stats.js?v=<?= time() ?>" defer></script>
+
+<script>
+// Auto-refresh removed for AJAX transition
+</script>
+
 </body>
 </html>

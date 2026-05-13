@@ -30,8 +30,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // Check if new password is same as current password
     if (empty($errors)) {
         $email = $_SESSION['reset_email'];
+        $stmt = $conn->prepare("SELECT password_hash FROM users WHERE email = ?");
+        $stmt->bind_param('s', $email);
+        $stmt->execute();
+        $user = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if ($user && !empty($user['password_hash']) && password_verify($password, $user['password_hash'])) {
+            $errors['password'] = 'New password cannot be the same as your current password.';
+        }
+    }
+
+    if (empty($errors)) {
         $hash = password_hash($password, PASSWORD_ARGON2ID);
 
         $stmt = $conn->prepare("UPDATE users SET password_hash = ? WHERE email = ?");

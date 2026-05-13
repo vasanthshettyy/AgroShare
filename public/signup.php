@@ -711,7 +711,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="panel-content">
             <h2>Join the AgroShare network.</h2>
-            <p>Thousands of Indian farmers already rent <!-- , share, and bulk-buy together -->. It takes less than 2 minutes to get started.</p>
+            <p>Thousands of Indian farmers already rent, share, and bulk-buy together. It takes less than 2 minutes to get started.</p>
 
             <div class="steps-indicator">
                 <div class="step-item">
@@ -726,12 +726,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="step-num">3</div>
                     <span class="step-text">List or rent equipment</span>
                 </div>
-                <!-- 
                 <div class="step-item">
                     <div class="step-num">4</div>
                     <span class="step-text">Join community pooling</span>
                 </div>
-                -->
             </div>
         </div>
 
