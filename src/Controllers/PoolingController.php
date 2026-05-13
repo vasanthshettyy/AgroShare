@@ -43,6 +43,9 @@ function createCampaign($conn, $data, $userId) {
  * 2. Get all campaigns with optional filters
  */
 function getCampaigns($conn, $filters = []) {
+    // Auto-expire past deadlines before fetching
+    expireDeadlines($conn);
+
     $sql = "SELECT pc.*, u.full_name as creator_name 
             FROM pooling_campaigns pc
             JOIN users u ON pc.creator_id = u.id";
@@ -56,9 +59,15 @@ function getCampaigns($conn, $filters = []) {
         $types .= "s";
     }
     if (!empty($filters['status'])) {
-        $where[] = "pc.status = ?";
-        $params[] = $filters['status'];
-        $types .= "s";
+        if ($filters['status'] === 'threshold_met') {
+            $where[] = "(pc.status = 'threshold_met' OR (pc.status = 'closed' AND pc.current_quantity >= pc.target_quantity))";
+        } elseif ($filters['status'] === 'open') {
+            $where[] = "pc.status = 'open'";
+        } else {
+            $where[] = "pc.status = ?";
+            $params[] = $filters['status'];
+            $types .= "s";
+        }
     }
 
     if ($where) {
@@ -83,6 +92,7 @@ function getCampaigns($conn, $filters = []) {
  * 3. Get a single campaign by ID
  */
 function getCampaignById($conn, $id) {
+    expireDeadlines($conn);
     $stmt = $conn->prepare("SELECT pooling_campaigns.*, users.full_name as creator_name FROM pooling_campaigns JOIN users ON users.id = pooling_campaigns.creator_id WHERE pooling_campaigns.id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
@@ -270,7 +280,8 @@ function closeCampaign($conn, $id, $userId) {
  * 9. Expire campaigns past their deadline
  */
 function expireDeadlines($conn) {
-    $stmt = $conn->prepare("UPDATE pooling_campaigns SET status = 'cancelled' WHERE deadline < CURDATE() AND status = 'open'");
+    // Mark campaigns as 'closed' if they pass their deadline
+    $stmt = $conn->prepare("UPDATE pooling_campaigns SET status = 'closed' WHERE deadline < CURDATE() AND status IN ('open', 'threshold_met')");
     $stmt->execute();
     $stmt->close();
 }

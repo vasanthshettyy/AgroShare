@@ -2,6 +2,7 @@
 /**
  * AdminController.php — Handles all admin-specific logic.
  */
+require_once __DIR__ . '/PoolingController.php';
 
 function getAdminDashboardStats(mysqli $conn): array
 {
@@ -105,6 +106,7 @@ function getAuditLogs(mysqli $conn): array
 
 function getPoolingCampaignsForAdmin(mysqli $conn): array
 {
+    expireDeadlines($conn);
     $sql = "SELECT c.*, u.full_name as creator_name,
             (SELECT COUNT(*) FROM pooling_pledges WHERE campaign_id = c.id) as pledge_count
             FROM pooling_campaigns c
