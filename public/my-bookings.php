@@ -1283,6 +1283,74 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                 color: var(--text-main);
                 border-color: var(--text-subtle);
             }
+
+            /* ── Light Mode Overrides ─────────────────── */
+            [data-theme="light"] .review-premium-modal {
+                background: #fff !important;
+                border: 1px solid #e0e0e0 !important;
+                box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.15) !important;
+            }
+            [data-theme="light"] .modal-close-x {
+                background: #f5f5f5;
+                border-color: #ddd;
+                color: #555;
+            }
+            [data-theme="light"] .modal-close-x:hover {
+                background: #eee;
+                color: #222;
+            }
+            [data-theme="light"] .liquid-stars-wrapper {
+                background: #fffbeb;
+                border-color: rgba(251, 191, 36, 0.4);
+            }
+            [data-theme="light"] .trust-preview-box {
+                background: #f0fdf4;
+                border-color: #bbf7d0;
+            }
+            [data-theme="light"] .premium-textarea {
+                background: #f8faf9;
+                border-color: #d1d5db;
+                color: #1a1a1a;
+            }
+            [data-theme="light"] .premium-textarea::placeholder {
+                color: #9ca3af;
+            }
+            [data-theme="light"] .premium-textarea:focus {
+                background: #fff;
+                border-color: var(--primary-action);
+            }
+            [data-theme="light"] .char-counter {
+                background: rgba(0, 0, 0, 0.06);
+                color: #666;
+            }
+            [data-theme="light"] .review-tag {
+                background: #f9fafb;
+                border-color: #d1d5db;
+                color: #4b5563;
+            }
+            [data-theme="light"] .review-tag:hover {
+                background: #f0fdf4;
+                border-color: #86efac;
+                color: #1a1a1a;
+            }
+            [data-theme="light"] .review-tag.active {
+                background: #ecfdf5;
+                border-color: var(--primary-action);
+                color: #065f46;
+            }
+            [data-theme="light"] .premium-btn-secondary {
+                background: #f9fafb;
+                border-color: #d1d5db;
+                color: #374151;
+            }
+            [data-theme="light"] .premium-btn-secondary:hover {
+                background: #f3f4f6;
+                color: #111827;
+                border-color: #9ca3af;
+            }
+            [data-theme="light"] #grad-stop-ghost {
+                stop-color: #e5e7eb;
+            }
         </style>
 
         <div class="rating-overview-row">
