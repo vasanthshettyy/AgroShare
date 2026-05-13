@@ -2848,6 +2848,80 @@ input[type="number"].form-input::-webkit-inner-spin-button {
     cursor: pointer;
 }
 
+/* ── Premium Modal Controls ──────────────────────── */
+.modal-close-premium {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.modal-close-premium:hover {
+    background: #ef4444 !important;
+    border-color: #ef4444;
+    color: #ffffff !important;
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+}
+
+.modal-footer-premium {
+    padding: 1.5rem 2.5rem;
+    background: hsla(155, 35%, 35%, 0.05);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.premium-btn-brand {
+    width: 100%;
+    padding: 0.85rem 1.5rem;
+    background: var(--primary-action);
+    color: #ffffff !important;
+    border: none;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
+    text-decoration: none;
+}
+
+.premium-btn-brand:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.35);
+    filter: brightness(1.1);
+    color: #ffffff !important;
+}
+
+.premium-btn-brand:active {
+    transform: translateY(0);
+}
+
+[data-theme="light"] .modal-close-premium {
+    background: rgba(255, 255, 255, 0.5);
+    color: var(--primary-action);
+}
+
+
 .btn-upload-avatar input[type="file"] {
     position: absolute;
     left: 0;

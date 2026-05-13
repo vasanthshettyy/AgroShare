@@ -1,7 +1,12 @@
 <!-- Profile Modal -->
 <div id="profileModal" class="modal-overlay">
     <div class="modal-content profile-modal-content">
-        <button type="button" class="modal-close" id="profileModalCloseBtn" aria-label="Close modal">&times;</button>
+        <button type="button" class="modal-close-premium" id="profileModalCloseBtn" aria-label="Close modal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
         <div class="modal-header">
             <h2>User Profile</h2>
             <p>Update your personal information and profile picture.</p>
@@ -156,14 +161,14 @@
                 </button>
             </div>
 
-            <div class="modal-footer-actions">
-                <a href="logout.php" class="btn-logout-modal" title="Log out of your account">
+            <div class="modal-footer-premium">
+                <a href="logout.php" class="btn-logout-modal" style="width: auto; margin: 0;" title="Log out of your account">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                     Log Out
                 </a>
-                <div style="display:flex; gap:10px;">
-                    <button type="button" class="btn-secondary" id="profileCancelBtn">Cancel</button>
-                    <button type="submit" class="btn-primary" id="profileSubmitBtn">Update Profile</button>
+                <div style="display:flex; gap:12px; flex: 1; justify-content: flex-end;">
+                    <button type="button" class="btn-secondary" id="profileCancelBtn" style="height: 48px; border-radius: 14px;">Cancel</button>
+                    <button type="submit" class="premium-btn-brand" id="profileSubmitBtn" style="width: auto; min-width: 160px;">Update Profile</button>
                 </div>
             </div>
         </form>

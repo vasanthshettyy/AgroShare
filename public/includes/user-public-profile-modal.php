@@ -3,8 +3,11 @@
     <div class="modal-content profile-modal-content premium-public-profile" style="max-width: 550px; width: 95%; padding: 0; overflow: hidden;">
         <!-- Cover/Header Section -->
         <div class="profile-header-card">
-            <button id="closePublicProfile" class="modal-close-x" style="background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.1); color: #fff; top: 1rem; right: 1rem;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <button id="closePublicProfile" class="modal-close-premium" onclick="closePublicProfile()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
             </button>
             
             <div class="profile-main-meta">
@@ -67,8 +70,13 @@
             </div>
         </div>
 
-        <div class="modal-footer-premium" style="padding: 1.5rem 2rem; background: rgba(0,0,0,0.1);">
-            <button type="button" class="premium-btn-secondary" style="width: 100%;" onclick="closePublicProfile()">Close Profile</button>
+        <div class="modal-footer-premium">
+            <button type="button" class="premium-btn-brand" onclick="closePublicProfile()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+                Close Profile
+            </button>
         </div>
     </div>
 </div>
