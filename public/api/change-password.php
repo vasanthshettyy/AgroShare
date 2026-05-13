@@ -68,18 +68,47 @@ try {
         }
     }
 
-    // 3. Update hash
+    // 3. Password History Check (Last 3)
+    $histStmt = $conn->prepare("SELECT password_hash FROM password_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 3");
+    $histStmt->bind_param('i', $userId);
+    $histStmt->execute();
+    $history = $histStmt->get_result();
+    while ($h = $history->fetch_assoc()) {
+        if (password_verify($newPassword, $h['password_hash'])) {
+            echo json_encode(['success' => false, 'message' => 'You cannot use any of your last 3 passwords.']);
+            $histStmt->close();
+            exit();
+        }
+    }
+    $histStmt->close();
+
+    // 4. Update hash
     $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
-    $updateStmt = $conn->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
-    $updateStmt->bind_param('si', $newHash, $userId);
-    
-    if ($updateStmt->execute()) {
+    $conn->begin_transaction();
+    try {
+        $updateStmt = $conn->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
+        $updateStmt->bind_param('si', $newHash, $userId);
+        $updateStmt->execute();
+        $updateStmt->close();
+
+        // Add to history
+        $addHist = $conn->prepare("INSERT INTO password_history (user_id, password_hash) VALUES (?, ?)");
+        $addHist->bind_param('is', $newHash, $userId);
+        $addHist->execute();
+        $addHist->close();
+
+        // Cleanup: Keep only last 3
+        $conn->query("DELETE FROM password_history WHERE user_id = $userId AND id NOT IN (
+            SELECT id FROM (SELECT id FROM password_history WHERE user_id = $userId ORDER BY created_at DESC LIMIT 3) as tmp
+        )");
+
+        $conn->commit();
         logError("User $userId successfully changed their password.");
         echo json_encode(['success' => true, 'message' => 'Password updated successfully!']);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Database error. Please try again.']);
+    } catch (Exception $e) {
+        $conn->rollback();
+        throw $e;
     }
-    $updateStmt->close();
 
 } catch (Exception $e) {
     logError('Change password error: ' . $e->getMessage());
