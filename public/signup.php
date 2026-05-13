@@ -193,50 +193,71 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             -webkit-font-smoothing: antialiased;
         }
 
-        /* -- Floating Theme Toggle -- */
+        /* -- Floating Theme Toggle (Modern Pill) -- */
         .theme-toggle-wrapper {
             position: fixed;
             top: 24px;
             right: 24px;
             z-index: 1000;
         }
-        .btn-icon.theme-toggle-btn {
+        .theme-pill {
+            position: relative;
+            width: 64px;
+            height: 32px;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .theme-pill-track {
+            display: block;
+            width: 100%;
+            height: 100%;
             background: var(--surface-color);
-            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            border: 1.5px solid var(--border-color);
+            position: relative;
+            transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+            overflow: hidden;
+        }
+        .theme-pill:hover .theme-pill-track {
+            border-color: var(--primary-action);
+            box-shadow: 0 0 12px rgba(76, 175, 120, 0.15);
+        }
+        .theme-pill-thumb {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-action);
             border-radius: 50%;
-            width: 44px;
-            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--text-muted);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            padding: 0;
-            cursor: pointer;
+            transition: transform 0.45s cubic-bezier(0.68, -0.3, 0.32, 1.3), background 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
-        .btn-icon.theme-toggle-btn:hover {
-            border-color: var(--primary-action);
-            color: var(--primary-action);
-            transform: rotate(15deg) scale(1.1);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        [data-theme="light"] .theme-pill-thumb {
+            transform: translateX(32px);
+            background: hsl(40, 90%, 55%);
         }
-        .theme-toggle-animated {
-            position: relative;
-            width: 20px;
-            height: 20px;
+        [data-theme="light"] .theme-pill-track {
+            background: hsl(40, 70%, 92%);
+            border-color: hsl(40, 60%, 80%);
         }
-        #theme-icon-sun, #theme-icon-moon {
+        .theme-pill-icon {
+            width: 14px;
+            height: 14px;
             position: absolute;
-            top: 0;
-            left: 0;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            transition: opacity 0.3s ease, transform 0.4s ease;
         }
-        #theme-icon-sun { opacity: 0; transform: rotate(-90deg) scale(0); }
-        #theme-icon-moon { opacity: 1; transform: rotate(0) scale(1); }
-
-        [data-theme="light"] #theme-icon-sun { opacity: 1; transform: rotate(0) scale(1); }
-        [data-theme="light"] #theme-icon-moon { opacity: 0; transform: rotate(90deg) scale(0); }
+        .sun-icon { opacity: 0; transform: rotate(-90deg) scale(0.5); stroke: white; }
+        .moon-icon { opacity: 1; transform: rotate(0deg) scale(1); stroke: white; }
+        [data-theme="light"] .sun-icon { opacity: 1; transform: rotate(0deg) scale(1); stroke: white; }
+        [data-theme="light"] .moon-icon { opacity: 0; transform: rotate(90deg) scale(0.5); }
 
         /* ── Auth wrapper — split panel ───────────────────── */
         .auth-wrapper {

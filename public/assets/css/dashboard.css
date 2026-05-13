@@ -71,43 +71,44 @@
     --transition-base: all 0.3s var(--ease-out);
 }
 
-/* ── Light Mode ────────────────────────────────────────── */
+/* ── Light Mode (Emerald Harvest Hybrid) ───────────────── */
 [data-theme="light"] {
-    --bg-color: hsl(140, 20%, 96%);
-    --surface-color: hsl(140, 25%, 93%);
-    --text-main: hsl(210, 20%, 18%);
-    --text-muted: hsl(210, 10%, 45%);
-    --text-subtle: hsl(210, 8%, 60%);
-    --border-color: hsl(145, 30%, 82%); 
+    --bg-color: hsl(140, 20%, 98%);          /* Near-white background */
+    --surface-color: hsl(145, 30%, 94%);     /* Soft mint surface */
+    --text-main: hsl(160, 40%, 12%);         /* Deep forest charcoal for high contrast */
+    --text-muted: hsl(160, 20%, 35%);
+    --text-subtle: hsl(160, 15%, 50%);
+    --border-color: hsl(145, 25%, 88%); 
 
     /* Enhanced Agro-Tokens */
-    --bg-main: hsl(140, 20%, 96%);
-    --bg-surface: hsl(140, 25%, 93%);
-    --bg-card: #ffffff;
-    --accent-light: hsla(145, 45%, 45%, 0.1);
-    --border-agro: hsl(145, 30%, 82%);
+    --bg-main: hsl(140, 20%, 98%);
+    --bg-surface: hsl(145, 35%, 95%);
+    --bg-card: hsl(145, 40%, 96%);           /* Very light mint green for cards */
+    --bg-sidebar: hsl(150, 30%, 93%);        /* Slightly deeper sage for sidebar */
+    --accent-light: hsla(150, 50%, 45%, 0.12);
+    --border-agro: hsl(145, 30%, 86%);
 
-    --primary-action: hsl(150, 55%, 38%);
-    --secondary-action: hsl(171, 40%, 42%);
-    --accent-soft: hsl(150, 20%, 85%);
-    --accent-dark: hsl(150, 45%, 32%);
+    --primary-action: hsl(155, 60%, 32%);    /* Vibrant emerald for CTAs */
+    --secondary-action: hsl(171, 45%, 40%);
+    --accent-soft: hsl(150, 25%, 90%);
+    --accent-dark: hsl(155, 50%, 28%);
 
-    --primary-10: rgba(46, 140, 87, 0.08);
-    --primary-15: rgba(46, 140, 87, 0.12);
-    --secondary-10: rgba(60, 150, 140, 0.08);
-    --nav-hover-bg: rgba(46, 140, 87, 0.06);
+    --primary-10: rgba(16, 185, 129, 0.08);
+    --primary-15: rgba(16, 185, 129, 0.12);
+    --secondary-10: rgba(20, 184, 166, 0.08);
+    --nav-hover-bg: hsla(155, 50%, 45%, 0.08);
 
-    --glass-bg: rgba(255, 255, 255, 0.70);
-    --glass-bg-heavy: rgba(255, 255, 255, 0.90);
-    --glass-border: rgba(0, 0, 0, 0.22); /* Highly visible border */
-    --glass-blur: 16px;
+    --glass-bg: rgba(255, 255, 255, 0.65);
+    --glass-bg-heavy: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(16, 185, 129, 0.15);
+    --glass-blur: 12px;
 
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-    --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.10);
-    --shadow-hover: 0 10px 25px rgba(46, 140, 87, 0.10), 0 4px 12px rgba(0, 0, 0, 0.06);
-    --shadow-card: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.06);
-    --glow-primary: 0 0 20px rgba(46, 140, 87, 0.10);
+    --shadow-sm: 0 1px 3px rgba(16, 185, 129, 0.04);
+    --shadow-md: 0 4px 14px rgba(16, 185, 129, 0.06);
+    --shadow-lg: 0 10px 30px rgba(16, 185, 129, 0.08);
+    --shadow-hover: 0 12px 28px rgba(16, 185, 129, 0.12);
+    --shadow-card: 0 0 0 1px hsla(155, 30%, 30%, 0.05), 0 2px 8px rgba(0, 0, 0, 0.04);
+    --glow-primary: 0 0 20px rgba(16, 185, 129, 0.12);
 
     --danger: #DC2626;
     --amber: #D97706;
@@ -129,8 +130,18 @@
 
 /* ── Light Mode — Sidebar visibility boost ─────────────── */
 [data-theme="light"] .sidebar {
-    background: rgba(245, 248, 246, 0.95) !important;
+    background: var(--bg-sidebar) !important;
     border-color: var(--border-color);
+}
+
+[data-theme="light"] .kpi-card,
+[data-theme="light"] .bento-card,
+[data-theme="light"] .action-card,
+[data-theme="light"] .booking-card,
+[data-theme="light"] .listing-card {
+    background: var(--bg-card) !important;
+    border: 1.5px solid var(--border-agro) !important;
+    box-shadow: var(--shadow-sm);
 }
 
 /* ── Light Mode — Global Micro-interactions ────────────── */
