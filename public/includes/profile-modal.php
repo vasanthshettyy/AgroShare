@@ -35,15 +35,15 @@
                 <div class="form-grid">
                     <div class="form-group full-width">
                         <label for="prof-name" class="form-label">Full Name <span style="color: var(--status-rejected);">*</span></label>
-                        <input type="text" name="full_name" id="prof-name" class="form-input" required>
+                        <input type="text" name="full_name" id="prof-name" class="form-input" required autocomplete="name">
                     </div>
                     <div class="form-group">
                         <label for="prof-phone" class="form-label">Phone Number <span style="color: var(--status-rejected);">*</span></label>
-                        <input type="text" name="phone" id="prof-phone" class="form-input" required pattern="[0-9]{10}">
+                        <input type="text" name="phone" id="prof-phone" class="form-input" required pattern="[0-9]{10}" autocomplete="tel">
                     </div>
                     <div class="form-group">
                         <label for="prof-email" class="form-label">Email Address <span style="color: var(--status-rejected);">*</span></label>
-                        <input type="email" name="email" id="prof-email" class="form-input" required>
+                        <input type="email" name="email" id="prof-email" class="form-input" required autocomplete="email">
                     </div>
                 </div>
             </div>
@@ -57,15 +57,15 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="prof-village" class="form-label">Village</label>
-                        <input type="text" name="village" id="prof-village" class="form-input" required>
+                        <input type="text" name="village" id="prof-village" class="form-input" required autocomplete="address-level3">
                     </div>
                     <div class="form-group">
                         <label for="prof-district" class="form-label">District</label>
-                        <input type="text" name="district" id="prof-district" class="form-input" required>
+                        <input type="text" name="district" id="prof-district" class="form-input" required autocomplete="address-level2">
                     </div>
                     <div class="form-group full-width">
                         <label for="prof-state" class="form-label">State</label>
-                        <input type="text" name="state" id="prof-state" class="form-input" required>
+                        <input type="text" name="state" id="prof-state" class="form-input" required autocomplete="address-level1">
                     </div>
                 </div>
             </div>
@@ -82,7 +82,7 @@
                         <input type="text" name="upi_id" id="prof-upi-id" class="form-input" placeholder="e.g. username@bankname">
                     </div>
                     <div class="form-group full-width">
-                        <label for="prof-upi-qr" class="form-label">UPI QR Scanner Image</label>
+                        <label for="prof-upi-qr-input" class="form-label">UPI QR Scanner Image</label>
                         <label class="btn-secondary btn-upload-avatar" style="width: 100%; display: flex; justify-content: center; margin-top: 5px;">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                             Upload QR Image
@@ -109,8 +109,8 @@
                     <!-- Read-Only View (Perfect Flex Alignment) -->
                     <div class="form-group full-width" id="readonly-password-group" style="flex-direction: row; align-items: flex-end; gap: 1rem;">
                         <div style="flex: 1;">
-                            <label class="form-label">Current Password</label>
-                            <input type="password" value="••••••••••••" class="form-input" readonly disabled style="color: var(--text-muted); background: var(--bg-color); letter-spacing: 2px;">
+                            <label for="prof-readonly-pass" class="form-label">Current Password</label>
+                            <input type="password" id="prof-readonly-pass" value="••••••••••••" class="form-input" readonly disabled style="color: var(--text-muted); background: var(--bg-color); letter-spacing: 2px;">
                         </div>
                         <button type="button" class="btn-secondary" id="btn-reveal-password-change" style="height: 40px; white-space: nowrap; padding: 0 1.5rem;">Change Password</button>
                     </div>
@@ -119,7 +119,7 @@
                     <div class="form-group full-width" id="password-verify-step" style="display: none; flex-direction: row; align-items: flex-end; gap: 1rem;">
                         <div style="flex: 1;">
                             <label for="prof-verify-current" class="form-label">Verify Current Password</label>
-                            <input type="password" id="prof-verify-current" class="form-input" placeholder="Enter current password to continue">
+                            <input type="password" id="prof-verify-current" class="form-input" placeholder="Enter current password to continue" autocomplete="current-password">
                         </div>
                         <button type="button" class="btn-primary" id="btn-verify-password" style="height: 40px; white-space: nowrap; padding: 0 1.5rem;">Verify</button>
                     </div>
@@ -135,13 +135,13 @@
                             </div>
                             <div class="form-group">
                                 <label for="prof-new-password" class="form-label">New Password</label>
-                                <input type="password" name="new_password" id="prof-new-password" class="form-input" placeholder="Min 8 chars, mixed case, number & symbol">
+                                <input type="password" name="new_password" id="prof-new-password" class="form-input" placeholder="Min 8 chars, mixed case, number & symbol" autocomplete="new-password">
                                 <div class="pw-strength" style="height: 3px; border-radius: 4px; background: var(--border-color); margin-top: 6px; overflow: hidden;"><div id="prof-pw-bar" style="height: 100%; width: 0; transition: all 0.3s ease;"></div></div>
                                 <span class="pw-hint" style="font-size: 0.7rem; color: var(--text-subtle);">Min 8 chars, mixed case, number & symbol</span>
                             </div>
                             <div class="form-group">
                                 <label for="prof-confirm-password" class="form-label">Confirm New Password</label>
-                                <input type="password" name="confirm_password" id="prof-confirm-password" class="form-input" placeholder="Repeat new password">
+                                <input type="password" name="confirm_password" id="prof-confirm-password" class="form-input" placeholder="Repeat new password" autocomplete="new-password">
                             </div>
                         </div>
                     </div>

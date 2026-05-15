@@ -102,12 +102,13 @@ function enforceSessionSecurity(): void
         return;
     }
 
-    $current_agent = md5($_SERVER['HTTP_USER_AGENT'] ?? 'unknown_agent');
+    $current_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
 
     if (!isset($_SESSION['user_agent_hash'])) {
-        // First request after login
-        $_SESSION['user_agent_hash'] = $current_agent;
-    } elseif ($_SESSION['user_agent_hash'] !== $current_agent) {
+        // First request after login - store the hash
+        $_SESSION['user_agent_hash'] = md5($current_agent);
+    } elseif ($current_agent !== '' && $_SESSION['user_agent_hash'] !== md5($current_agent)) {
+        // Hijacking suspected - user agent changed and is not empty
         // Hijacking suspected - user agent changed
         $_SESSION = [];
         if (ini_get("session.use_cookies")) {

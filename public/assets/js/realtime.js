@@ -237,6 +237,7 @@ const RealtimeEngine = (function() {
         return div.innerHTML;
     }
 
+    return {
         /**
          * Universal Poller Logic: Replaces <main> content if hash changed.
          */
@@ -333,6 +334,20 @@ const RealtimeEngine = (function() {
  */
 document.addEventListener('DOMContentLoaded', () => {
     const path = window.location.pathname;
+    const isAuthPage =
+        path.includes('login.php') ||
+        path.includes('signup.php') ||
+        path.includes('forgot-password.php') ||
+        path.includes('verify-otp.php') ||
+        path.includes('reset-password.php') ||
+        path.includes('/auth/complete-google-profile.php');
+
+    // Auth pages use session-bound CAPTCHA/OTP flows; disable background polling
+    // to prevent session-side values from being rotated by silent requests.
+    if (isAuthPage) {
+        return;
+    }
+
     if (path.includes('/admin/')) {
         RealtimeEngine.init('universal');
     } else if (path.includes('dashboard.php')) {

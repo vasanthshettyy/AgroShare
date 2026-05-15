@@ -14,7 +14,7 @@ if (!isset($_SESSION['user_id'])) {
 
 try {
     $userId = (int)$_SESSION['user_id'];
-    $stmt = $conn->prepare("SELECT full_name, phone, email, village, district, state, upi_id, upi_qr_image, profile_photo, trust_score, (password_hash IS NOT NULL) as has_password FROM users WHERE id = ?");
+    $stmt = $conn->prepare("SELECT full_name, phone, email, village, district, state, upi_id, upi_qr_path AS upi_qr_image, profile_photo, trust_score, (password_hash IS NOT NULL) as has_password FROM users WHERE id = ?");
     $stmt->bind_param('i', $userId);
     $stmt->execute();
     $user = $stmt->get_result()->fetch_assoc();

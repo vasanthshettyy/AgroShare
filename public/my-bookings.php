@@ -837,6 +837,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                 <?php
                                     $bData = [
                                         'id' => $b['id'],
+                                        'equipment_id' => $b['equipment_id'],
                                         'title' => $b['equipment_title'],
                                         'status' => $b['status'],
                                         'start' => date('d M Y', strtotime($b['start_datetime'])),
@@ -852,10 +853,20 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                         'party_type' => isset($b['owner_name']) ? 'Owner' : 'Renter',
                                         'party_photo' => $b['owner_photo'] ?? $b['renter_photo'] ?? null,
                                         'upi_id' => $b['owner_upi_id'] ?? null,
-                                        'upi_qr' => $b['owner_upi_qr_path'] ?? null
+                                        'upi_qr' => $b['owner_upi_qr_path'] ?? null,
+                                        'start_datetime' => $b['start_datetime'],
+                                        'end_datetime' => $b['end_datetime']
                                     ];
                                 ?>
                                 <button type="button" class="btn-sm btn-secondary view-booking-details" data-booking="<?= htmlspecialchars(json_encode($bData)) ?>">Details</button>
+                                
+                                <?php if ($b['status'] === 'confirmed' && ($b['payment_status'] ?? 'pending') !== 'confirmed'): ?>
+                                    <button class="btn-primary btn-sm view-payment-btn" 
+                                            style="background: #fbbf24; color: #000;"
+                                            data-booking="<?= htmlspecialchars(json_encode($bData)) ?>">
+                                        💳 Pay Now
+                                    </button>
+                                <?php endif; ?>
                                 
                                 <?php if (empty($b['review_id']) && in_array($b['status'], ['confirmed', 'active', 'completed'])): ?>
                                     <button class="btn-primary btn-sm" 
@@ -870,6 +881,9 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                 <div class="dots-container">
                                     <button class="btn-sm btn-icon dots-trigger" aria-label="More actions">⋮</button>
                                     <div class="dots-menu">
+                                        <?php if (in_array($b['status'], ['pending', 'confirmed']) && ($b['payment_status'] ?? 'pending') !== 'confirmed'): ?>
+                                            <button class="btn-sm btn-reschedule" data-booking="<?= htmlspecialchars(json_encode($bData)) ?>" style="color: var(--primary-action);">Reschedule</button>
+                                        <?php endif; ?>
                                         <?php if (in_array($b['status'], ['pending', 'confirmed'])): ?>
                                             <button class="btn-sm status-action" data-id="<?= $b['id'] ?>" data-status="cancelled" style="color: var(--danger);">Cancel</button>
                                         <?php endif; ?>
@@ -977,10 +991,29 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                         'party_type' => isset($b['owner_name']) ? 'Owner' : 'Renter',
                                         'party_photo' => $b['owner_photo'] ?? $b['renter_photo'] ?? null,
                                         'upi_id' => $b['owner_upi_id'] ?? null,
-                                        'upi_qr' => $b['owner_upi_qr_path'] ?? null
+                                        'upi_qr' => $b['owner_upi_qr_path'] ?? null,
+                                        'start_datetime' => $b['start_datetime'],
+                                        'end_datetime' => $b['end_datetime']
                                     ];
                                 ?>
                                 <button type="button" class="btn-sm btn-secondary view-booking-details" data-booking="<?= htmlspecialchars(json_encode($bData)) ?>">Details</button>
+                                
+                                <?php if ($b['status'] === 'confirmed' && ($b['payment_status'] ?? 'pending') === 'confirmed' && empty($b['payment_verified_at'])): ?>
+                                     <button class="btn-primary btn-sm verify-payment-btn" 
+                                             style="background: #10b981; color: #fff;"
+                                             data-id="<?= $b['id'] ?>"
+                                             data-renter="<?= e($b['renter_name'] ?? '') ?>"
+                                             data-reference="<?= e($b['payment_reference'] ?? 'N/A') ?>">
+                                         ✅ Verify Payment
+                                     </button>
+                                 <?php endif; ?>
+                                 <?php if (false): ?>
+                                    <button class="btn-primary btn-sm view-payment-btn" 
+                                            style="background: #fbbf24; color: #000;"
+                                            data-booking="<?= htmlspecialchars(json_encode($bData)) ?>">
+                                        💳 Pay Now
+                                    </button>
+                                <?php endif; ?>
                                 
                                 <?php if ($b['status'] === 'pending'): ?>
                                     <button class="btn-primary btn-sm status-action" 
@@ -1445,24 +1478,34 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 <?php require_once __DIR__ . '/includes/viewer-reviews-modal.php'; ?>
 <?php require_once __DIR__ . '/includes/booking-detail-modal.php'; ?>
 <?php require_once __DIR__ . '/includes/user-public-profile-modal.php'; ?>
-<?php // require_once __DIR__ . '/includes/payment-modal.php'; ?>
+<?php require_once __DIR__ . '/includes/payment-modal.php'; ?>
 <script src="assets/js/theme-toggle.js" defer></script>
 <script src="assets/js/dashboard.js" defer></script>
 <script src="assets/js/reviews.js" defer></script>
 <script>
-    /* 
     // --- AgroPay Payment Modal Logic ---
     const paymentModal = document.getElementById('paymentModal');
+    let activePaymentBookingId = null;
     
     document.addEventListener('click', (e) => {
         const payBtn = e.target.closest('.view-payment-btn');
         if (payBtn) {
             const b = JSON.parse(payBtn.dataset.booking);
+            activePaymentBookingId = b.id || null;
             
             // Format number correctly
             const totalAmount = parseFloat(b.total) || 0;
             document.getElementById('payment-grand-total').innerText = new Intl.NumberFormat('en-IN').format(totalAmount);
             document.getElementById('payment-upi-id').innerText = b.upi_id || 'Not Provided';
+            const ack = document.getElementById('paymentAcknowledge');
+            const confirmBtn = document.getElementById('paymentConfirmBtn');
+            if (ack) ack.checked = false;
+            if (confirmBtn) {
+                confirmBtn.disabled = true;
+                confirmBtn.style.opacity = '0.65';
+                confirmBtn.style.cursor = 'not-allowed';
+                confirmBtn.textContent = "I've Paid — Confirm Payment";
+            }
             
             const qrContainer = document.getElementById('payment-qr-container');
             const qrImg = document.getElementById('payment-qr-img');
@@ -1480,11 +1523,13 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
     });
 
     const closePaymentModal = () => {
+        if (!paymentModal) return;
         paymentModal.classList.remove('show-modal');
         setTimeout(() => {
             paymentModal.style.display = 'none';
             document.body.style.overflow = '';
         }, 400);
+        activePaymentBookingId = null;
     };
 
     document.getElementById('paymentModalCloseBtn')?.addEventListener('click', closePaymentModal);
@@ -1513,7 +1558,95 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             if (window.showToast) window.showToast('success', 'UPI ID copied to clipboard!');
         });
     });
-    */
+
+    document.getElementById('paymentAcknowledge')?.addEventListener('change', (e) => {
+        const confirmBtn = document.getElementById('paymentConfirmBtn');
+        if (!confirmBtn) return;
+        confirmBtn.disabled = !e.target.checked;
+        confirmBtn.style.opacity = e.target.checked ? '1' : '0.65';
+        confirmBtn.style.cursor = e.target.checked ? 'pointer' : 'not-allowed';
+    });
+
+    document.getElementById('paymentConfirmBtn')?.addEventListener('click', async () => {
+        const confirmBtn = document.getElementById('paymentConfirmBtn');
+        const ack = document.getElementById('paymentAcknowledge');
+
+        if (!activePaymentBookingId) {
+            if (window.showToast) window.showToast('error', 'Booking reference missing. Reopen payment modal.');
+            return;
+        }
+        if (!ack || !ack.checked) {
+            if (window.showToast) window.showToast('error', 'Please acknowledge the reschedule lock warning first.');
+            return;
+        }
+
+        const originalText = confirmBtn.textContent;
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Confirming...';
+
+        try {
+            const formData = new FormData();
+            formData.append('booking_id', String(activePaymentBookingId));
+            formData.append('payment_reference', document.getElementById('payment_reference')?.value || '');
+            formData.append('csrf_token', document.getElementById('csrf_token').value);
+
+            const res = await fetch('api/confirm-payment.php', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (data.success) {
+                if (window.showToast) window.showToast('success', data.message || 'Payment confirmed.');
+                closePaymentModal();
+                setTimeout(() => window.location.reload(), 600);
+            } else {
+                if (window.showToast) window.showToast('error', data.message || 'Could not confirm payment.');
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = originalText;
+            }
+        } catch (err) {
+            if (window.showToast) window.showToast('error', 'Network error. Please try again.');
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = originalText;
+        }
+    });
+
+    // --- Owner Verification Logic ---
+    document.addEventListener('click', async (e) => {
+        const verifyBtn = e.target.closest('.verify-payment-btn');
+        if (!verifyBtn) return;
+
+        const bookingId = verifyBtn.dataset.id;
+        const renterName = verifyBtn.dataset.renter;
+        const ref = verifyBtn.dataset.reference;
+
+        const confirmed = confirm(`Verify payment from ${renterName}?\nReference: ${ref}\n\nThis will record that you have received the funds.`);
+        if (!confirmed) return;
+
+        verifyBtn.disabled = true;
+        verifyBtn.style.opacity = '0.5';
+
+        try {
+            const formData = new FormData();
+            formData.append('booking_id', bookingId);
+            formData.append('csrf_token', document.getElementById('csrf_token').value);
+
+            const res = await fetch('api/verify-payment.php', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (data.success) {
+                if (window.showToast) window.showToast('success', data.message);
+                setTimeout(() => window.location.reload(), 600);
+            } else {
+                if (window.showToast) window.showToast('error', data.message);
+                verifyBtn.disabled = false;
+                verifyBtn.style.opacity = '1';
+            }
+        } catch (err) {
+            console.error('Verification error:', err);
+            if (window.showToast) window.showToast('error', 'Network error.');
+            verifyBtn.disabled = false;
+            verifyBtn.style.opacity = '1';
+        }
+    });
 
     // --- Dynamic Statistics & Filtering ---
     function updateCapsuleCounts(activeTabId) {
@@ -1571,43 +1704,186 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             card.style.display = show ? 'flex' : 'none';
         });
 
-        // Update numbers whenever filter changes (optional, but keeps view consistent)
         updateCapsuleCounts(activeTabId);
     }
 
-    // Main Tab Switching
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+    /**
+     * Re-init logic for Realtime updates.
+     * This is called by RealtimeEngine when the <main> content is replaced.
+     */
+    window.reinitPageLogic = function() {
+        const activeTabId = document.querySelector('.tab-btn.active')?.dataset.tab || 'rentals';
+        updateCapsuleCounts(activeTabId);
+        applyCapsuleFilter();
+    };
+
+    // --- Unified Event Delegation ---
+    document.addEventListener('click', async (e) => {
+        // 1. Tab Switching
+        const tabBtn = e.target.closest('.tab-btn');
+        if (tabBtn) {
             document.querySelectorAll('.tab-btn, .booking-grid').forEach(el => el.classList.remove('active'));
-            btn.classList.add('active');
+            tabBtn.classList.add('active');
             
-            const targetId = btn.dataset.tab;
+            const targetId = tabBtn.dataset.tab;
             const targetGrid = document.getElementById(targetId);
             if (targetGrid) targetGrid.classList.add('active');
             
-            // Reset to 'All' filter when switching main tabs
             document.querySelectorAll('.capsule-btn').forEach(p => p.classList.remove('active'));
             const allCapsule = document.querySelector('.capsule-btn[data-filter="all"]');
             if (allCapsule) allCapsule.classList.add('active');
             
             applyCapsuleFilter();
-        });
-    });
+            return;
+        }
 
-    // Status Capsule Click Listeners
-    document.querySelectorAll('.capsule-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+        // 2. Status Capsule Filtering
+        const capsuleBtn = e.target.closest('.capsule-btn');
+        if (capsuleBtn) {
             document.querySelectorAll('.capsule-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            capsuleBtn.classList.add('active');
             applyCapsuleFilter();
-        });
-    });
+            return;
+        }
 
-    // Initialization
-    window.addEventListener('load', () => {
-        const initialTabId = document.querySelector('.tab-btn.active').dataset.tab;
-        updateCapsuleCounts(initialTabId);
-        applyCapsuleFilter();
+        // 3. Three-Dot Menu Toggle
+        const dotsTrigger = e.target.closest('.dots-trigger');
+        if (dotsTrigger) {
+            e.stopPropagation();
+            const menu = dotsTrigger.nextElementSibling;
+            const isOpen = menu.classList.contains('is-open');
+            
+            document.querySelectorAll('.dots-menu').forEach(m => m.classList.remove('is-open'));
+            if (!isOpen) menu.classList.add('is-open');
+            return;
+        }
+
+        if (!e.target.closest('.dots-menu')) {
+            document.querySelectorAll('.dots-menu').forEach(m => m.classList.remove('is-open'));
+        }
+
+        // 5. AJAX Status Actions
+        const statusBtn = e.target.closest('.status-action');
+        if (statusBtn) {
+            const bookingId = statusBtn.dataset.id;
+            const newStatus = statusBtn.dataset.status;
+            const info = {
+                renter: statusBtn.dataset.renter || '—',
+                dates: statusBtn.dataset.dates || '—',
+                price: statusBtn.dataset.price || '—',
+                equipment: statusBtn.dataset.equipment || '—'
+            };
+
+            const confirmed = await showActionConfirm(newStatus, bookingId, info);
+            if (!confirmed) return;
+
+            statusBtn.disabled = true;
+            statusBtn.style.opacity = '0.5';
+
+            try {
+                const formData = new FormData();
+                formData.append('id', bookingId);
+                formData.append('status', newStatus);
+                formData.append('csrf_token', document.getElementById('csrf_token').value);
+
+                const res = await fetch('api/update-booking-status.php', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.success) {
+                    const card = document.getElementById(`booking-${bookingId}`);
+                    if (card) {
+                        const badge = card.querySelector('.status-badge');
+                        const actions = card.querySelector('.actions-wrap');
+                        card.dataset.status = newStatus;
+                        badge.className = `status-badge status-${newStatus}`;
+                        badge.textContent = newStatus;
+                        if (actions) {
+                            actions.style.opacity = '0';
+                            setTimeout(() => {
+                                actions.remove();
+                                applyCapsuleFilter();
+                            }, 300);
+                        }
+                    }
+                    showInlineToast('success', data.message);
+                } else {
+                    showInlineToast('error', data.message);
+                    statusBtn.disabled = false;
+                    statusBtn.style.opacity = '1';
+                }
+            } catch (err) {
+                showInlineToast('error', 'Network error. Please try again.');
+                statusBtn.disabled = false;
+                statusBtn.style.opacity = '1';
+            }
+            return;
+        }
+
+        // 6. Dispute Actions
+        const disputeBtn = e.target.closest('.btn-dispute');
+        if (disputeBtn) {
+            const bookingId = disputeBtn.dataset.id;
+            const confirmed = confirm("Are you sure you want to dispute this deposit return?");
+            if (!confirmed) return;
+
+            disputeBtn.disabled = true;
+            disputeBtn.style.opacity = '0.5';
+
+            try {
+                const formData = new FormData();
+                formData.append('booking_id', bookingId);
+                formData.append('csrf_token', document.getElementById('csrf_token').value);
+
+                const res = await fetch('api/raise_dispute.php', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.success) {
+                    const card = document.getElementById(`booking-${bookingId}`);
+                    if (card) {
+                        card.dataset.status = 'disputed';
+                        const badge = card.querySelector('.status-badge');
+                        badge.className = 'status-badge status-disputed';
+                        badge.textContent = 'disputed';
+                        const actions = card.querySelector('.actions-wrap');
+                        if (actions) actions.remove();
+                        applyCapsuleFilter();
+                    }
+                    showInlineToast('success', data.message);
+                } else {
+                    showInlineToast('error', data.message);
+                    disputeBtn.disabled = false;
+                    disputeBtn.style.opacity = '1';
+                }
+            } catch (err) {
+                showInlineToast('error', 'Network error. Please try again.');
+                disputeBtn.disabled = false;
+                disputeBtn.style.opacity = '1';
+            }
+            return;
+        }
+
+        // 7. Reschedule Modal Trigger
+        const resBtn = e.target.closest('.btn-reschedule');
+        if (resBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            try {
+                const dataRaw = resBtn.getAttribute('data-booking');
+                if (!dataRaw) return;
+                
+                const booking = JSON.parse(dataRaw);
+                const modal = document.getElementById('rescheduleModal');
+                
+                if (modal && typeof window.initRescheduleModal === 'function') {
+                    window.initRescheduleModal(booking);
+                } else {
+                    console.error('Reschedule modal or init function not found.');
+                }
+            } catch (err) {
+                console.error('Reschedule trigger error:', err);
+            }
+        }
     });
 
     function showInlineToast(type, message) {
@@ -1632,155 +1908,6 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }
-
-    // 3-Dot Menu Logic
-    document.addEventListener('click', (e) => {
-        const trigger = e.target.closest('.dots-trigger');
-        const allMenus = document.querySelectorAll('.dots-menu');
-
-        if (trigger) {
-            const menu = trigger.nextElementSibling;
-            const isShowing = menu.classList.contains('is-open');
-            
-            // Close all others
-            allMenus.forEach(m => m.classList.remove('is-open'));
-            
-            // Toggle current
-            if (!isShowing) menu.classList.add('is-open');
-            e.stopPropagation();
-        } else {
-            // Clicked outside, close all
-            allMenus.forEach(m => m.classList.remove('is-open'));
-        }
-    });
-
-    // Contact buttons are now direct <a> links with tel: protocol
-
-    // AJAX Status Management
-    document.querySelectorAll('.status-action').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const bookingId = btn.dataset.id;
-            const newStatus = btn.dataset.status;
-            
-            const info = {
-                renter: btn.dataset.renter || '—',
-                dates: btn.dataset.dates || '—',
-                price: btn.dataset.price || '—',
-                equipment: btn.dataset.equipment || '—'
-            };
-
-            const confirmed = await showActionConfirm(newStatus, bookingId, info);
-            if (!confirmed) return;
-
-            btn.disabled = true;
-            btn.style.opacity = '0.5';
-
-            try {
-                const formData = new FormData();
-                formData.append('id', bookingId);
-                formData.append('status', newStatus);
-                formData.append('csrf_token', document.getElementById('csrf_token').value);
-
-                const res = await fetch('api/update-booking-status.php', { method: 'POST', body: formData });
-                const data = await res.json();
-
-                if (data.success) {
-                    const card = document.getElementById(`booking-${bookingId}`);
-                    const badge = card.querySelector('.status-badge');
-                    const actions = card.querySelector('.actions-wrap');
-
-                    // Update Card Data & Badge UI
-                    card.dataset.status = newStatus;
-                    badge.className = `status-badge status-${newStatus}`;
-                    badge.textContent = newStatus;
-                    
-                    // Hide buttons smoothly
-                    actions.style.opacity = '0';
-                    setTimeout(() => {
-                        actions.remove();
-                        // Re-apply filter and update counts after removal
-                        applyCapsuleFilter();
-                    }, 300);
-
-                    // Show visual success feedback
-                    if (window.showToast) {
-                        window.showToast('success', data.message);
-                    } else {
-                        const existingToast = document.querySelector('.toast');
-                        if (existingToast) existingToast.remove();
-                        
-                        const toast = document.createElement('div');
-                        toast.className = 'toast toast-success';
-                        toast.style.position = 'fixed';
-                        toast.style.bottom = '20px';
-                        toast.style.right = '20px';
-                        toast.style.background = 'var(--primary-action)';
-                        toast.style.color = '#fff';
-                        toast.style.padding = '12px 24px';
-                        toast.style.borderRadius = '8px';
-                        toast.style.zIndex = '9999';
-                        toast.textContent = data.message;
-                        document.body.appendChild(toast);
-                        
-                        setTimeout(() => toast.remove(), 3000);
-                    }
-                } else {
-                    showInlineToast('error', data.message);
-                    btn.disabled = false;
-                    btn.style.opacity = '1';
-                }
-            } catch (err) {
-                showInlineToast('error', 'Network error. Please try again.');
-                btn.disabled = false;
-                btn.style.opacity = '1';
-            }
-        });
-    });
-
-    // Dispute Management
-    document.querySelectorAll('.btn-dispute').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const bookingId = btn.dataset.id;
-            const confirmed = confirm("Are you sure you want to dispute this deposit return?");
-            if (!confirmed) return;
-
-            btn.disabled = true;
-            btn.style.opacity = '0.5';
-
-            try {
-                const formData = new FormData();
-                formData.append('booking_id', bookingId);
-                formData.append('csrf_token', document.getElementById('csrf_token').value);
-
-                const res = await fetch('api/raise_dispute.php', { method: 'POST', body: formData });
-                const data = await res.json();
-
-                if (data.success) {
-                    card.dataset.status = 'disputed';
-                    badge.className = 'status-badge status-disputed';
-                    badge.textContent = 'disputed';
-                    badge.style.background = 'rgba(255, 87, 34, 0.15)';
-                    badge.style.color = '#FF5722';
-                    badge.style.border = '1px solid rgba(255, 87, 34, 0.2)';
-
-                    actions.style.opacity = '0';
-                    setTimeout(() => {
-                        actions.remove();
-                        applyCapsuleFilter();
-                    }, 300);
-                    showInlineToast('success', data.message);
-                } else {
-                    showInlineToast('error', data.message);
-                    btn.disabled = false;
-                    btn.style.opacity = '1';
-                }
-            } catch (err) {
-                showInlineToast('error', 'Network error. Please try again.');
-                btn.disabled = false;
-                btn.style.opacity = '1';
-            }
-        });
-    });
 
     function showActionConfirm(status, bookingId, info) {
         return new Promise((resolve) => {
@@ -1863,6 +1990,8 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
         });
     }
 </script>
+<?php include 'includes/reschedule-modal.php'; ?>
 <script src="assets/js/realtime.js?v=<?= time() ?>" defer></script>
+
 </body>
 </html>

@@ -59,7 +59,13 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
 
     <?php if ($needsTabCheck): ?>
     <script>
-        if (!sessionStorage.getItem('agroshare_tab')) window.location.href = 'logout.php';
+        try {
+            if (!sessionStorage.getItem('agroshare_tab')) {
+                sessionStorage.setItem('agroshare_tab', '1');
+            }
+        } catch (e) {
+            // If storage is unavailable, skip forced logout to avoid false session drops.
+        }
     </script>
     <?php endif; ?>
 

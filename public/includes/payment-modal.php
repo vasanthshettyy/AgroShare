@@ -27,9 +27,9 @@
 
         <!-- UPI ID Section -->
         <div style="margin-bottom: 1.5rem;">
-            <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.6rem; margin-left: 4px;">Owner's UPI ID</label>
+            <label for="payment-upi-id" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.6rem; margin-left: 4px;">Owner's UPI ID</label>
             <div style="display: flex; gap: 0.75rem;">
-                <div id="payment-upi-id" style="flex: 1; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 0.85rem 1rem; color: var(--text-main); font-family: monospace; font-size: 1rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                <div id="payment-upi-id" tabindex="0" style="flex: 1; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 0.85rem 1rem; color: var(--text-main); font-family: monospace; font-size: 1rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                     Not Provided
                 </div>
                 <button type="button" id="copyUpiBtn" style="background: var(--primary-action); color: #fff; border: none; border-radius: 12px; padding: 0 1.25rem; font-weight: 700; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;" title="Copy UPI ID">
@@ -40,23 +40,45 @@
 
         <!-- QR Code Display -->
         <div id="payment-qr-container" style="display: none; margin-bottom: 2rem;">
-            <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.6rem; margin-left: 4px;">Scan to Pay</label>
-            <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 1.25rem; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+            <label id="qr-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.6rem; margin-left: 4px;">Scan to Pay</label>
+            <div aria-labelledby="qr-label" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 1.25rem; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
                 <img id="payment-qr-img" src="" alt="UPI QR Code" style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
             </div>
         </div>
 
         <!-- Manual Instructions -->
-        <div style="background: rgba(251, 191, 36, 0.05); border: 1px solid rgba(251, 191, 36, 0.15); border-radius: 16px; padding: 1.25rem; display: flex; gap: 1rem; align-items: flex-start;">
-            <div style="color: #fbbf24; flex-shrink: 0; margin-top: 2px;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div style="background: rgba(251, 191, 36, 0.05); border: 1px solid rgba(251, 191, 36, 0.15); border-radius: 16px; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;">
+            <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                <div style="color: #fbbf24; flex-shrink: 0; margin-top: 2px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                </div>
+                <p style="font-size: 0.82rem; line-height: 1.5; color: var(--text-main); margin: 0;">
+                    Scan to pay via <strong>GPay, PhonePe, or Paytm</strong>. Once paid, contact the owner to verify your booking.
+                </p>
             </div>
-            <p style="font-size: 0.82rem; line-height: 1.5; color: var(--text-main); margin: 0;">
-                Scan to pay via <strong>GPay, PhonePe, or Paytm</strong>. Once paid, contact the owner to verify your booking and coordinate delivery.
-            </p>
+            <div style="background: rgba(198, 40, 40, 0.1); border: 1px solid rgba(198, 40, 40, 0.2); border-radius: 10px; padding: 0.75rem; display: flex; align-items: center; gap: 10px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span style="font-size: 0.75rem; color: #ef4444; font-weight: 700;">NOTE: Once payment is confirmed, rescheduling will be disabled.</span>
+            </div>
+            <label style="display:flex; align-items:flex-start; gap:10px; margin-top: 2px; cursor:pointer;">
+                <input type="checkbox" id="paymentAcknowledge" style="margin-top: 2px;">
+                <span style="font-size: 0.78rem; color: var(--text-main); line-height: 1.4;">
+                    I understand that after I click <strong>I've Paid</strong>, this booking can no longer be rescheduled.
+                </span>
+            </label>
+        </div>
+
+        <!-- Evidence Capture -->
+        <div style="margin-top: 1.5rem;">
+            <label for="payment_reference" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.6rem; margin-left: 4px;">Transaction Reference (UTR)</label>
+            <input type="text" id="payment_reference" placeholder="Enter UTR / Reference Number" style="width: 100%; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.95rem; font-weight: 600;">
+            <p style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.5rem; margin-left: 4px;">Optional but recommended for faster verification by the owner.</p>
         </div>
 
         <div style="margin-top: 2rem;">
+            <button type="button" class="btn-primary" id="paymentConfirmBtn" disabled style="width: 100%; padding: 0.85rem; border-radius: 14px; font-weight: 700; margin-bottom: 0.75rem; opacity: 0.65; cursor: not-allowed;">
+                I've Paid — Confirm Payment
+            </button>
             <button type="button" class="btn-secondary" id="paymentModalCloseAction" style="width: 100%; padding: 0.85rem; border-radius: 14px; font-weight: 700;">Close</button>
         </div>
     </div>
