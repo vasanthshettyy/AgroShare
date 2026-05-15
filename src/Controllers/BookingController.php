@@ -25,24 +25,130 @@ function calculateServerSidePrice(mysqli $conn, int $equipmentId, string $start,
 }
 
 /**
- * Check for booking overlaps using the specified algorithm.
+ * Check for booking overlaps while optionally excluding a specific booking ID (useful for rescheduling).
  */
-function hasBookingConflict(mysqli $conn, int $equipmentId, string $start, string $end): bool 
+function hasBookingConflict(mysqli $conn, int $equipmentId, string $start, string $end, ?int $excludeBookingId = null): bool 
 {
-    // Exact logic requested: SELECT id FROM bookings WHERE equipment_id = ? 
-    // AND status IN ('pending', 'confirmed', 'active') AND start_datetime < ? AND end_datetime > ? LIMIT 1
     $sql = "SELECT id FROM bookings 
             WHERE equipment_id = ? 
             AND status IN ('pending', 'confirmed', 'active') 
             AND start_datetime < ? 
-            AND end_datetime > ? 
-            LIMIT 1";
+            AND end_datetime > ?";
+    
+    if ($excludeBookingId !== null) {
+        $sql .= " AND id != ?";
+    }
+    
+    $sql .= " LIMIT 1";
     
     $stmt = $conn->prepare($sql);
-    // Note: To check overlap of (S, E) against (bS, bE), we pass E and S to the query
-    $stmt->bind_param('iss', $equipmentId, $end, $start);
+    if ($excludeBookingId !== null) {
+        $stmt->bind_param('isssi', $equipmentId, $end, $start, $excludeBookingId);
+    } else {
+        $stmt->bind_param('iss', $equipmentId, $end, $start);
+    }
+    
     $stmt->execute();
     return $stmt->get_result()->num_rows > 0;
+}
+
+/**
+ * Reschedule an existing booking (Renter Only).
+ * 
+ * Rules:
+ * 1. Actor must be the renter.
+ * 2. Old status must be 'pending' or 'confirmed'.
+ * 3. payment_status must be 'pending'.
+ * 4. Creates a new 'pending' booking and marks the old one as 'rescheduled'.
+ */
+function rescheduleBooking(mysqli $conn, int $bookingId, int $userId, string $newStart, string $newEnd): array 
+{
+    // 1. Fetch and Lock the original booking for consistency
+    $conn->begin_transaction();
+    try {
+        $stmt = $conn->prepare("SELECT * FROM bookings WHERE id = ? FOR UPDATE");
+        $stmt->bind_param('i', $bookingId);
+        $stmt->execute();
+        $old = $stmt->get_result()->fetch_assoc();
+
+        if (!$old) {
+            $conn->rollback();
+            return ['success' => false, 'message' => 'Booking not found.'];
+        }
+
+        // 2. Strict Validations
+        if ((int)$old['renter_id'] !== $userId) {
+            $conn->rollback();
+            return ['success' => false, 'message' => 'Permission denied. Only renters can reschedule requests.'];
+        }
+
+        if (!in_array($old['status'], ['pending', 'confirmed'])) {
+            $conn->rollback();
+            return ['success' => false, 'message' => "Reschedule blocked: Booking is currently '{$old['status']}'."];
+        }
+
+        $paymentStatus = $old['payment_status'] ?? 'pending';
+        $paymentRef = $old['payment_reference'] ?? '';
+        if ($paymentStatus === 'confirmed' || !empty($paymentRef)) {
+            $conn->rollback();
+            return ['success' => false, 'message' => 'Reschedule locked: Payment has already been initiated or confirmed.'];
+        }
+
+        // 3. Chronological Validation
+        $startTime = strtotime($newStart);
+        $endTime   = strtotime($newEnd);
+        if (!$startTime || !$endTime || $endTime <= $startTime || $startTime < time()) {
+            $conn->rollback();
+            return ['success' => false, 'message' => 'Invalid date range.'];
+        }
+
+        // 4. Conflict Check (Ignore current booking ID)
+        if (hasBookingConflict($conn, (int)$old['equipment_id'], $newStart, $newEnd, $bookingId)) {
+            $conn->rollback();
+            return ['success' => false, 'message' => 'The selected dates conflict with an existing booking.'];
+        }
+
+        // 5. Calculate New Price
+        $newPrice = calculateServerSidePrice($conn, (int)$old['equipment_id'], $newStart, $newEnd);
+
+        // 6. Execute Pivot (Cancel Old + Create New)
+        // This preserves audit logs of the original booking while initiating a fresh approval flow.
+        $newStatus = 'pending';
+        $newPaymentStatus = 'pending';
+        $ins = $conn->prepare("INSERT INTO bookings (equipment_id, renter_id, owner_id, start_datetime, end_datetime, total_price, deposit_amount, status, payment_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $ins->bind_param('iiissddss', 
+            $old['equipment_id'], $old['renter_id'], $old['owner_id'], 
+            $newStart, $newEnd, $newPrice, $old['deposit_amount'], 
+            $newStatus, $newPaymentStatus
+        );
+        $ins->execute();
+        $newBookingId = $conn->insert_id;
+
+        // B) Mark Old Booking as Rescheduled
+        $upd = $conn->prepare("UPDATE bookings SET status = 'rescheduled' WHERE id = ?");
+        $upd->bind_param('i', $bookingId);
+        $upd->execute();
+
+        // 7. Notification Logic
+        $eqTitleStmt = $conn->prepare("SELECT title FROM equipment WHERE id = ?");
+        $eqTitleStmt->bind_param('i', $old['equipment_id']);
+        $eqTitleStmt->execute();
+        $eqTitle = $eqTitleStmt->get_result()->fetch_column();
+
+        createNotification($conn, (int)$old['owner_id'], "Renter has rescheduled booking for '$eqTitle'. Please review the new pending request.");
+
+        $conn->commit();
+        return [
+            'success' => true, 
+            'message' => 'Booking rescheduled successfully. New request created.',
+            'new_booking_id' => $newBookingId
+        ];
+
+    } catch (Exception $e) {
+        $conn->rollback();
+        logError('rescheduleBooking error: ' . $e->getMessage(), ['booking_id' => $bookingId, 'user_id' => $userId]);
+        return ['success' => false, 'message' => 'An internal error occurred while rescheduling.'];
+    }
 }
 
 /**
@@ -137,6 +243,84 @@ function createNotification(mysqli $conn, int $userId, string $message): void
     $stmt = $conn->prepare("INSERT INTO notifications (user_id, message) VALUES (?, ?)");
     $stmt->bind_param('is', $userId, $message);
     $stmt->execute();
+}
+
+/**
+ * Mark booking payment as confirmed (Renter only).
+ * Once confirmed, rescheduling should be blocked by rescheduleBooking rules.
+ */
+function confirmBookingPayment(mysqli $conn, int $bookingId, int $userId, string $reference = ''): array
+{
+    try {
+        $stmt = $conn->prepare("SELECT id, renter_id, owner_id, status, payment_status, equipment_id FROM bookings WHERE id = ?");
+        $stmt->bind_param('i', $bookingId);
+        $stmt->execute();
+        $booking = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$booking) {
+            return ['success' => false, 'message' => 'Booking not found.'];
+        }
+        if ((int)$booking['renter_id'] !== $userId) {
+            return ['success' => false, 'message' => 'Only the renter can confirm payment.'];
+        }
+        if ($booking['status'] !== 'confirmed') {
+            return ['success' => false, 'message' => 'Payment can only be confirmed for confirmed bookings.'];
+        }
+        if (($booking['payment_status'] ?? 'pending') === 'confirmed') {
+            return ['success' => true, 'message' => 'Payment is already confirmed.'];
+        }
+
+        $upd = $conn->prepare("UPDATE bookings SET payment_status = 'confirmed', payment_reference = ? WHERE id = ? AND renter_id = ?");
+        $upd->bind_param('sii', $reference, $bookingId, $userId);
+        $upd->execute();
+        $upd->close();
+
+        $eqStmt = $conn->prepare("SELECT title FROM equipment WHERE id = ?");
+        $eqStmt->bind_param('i', $booking['equipment_id']);
+        $eqStmt->execute();
+        $eqTitle = $eqStmt->get_result()->fetch_column() ?: 'your equipment';
+        $eqStmt->close();
+
+        createNotification($conn, (int)$booking['owner_id'], "Renter marked payment as completed for '$eqTitle'. Reference: " . ($reference ?: 'None'));
+
+        return ['success' => true, 'message' => 'Payment confirmed. Rescheduling is now disabled for this booking.'];
+    } catch (Exception $e) {
+        logError('confirmBookingPayment error: ' . $e->getMessage(), ['booking_id' => $bookingId, 'user_id' => $userId]);
+        return ['success' => false, 'message' => 'Could not confirm payment at this time.'];
+    }
+}
+
+/**
+ * Verify payment received (Owner only).
+ */
+function verifyOwnerPayment(mysqli $conn, int $bookingId, int $userId): array
+{
+    try {
+        $stmt = $conn->prepare("SELECT id, owner_id, payment_status, equipment_id FROM bookings WHERE id = ?");
+        $stmt->bind_param('i', $bookingId);
+        $stmt->execute();
+        $booking = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$booking) {
+            return ['success' => false, 'message' => 'Booking not found.'];
+        }
+        if ((int)$booking['owner_id'] !== $userId) {
+            return ['success' => false, 'message' => 'Only the owner can verify payment.'];
+        }
+
+        $now = date('Y-m-d H:i:s');
+        $upd = $conn->prepare("UPDATE bookings SET payment_verified_at = ? WHERE id = ?");
+        $upd->bind_param('si', $now, $bookingId);
+        $upd->execute();
+        $upd->close();
+
+        return ['success' => true, 'message' => 'Payment verification recorded.'];
+    } catch (Exception $e) {
+        logError('verifyOwnerPayment error: ' . $e->getMessage(), ['booking_id' => $bookingId, 'user_id' => $userId]);
+        return ['success' => false, 'message' => 'Could not verify payment at this time.'];
+    }
 }
 
 /**
@@ -270,4 +454,3 @@ function getBlockedDatesForEquipment(mysqli $conn, int $equipmentId): array
     $stmt->execute();
     return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 }
-
