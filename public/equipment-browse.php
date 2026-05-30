@@ -73,7 +73,6 @@ $items   = $results['items'];
 
     <link rel="stylesheet" href="assets/css/dashboard.css?v=<?= time() ?>">
     <link rel="stylesheet" href="assets/css/equipment.css?v=<?= time() ?>">
-    <script>window.currentUserId = <?= (int)($_SESSION['user_id'] ?? 0) ?>;</script>
 </head>
 <body>
 

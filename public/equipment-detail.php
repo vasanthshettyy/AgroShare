@@ -669,5 +669,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 <script src="assets/js/calendar.js?v=<?= time() ?>" defer></script>
 <script src="assets/js/reviews.js?v=<?= time() ?>" defer></script>
 <script src="assets/js/realtime.js?v=<?= time() ?>" defer></script>
+<script>
+    // Integration with RealtimeEngine for partial page refreshes
+    window.reinitPageLogic = function() {
+        if (window.initBookingCalendar) {
+            window.initBookingCalendar();
+        }
+    };
+</script>
 </body>
 </html>

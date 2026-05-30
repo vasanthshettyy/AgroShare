@@ -49,3 +49,11 @@ Reference lightmode images/
 scratch/
 .tempmediaStorage/
 .gemini/
+
+# Demo and Presentation files
+@demo_images/
+demo_images/
+*ppt
+*pptx
+~$*
+desktop.ini

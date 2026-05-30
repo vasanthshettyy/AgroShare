@@ -70,7 +70,6 @@ $needsTabCheck = isset($_SESSION['persist']) && $_SESSION['persist'] === false;
     <?php endif; ?>
 
     <link rel="stylesheet" href="assets/css/dashboard.css?v=<?= time() ?>">
-    <script>window.currentUserId = <?= (int)$_SESSION['user_id'] ?>;</script>
 </head>
 <body>
 
