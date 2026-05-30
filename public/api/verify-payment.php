@@ -1,35 +1,46 @@
 <?php
 /**
- * verify-payment.php — Owner verifies receipt of payment for a booking.
+ * verify-payment.php — Owner verifies they have received the payment.
  */
+
+// Use output buffering to catch any accidental output/warnings
+ob_start();
 
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/../../src/Controllers/BookingController.php';
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['success' => false, 'message' => 'Method not allowed.']);
+// Helper to send JSON and exit
+function sendJsonResponse(array $data, int $statusCode = 200) {
+    ob_clean(); // Discard any buffered output
+    http_response_code($statusCode);
+    echo json_encode($data);
     exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    sendJsonResponse(['success' => false, 'message' => 'Method not allowed.'], 405);
 }
 
 if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Authentication required.']);
-    exit();
+    sendJsonResponse(['success' => false, 'message' => 'Authentication required.'], 401);
 }
 
 if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'Security check failed. Please refresh the page.']);
-    exit();
+    sendJsonResponse(['success' => false, 'message' => 'Security check failed. Please refresh the page.'], 403);
 }
 
 $bookingId = (int)($_POST['booking_id'] ?? 0);
+
 if ($bookingId <= 0) {
-    echo json_encode(['success' => false, 'message' => 'Invalid booking reference.']);
-    exit();
+    sendJsonResponse(['success' => false, 'message' => 'Invalid booking reference.']);
 }
 
-$result = verifyOwnerPayment($conn, $bookingId, (int)$_SESSION['user_id']);
-echo json_encode($result);
+try {
+    // Controller logic handles ownership and status checks
+    $result = verifyOwnerPayment($conn, $bookingId, (int)$_SESSION['user_id']);
+    sendJsonResponse($result);
+} catch (Exception $e) {
+    logError('verify-payment API error: ' . $e->getMessage());
+    sendJsonResponse(['success' => false, 'message' => 'An internal error occurred.'], 500);
+}

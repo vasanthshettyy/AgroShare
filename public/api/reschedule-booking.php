@@ -1,37 +1,37 @@
 <?php
 /**
  * api/reschedule-booking.php — Standardized endpoint for Module 15 (Rescheduling).
- * 
- * Contract:
- * - Method: POST
- * - Input: booking_id, new_start_datetime, new_end_datetime, csrf_token
- * - Output: JSON { success, message, data: { old_booking_id, new_booking_id, new_status, old_status } }
  */
+
+// Use output buffering to catch any accidental output/warnings
+ob_start();
 
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/../../src/Controllers/BookingController.php';
 
+// Helper to send JSON and exit
+function sendJsonResponse(array $data, int $statusCode = 200) {
+    ob_clean(); // Discard any buffered output
+    http_response_code($statusCode);
+    echo json_encode($data);
+    exit();
+}
+
 // 1. Method Validation
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['success' => false, 'message' => 'Method not allowed. Use POST.']);
-    exit();
+    sendJsonResponse(['success' => false, 'message' => 'Method not allowed. Use POST.'], 405);
 }
 
 // 2. Authentication Check
 if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Authentication required.']);
-    exit();
+    sendJsonResponse(['success' => false, 'message' => 'Authentication required.'], 401);
 }
 
 // 3. CSRF Validation
 $csrfToken = $_POST['csrf_token'] ?? '';
 if (!validateCsrfToken($csrfToken)) {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'Security check failed. Please refresh the page.']);
-    exit();
+    sendJsonResponse(['success' => false, 'message' => 'Security check failed. Please refresh the page.'], 403);
 }
 
 // 4. Input Extraction & Basic Validation
@@ -41,13 +41,11 @@ $newEnd    = $_POST['new_end_datetime'] ?? '';
 $userId    = (int)$_SESSION['user_id'];
 
 if ($bookingId <= 0) {
-    echo json_encode(['success' => false, 'message' => 'Invalid booking reference.']);
-    exit();
+    sendJsonResponse(['success' => false, 'message' => 'Invalid booking reference.']);
 }
 
 if (empty($newStart) || empty($newEnd)) {
-    echo json_encode(['success' => false, 'message' => 'New start and end dates are required.']);
-    exit();
+    sendJsonResponse(['success' => false, 'message' => 'New start and end dates are required.']);
 }
 
 // 5. Date Logic Pre-check (Chronology)
@@ -55,18 +53,15 @@ $startTime = strtotime($newStart);
 $endTime   = strtotime($newEnd);
 
 if (!$startTime || !$endTime) {
-    echo json_encode(['success' => false, 'message' => 'Invalid date format provided.']);
-    exit();
+    sendJsonResponse(['success' => false, 'message' => 'Invalid date format provided.']);
 }
 
 if ($endTime <= $startTime) {
-    echo json_encode(['success' => false, 'message' => 'End date must be after start date.']);
-    exit();
+    sendJsonResponse(['success' => false, 'message' => 'End date must be after start date.']);
 }
 
 if ($startTime < time()) {
-    echo json_encode(['success' => false, 'message' => 'Cannot reschedule to a past date.']);
-    exit();
+    sendJsonResponse(['success' => false, 'message' => 'Cannot reschedule to a past date.']);
 }
 
 // 6. Process Reschedule via Controller
@@ -75,7 +70,7 @@ try {
 
     if ($result['success']) {
         // Success response matches requested contract
-        echo json_encode([
+        sendJsonResponse([
             'success' => true,
             'message' => $result['message'],
             'data' => [
@@ -87,8 +82,7 @@ try {
         ]);
     } else {
         // Handle specific business logic failures from controller
-        // (Actor forbidden, payment confirmed, or date conflicts)
-        echo json_encode([
+        sendJsonResponse([
             'success' => false,
             'message' => $result['message']
         ]);
@@ -96,6 +90,5 @@ try {
 
 } catch (Exception $e) {
     logError('API reschedule-booking fatal error: ' . $e->getMessage());
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Internal server error. Our team has been notified.']);
+    sendJsonResponse(['success' => false, 'message' => 'Internal server error. Our team has been notified.'], 500);
 }
