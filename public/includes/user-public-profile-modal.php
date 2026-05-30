@@ -1,8 +1,8 @@
 <!-- Public User Profile Modal -->
 <div id="userPublicProfileModal" class="modal-overlay" style="display: none;">
-    <div class="modal-content profile-modal-content premium-public-profile" style="max-width: 550px; width: 95%; padding: 0; overflow: hidden;">
+    <div class="modal-content profile-modal-content premium-public-profile" style="max-width: 550px; width: 95%; padding: 0; display: flex; flex-direction: column; max-height: 90vh; overflow: hidden;">
         <!-- Cover/Header Section -->
-        <div class="profile-header-card">
+        <div class="profile-header-card" style="flex-shrink: 0;">
             <button id="closePublicProfile" class="modal-close-premium" onclick="closePublicProfile()">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -38,7 +38,7 @@
             </div>
         </div>
 
-        <div class="profile-content-scroll custom-scrollbar" style="padding: 2rem; max-height: 400px; overflow-y: auto;">
+        <div class="profile-content-scroll custom-scrollbar" style="padding: 2rem; flex-grow: 1; overflow-y: auto; min-height: 200px;">
             <!-- Contact Quick-Links -->
             <div class="pub-section">
                 <h4 class="pub-section-label">Contact Information</h4>
@@ -70,7 +70,7 @@
             </div>
         </div>
 
-        <div class="modal-footer-premium">
+        <div class="modal-footer-premium" style="flex-shrink: 0;">
             <button type="button" class="premium-btn-brand" onclick="closePublicProfile()">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                     <path d="M18 6L6 18M6 6l12 12"/>

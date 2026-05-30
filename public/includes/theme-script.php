@@ -10,8 +10,21 @@ require_once __DIR__ . '/../../src/Helpers/auth.php'; // For getBasePath()
         // ── 0. Global Configuration ──
         window.AgroShare = {
             apiUrl: '<?= SITE_URL ?>/public/api',
-            adminApiUrl: '<?= SITE_URL ?>/public/admin/api'
+            adminApiUrl: '<?= SITE_URL ?>/public/admin/api',
+            isPersistent: <?= (isset($_SESSION['persist']) && $_SESSION['persist'] === true) ? 'true' : 'false' ?>,
+            isLoggedIn: <?= isset($_SESSION['user_id']) ? 'true' : 'false' ?>,
+            userId: <?= (int)($_SESSION['user_id'] ?? 0) ?>
         };
+
+        // ── 0.5 Tab Session Enforcement ──
+        // If not persistent, the session should only live in the current tab/window process.
+        if (window.AgroShare.isLoggedIn && !window.AgroShare.isPersistent) {
+            if (!sessionStorage.getItem('agroshare_tab')) {
+                // This is a fresh tab/window without the login marker -> Force logout
+                window.location.href = '<?= getBasePath() ?>/public/logout.php';
+                return; // Stop execution
+            }
+        }
 
         // ── 1. Theme Initialization ──
         const savedTheme = localStorage.getItem('theme') || 'dark';

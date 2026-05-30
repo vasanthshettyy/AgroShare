@@ -74,6 +74,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['persist']       = $remember;
                     $_SESSION['last_activity'] = time();
 
+                    // If "Remember Me" is checked, set cookie to last 30 days (2,592,000 seconds)
+                    if ($remember) {
+                        $params = session_get_cookie_params();
+                        setcookie(session_name(), session_id(), time() + 2592000, 
+                            $params["path"], $params["domain"], 
+                            $params["secure"], $params["httponly"]
+                        );
+                    }
+
                     logAuditEvent($conn, 'login_success', $user['id'], "User logged in successfully: " . $user['full_name']);
 
                     $redirect = ($user['role'] === 'admin')
@@ -1199,6 +1208,22 @@ $_SESSION['captcha_code'] = $captcha_code;
 
         .auth-chip.go-right:hover span { transform: translateX(4px); }
         .auth-chip.go-left:hover span { transform: translateX(-4px); }
+        .auth-chip.go-home {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--border-color);
+            color: var(--text-muted);
+        }
+        .auth-chip.go-home:hover {
+            background: var(--primary-10);
+            border-color: var(--primary-action);
+            color: var(--primary-action);
+            transform: translateY(-2px);
+        }
+        .auth-chip.go-home svg {
+            width: 14px;
+            height: 14px;
+            margin-right: 6px;
+        }
 
         @media (max-width: 480px) {
             .auth-switch-row { margin-bottom: 20px; }
@@ -1280,7 +1305,14 @@ $_SESSION['captcha_code'] = $captcha_code;
     <div class="login-pane-container">
         <div class="auth-form-panel">
 
-        <div class="auth-switch-row">
+        <div class="auth-switch-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <a href="index.php" class="auth-chip go-home">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                Home
+            </a>
             <button type="button" id="switch-to-signup" class="auth-chip go-right">Sign Up <span>&rarr;</span></button>
         </div>
         
@@ -1419,8 +1451,15 @@ $_SESSION['captcha_code'] = $captcha_code;
     <div class="signup-pane-container">
         <div class="auth-form-panel">
 
-        <div class="auth-switch-row">
+        <div class="auth-switch-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
             <button type="button" id="switch-to-login" class="auth-chip go-left"><span>&larr;</span> Log In</button>
+            <a href="index.php" class="auth-chip go-home">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                Home
+            </a>
         </div>
         
         <div class="form-head">
