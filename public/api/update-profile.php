@@ -67,14 +67,32 @@ try {
     // Handle Profile Photo Upload
     $photoPath = null;
     if (isset($_FILES['profile_photo']) && $_FILES['profile_photo']['error'] === UPLOAD_ERR_OK) {
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
         $maxSize = 2 * 1024 * 1024; // 2MB
 
-        $finfo = new finfo(FILEINFO_MIME_TYPE);
-        $mimeType = $finfo->file($_FILES['profile_photo']['tmp_name']);
+        $tmpName = $_FILES['profile_photo']['tmp_name'];
+        $originalName = $_FILES['profile_photo']['name'];
 
-        if (!in_array($mimeType, $allowedTypes)) {
+        // 1. Validate MIME Type strictly
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($tmpName);
+
+        if (!in_array($mimeType, $allowedMimeTypes, true)) {
             echo json_encode(['success' => false, 'message' => 'Invalid image format. Use JPG, PNG or WebP.']);
+            exit();
+        }
+
+        // 2. Validate Structural Integrity
+        if (@getimagesize($tmpName) === false) {
+            echo json_encode(['success' => false, 'message' => 'Uploaded file is not a valid image.']);
+            exit();
+        }
+
+        // 3. Validate Extension
+        $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+        if (!in_array($extension, $allowedExtensions, true)) {
+            echo json_encode(['success' => false, 'message' => 'Invalid file extension.']);
             exit();
         }
 
@@ -88,11 +106,12 @@ try {
             mkdir($uploadDir, 0755, true);
         }
 
-        $extension = pathinfo($_FILES['profile_photo']['name'], PATHINFO_EXTENSION);
-        $fileName = 'profile_' . $userId . '_' . time() . '.' . $extension;
+        // 4. Enforce Safe Random Filenames
+        $randomName = bin2hex(random_bytes(16));
+        $fileName = 'profile_' . $userId . '_' . $randomName . '.' . $extension;
         $destPath = $uploadDir . $fileName;
 
-        if (move_uploaded_file($_FILES['profile_photo']['tmp_name'], $destPath)) {
+        if (move_uploaded_file($tmpName, $destPath)) {
             $photoPath = 'uploads/profiles/' . $fileName;
             
             // Delete old photo if exists
@@ -103,7 +122,7 @@ try {
             $stmt->close();
 
             if ($oldPhoto && file_exists(__DIR__ . '/../../public/' . $oldPhoto)) {
-                unlink(__DIR__ . '/../../public/' . $oldPhoto);
+                @unlink(__DIR__ . '/../../public/' . $oldPhoto);
             }
         }
     }
@@ -111,14 +130,31 @@ try {
     // Handle UPI QR Code Upload
     $qrPath = null;
     if (isset($_FILES['upi_qr_image']) && $_FILES['upi_qr_image']['error'] === UPLOAD_ERR_OK) {
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-        // No size limit for high quality transaction QR codes as requested
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
         
-        $finfo = new finfo(FILEINFO_MIME_TYPE);
-        $mimeType = $finfo->file($_FILES['upi_qr_image']['tmp_name']);
+        $tmpName = $_FILES['upi_qr_image']['tmp_name'];
+        $originalName = $_FILES['upi_qr_image']['name'];
 
-        if (!in_array($mimeType, $allowedTypes)) {
+        // 1. Validate MIME Type strictly
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($tmpName);
+
+        if (!in_array($mimeType, $allowedMimeTypes, true)) {
             echo json_encode(['success' => false, 'message' => 'Invalid QR image format. Use JPG, PNG or WebP.']);
+            exit();
+        }
+
+        // 2. Validate Structural Integrity
+        if (@getimagesize($tmpName) === false) {
+            echo json_encode(['success' => false, 'message' => 'Uploaded QR file is not a valid image.']);
+            exit();
+        }
+
+        // 3. Validate Extension
+        $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+        if (!in_array($extension, $allowedExtensions, true)) {
+            echo json_encode(['success' => false, 'message' => 'Invalid QR file extension.']);
             exit();
         }
 
@@ -127,11 +163,12 @@ try {
             mkdir($qrUploadDir, 0755, true);
         }
 
-        $extension = pathinfo($_FILES['upi_qr_image']['name'], PATHINFO_EXTENSION);
-        $fileName = 'qr_' . $userId . '_' . time() . '.' . $extension;
+        // 4. Enforce Safe Random Filenames
+        $randomName = bin2hex(random_bytes(16));
+        $fileName = 'qr_' . $userId . '_' . $randomName . '.' . $extension;
         $destPath = $qrUploadDir . $fileName;
 
-        if (move_uploaded_file($_FILES['upi_qr_image']['tmp_name'], $destPath)) {
+        if (move_uploaded_file($tmpName, $destPath)) {
             $qrPath = 'uploads/qrs/' . $fileName;
             
             // Delete old QR if exists
@@ -142,7 +179,7 @@ try {
             $stmt->close();
 
             if ($oldQr && file_exists(__DIR__ . '/../../public/' . $oldQr)) {
-                unlink(__DIR__ . '/../../public/' . $oldQr);
+                @unlink(__DIR__ . '/../../public/' . $oldQr);
             }
         }
     }
