@@ -58,7 +58,9 @@ date_default_timezone_set(APP_TIMEZONE);
 
 // ── Session Configuration ──────────────────────────────────
 if (session_status() === PHP_SESSION_NONE) {
-    ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
+    // Set server-side session cleanup to 30 days to support "Stay Logged In"
+    // The 1-hour idle timeout for regular sessions is enforced in enforceSessionIdleTimeout()
+    ini_set('session.gc_maxlifetime', 2592000); // 30 days
     ini_set('session.cookie_httponly', 1);   // JS cannot read session cookie
     ini_set('session.cookie_samesite', 'Lax');
     ini_set('session.use_strict_mode', 1);   // Reject uninitialized session IDs
