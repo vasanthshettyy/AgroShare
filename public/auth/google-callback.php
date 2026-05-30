@@ -57,6 +57,13 @@ if ($result['status'] === 'success') {
     $_SESSION['role']       = $user['role'] ?? 'user';
     $_SESSION['persist']    = true; 
     $_SESSION['last_activity'] = time();
+
+    // Set persistent session cookie (30 days)
+    $params = session_get_cookie_params();
+    setcookie(session_name(), session_id(), time() + 2592000, 
+        $params["path"], $params["domain"], 
+        $params["secure"], $params["httponly"]
+    );
     
     session_regenerate_id(true);
     logAuditEvent($conn, 'login_google', $user['id'], 'User logged in via Google OAuth.');

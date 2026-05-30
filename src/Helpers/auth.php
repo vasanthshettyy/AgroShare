@@ -60,6 +60,7 @@ function requireRole(string $role): void
 /**
  * Enforce session idle timeout based on SESSION_LIFETIME.
  * Redirects to login if the user has been inactive for too long.
+ * Handles "Stay Logged In" users by bypassing the strict idle limit.
  */
 function enforceSessionIdleTimeout(): void
 {
@@ -69,26 +70,42 @@ function enforceSessionIdleTimeout(): void
     }
 
     $now = time();
-    if (isset($_SESSION['last_activity']) && ($now - $_SESSION['last_activity']) > SESSION_LIFETIME) {
-        // Safe logout sequence:
-        $_SESSION = [];
-        if (ini_get("session.use_cookies")) {
+    $isPersistent = (isset($_SESSION['persist']) && $_SESSION['persist'] === true);
+
+    if (!$isPersistent) {
+        // Strict 1-hour idle timeout for non-persistent sessions
+        if (isset($_SESSION['last_activity']) && ($now - $_SESSION['last_activity']) > SESSION_LIFETIME) {
+            // Safe logout sequence:
+            $_SESSION = [];
+            if (ini_get("session.use_cookies")) {
+                $params = session_get_cookie_params();
+                setcookie(session_name(), '', time() - 42000,
+                    $params["path"], $params["domain"],
+                    $params["secure"], $params["httponly"]
+                );
+            }
+            session_destroy();
+
+            // Start fresh session just to show the error
+            session_start();
+            setFlash('error', 'Session expired due to inactivity. Please log in again.');
+            header('Location: ' . getBasePath() . '/public/login.php');
+            exit();
+        }
+    } else {
+        // For Persistent sessions, we check against a 30-day limit (if user never visits)
+        // This is primarily handled by the server GC, but we can also renew the cookie here
+        // to provide "sliding" expiration (extending the 30 days on every active use)
+        if (isset($_SESSION['last_activity']) && ($now - $_SESSION['last_activity']) > 86400) { // Every 24 hours
             $params = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000,
-                $params["path"], $params["domain"],
+            setcookie(session_name(), session_id(), $now + 2592000, 
+                $params["path"], $params["domain"], 
                 $params["secure"], $params["httponly"]
             );
         }
-        session_destroy();
-
-        // Start fresh session just to show the error
-        session_start();
-        setFlash('error', 'Session expired due to inactivity. Please log in again.');
-        header('Location: ' . getBasePath() . '/public/login.php');
-        exit();
     }
 
-    // Otherwise update activity time
+    // Update activity time
     $_SESSION['last_activity'] = $now;
 }
 

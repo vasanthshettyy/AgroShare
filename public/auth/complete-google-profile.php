@@ -84,6 +84,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['persist']    = true;
             $_SESSION['last_activity'] = time();
             
+            // Set persistent session cookie (30 days)
+            $params = session_get_cookie_params();
+            setcookie(session_name(), session_id(), time() + 2592000, 
+                $params["path"], $params["domain"], 
+                $params["secure"], $params["httponly"]
+            );
+
             unset($_SESSION['temp_google_user']);
             session_regenerate_id(true);
             logAuditEvent($conn, 'register_google', $newId, 'Account created via Google OAuth.');
