@@ -114,34 +114,46 @@ function processImageUploads(array $files): array
             continue;
         }
 
-        // Validate MIME type using finfo (server-side, not extension-based)
+        $tmpName = $files['tmp_name'][$i];
+        $originalName = $files['name'][$i];
+
+        // 1. Validate MIME type strictly using finfo
         $finfo = new finfo(FILEINFO_MIME_TYPE);
-        $mimeType = $finfo->file($files['tmp_name'][$i]);
-        if (!in_array($mimeType, ALLOWED_MIME_TYPES, true) || @getimagesize($files['tmp_name'][$i]) === false) {
-            $errors[] = 'File "' . htmlspecialchars($files['name'][$i]) . '" is not a valid image (JPEG, PNG, or WebP only).';
+        $mimeType = $finfo->file($tmpName);
+        if (!in_array($mimeType, ALLOWED_MIME_TYPES, true)) {
+            $errors[] = 'File "' . htmlspecialchars($originalName) . '" has an invalid format (JPEG, PNG, or WebP only).';
+            continue;
+        }
+
+        // 2. Validate Structural Integrity
+        if (@getimagesize($tmpName) === false) {
+            $errors[] = 'File "' . htmlspecialchars($originalName) . '" is not a valid image.';
+            continue;
+        }
+
+        // 3. Validate Extension strictly
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowedExtensions, true)) {
+            $errors[] = 'File "' . htmlspecialchars($originalName) . '" has an invalid extension.';
             continue;
         }
 
         // Validate size
         if ($files['size'][$i] > MAX_IMAGE_SIZE) {
-            $errors[] = 'File "' . htmlspecialchars($files['name'][$i]) . '" exceeds 2MB.';
+            $errors[] = 'File "' . htmlspecialchars($originalName) . '" exceeds 10MB.';
             continue;
         }
 
         // Generate unique filename
-        $ext = match ($mimeType) {
-            'image/jpeg' => 'jpg',
-            'image/png'  => 'png',
-            'image/webp' => 'webp',
-            default      => 'jpg',
-        };
-        $filename = uniqid('eq_', true) . '.' . $ext;
+        $randomName = bin2hex(random_bytes(16));
+        $filename = 'eq_' . $randomName . '.' . $ext;
         $destPath = UPLOAD_DIR . $filename;
 
-        if (move_uploaded_file($files['tmp_name'][$i], $destPath)) {
+        if (move_uploaded_file($tmpName, $destPath)) {
             $paths[] = UPLOAD_URL_PREFIX . $filename;
         } else {
-            $errors[] = 'Failed to save file ' . ($i + 1) . '.';
+            $errors[] = 'Failed to save file "' . htmlspecialchars($originalName) . '".';
         }
     }
 

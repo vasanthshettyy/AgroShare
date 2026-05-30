@@ -43,7 +43,7 @@ function hasBookingConflict(mysqli $conn, int $equipmentId, string $start, strin
     
     $stmt = $conn->prepare($sql);
     if ($excludeBookingId !== null) {
-        $stmt->bind_param('isssi', $equipmentId, $end, $start, $excludeBookingId);
+        $stmt->bind_param('issi', $equipmentId, $end, $start, $excludeBookingId);
     } else {
         $stmt->bind_param('iss', $equipmentId, $end, $start);
     }
@@ -59,7 +59,8 @@ function hasBookingConflict(mysqli $conn, int $equipmentId, string $start, strin
  * 1. Actor must be the renter.
  * 2. Old status must be 'pending' or 'confirmed'.
  * 3. payment_status must be 'pending'.
- * 4. Creates a new 'pending' booking and marks the old one as 'rescheduled'.
+ * 4. payment_reference must be empty.
+ * 5. Creates a new 'pending' booking and marks the old one as 'rescheduled'.
  */
 function rescheduleBooking(mysqli $conn, int $bookingId, int $userId, string $newStart, string $newEnd): array 
 {
@@ -87,11 +88,12 @@ function rescheduleBooking(mysqli $conn, int $bookingId, int $userId, string $ne
             return ['success' => false, 'message' => "Reschedule blocked: Booking is currently '{$old['status']}'."];
         }
 
+        // HARDENED GUARD: Check payment status AND reference
         $paymentStatus = $old['payment_status'] ?? 'pending';
         $paymentRef = $old['payment_reference'] ?? '';
         if ($paymentStatus === 'confirmed' || !empty($paymentRef)) {
             $conn->rollback();
-            return ['success' => false, 'message' => 'Reschedule locked: Payment has already been initiated or confirmed.'];
+            return ['success' => false, 'message' => 'Reschedule locked: Payment initiated.'];
         }
 
         // 3. Chronological Validation
@@ -158,31 +160,37 @@ function autoPromoteBookings(mysqli $conn, int $userId): void
 {
     $now = date('Y-m-d H:i:s');
     
-    // confirmed -> active
-    $sql1 = "UPDATE bookings b
-             SET b.status = 'active' 
-             WHERE (b.renter_id = ? OR b.owner_id = ?) 
-             AND b.status = 'confirmed' 
-             AND b.start_datetime <= ? 
-             AND b.end_datetime > ?";
-    $stmt1 = $conn->prepare($sql1);
-    if ($stmt1) {
-        $stmt1->bind_param('iiss', $userId, $userId, $now, $now);
-        $stmt1->execute();
-        $stmt1->close();
-    }
+    try {
+        // confirmed -> active (Ongoing)
+        $sql1 = "UPDATE bookings b
+                 SET b.status = 'active' 
+                 WHERE (b.renter_id = ? OR b.owner_id = ?) 
+                 AND b.status = 'confirmed' 
+                 AND b.start_datetime <= ? 
+                 AND b.end_datetime > ?";
+        $stmt1 = $conn->prepare($sql1);
+        if ($stmt1) {
+            $stmt1->bind_param('iiss', $userId, $userId, $now, $now);
+            $stmt1->execute();
+            $stmt1->close();
+        }
 
-    // active -> completed
-    $sql2 = "UPDATE bookings b
-             SET b.status = 'completed' 
-             WHERE (b.renter_id = ? OR b.owner_id = ?) 
-             AND b.status = 'active' 
-             AND b.end_datetime <= ?";
-    $stmt2 = $conn->prepare($sql2);
-    if ($stmt2) {
-        $stmt2->bind_param('iis', $userId, $userId, $now);
-        $stmt2->execute();
-        $stmt2->close();
+        // confirmed/active -> completed (Finished)
+        $sql2 = "UPDATE bookings b
+                 SET b.status = 'completed' 
+                 WHERE (b.renter_id = ? OR b.owner_id = ?) 
+                 AND b.status IN ('confirmed', 'active') 
+                 AND b.end_datetime <= ?";
+        $stmt2 = $conn->prepare($sql2);
+        if ($stmt2) {
+            $stmt2->bind_param('iis', $userId, $userId, $now);
+            $stmt2->execute();
+            $stmt2->close();
+        }
+    } catch (mysqli_sql_exception $e) {
+        // Log the error but don't crash the page for the user.
+        // This is an automatic maintenance task.
+        error_log("autoPromoteBookings Error: " . $e->getMessage());
     }
 }
 

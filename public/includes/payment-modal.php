@@ -60,9 +60,14 @@
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 <span style="font-size: 0.75rem; color: #ef4444; font-weight: 700;">NOTE: Once payment is confirmed, rescheduling will be disabled.</span>
             </div>
-            <label style="display:flex; align-items:flex-start; gap:10px; margin-top: 2px; cursor:pointer;">
-                <input type="checkbox" id="paymentAcknowledge" style="margin-top: 2px;">
-                <span style="font-size: 0.78rem; color: var(--text-main); line-height: 1.4;">
+            <label style="display:flex; align-items:center; gap:12px; margin-top: 10px; cursor:pointer; background:rgba(255,255,255,0.03); padding:0.85rem; border-radius:12px; border:1px solid var(--border-color); transition: all 0.2s;">
+                <div style="position:relative; width:22px; height:22px; flex-shrink:0;">
+                    <input type="checkbox" id="paymentAcknowledge" style="position:absolute; inset:0; opacity:0; z-index:2; cursor:pointer;">
+                    <div id="paymentAckVisual" style="position:absolute; inset:0; border:2px solid var(--text-muted); border-radius:6px; background:rgba(255,255,255,0.02); display:flex; align-items:center; justify-content:center; transition:all 0.2s;">
+                        <svg class="check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </div>
+                </div>
+                <span style="font-size: 0.8rem; color: var(--text-main); font-weight: 500; line-height: 1.4;">
                     I understand that after I click <strong>I've Paid</strong>, this booking can no longer be rescheduled.
                 </span>
             </label>
@@ -70,9 +75,9 @@
 
         <!-- Evidence Capture -->
         <div style="margin-top: 1.5rem;">
-            <label for="payment_reference" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.6rem; margin-left: 4px;">Transaction Reference (UTR)</label>
-            <input type="text" id="payment_reference" placeholder="Enter UTR / Reference Number" style="width: 100%; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.95rem; font-weight: 600;">
-            <p style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.5rem; margin-left: 4px;">Optional but recommended for faster verification by the owner.</p>
+            <label for="payment_reference" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.6rem; margin-left: 4px;">Transaction Reference (UTR) <span style="color: #ef4444;">*</span></label>
+            <input type="text" id="payment_reference" placeholder="Enter 12-digit UTR or Reference" required style="width: 100%; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 0.85rem 1rem; color: var(--text-main); font-size: 0.95rem; font-weight: 600;">
+            <p style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.5rem; margin-left: 4px;">This reference is required to help the owner verify your payment quickly.</p>
         </div>
 
         <div style="margin-top: 2rem;">
@@ -90,3 +95,25 @@
     to { opacity: 1; transform: scale(1) translateY(0); }
 }
 </style>
+
+<script>
+(function() {
+    const ackInput = document.getElementById('paymentAcknowledge');
+    const ackVisual = document.getElementById('paymentAckVisual');
+    const checkIcon = ackVisual?.querySelector('.check-icon');
+
+    if (ackInput && ackVisual && checkIcon) {
+        ackInput.addEventListener('change', function() {
+            if (this.checked) {
+                ackVisual.style.background = 'var(--primary-action)';
+                ackVisual.style.borderColor = 'var(--primary-action)';
+                checkIcon.style.display = 'block';
+            } else {
+                ackVisual.style.background = 'rgba(255,255,255,0.02)';
+                ackVisual.style.borderColor = 'var(--text-muted)';
+                checkIcon.style.display = 'none';
+            }
+        });
+    }
+})();
+</script>
