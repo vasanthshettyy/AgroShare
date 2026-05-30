@@ -3,7 +3,7 @@
  * This centralized engine handles background fetching for the dashboard and equipment browsing.
  */
 
-const RealtimeEngine = (function() {
+window.RealtimeEngine = window.RealtimeEngine || (function() {
     let pollingInterval = null;
     let isFetching = false;
     const POLLING_RATE = 5000; // 5 seconds
@@ -109,11 +109,19 @@ const RealtimeEngine = (function() {
         const grid = document.getElementById('equipment-grid');
         if (!grid || !data.data) return;
 
+        // Surgical Check: Only update if the data payload has actually changed
+        const dataHash = JSON.stringify(data.data);
+        if (grid.dataset.lastHash === dataHash) return;
+        grid.dataset.lastHash = dataHash;
+
+        // Signal to CSS that this is a silent background update
+        grid.classList.add('is-updating');
+
         let html = '';
         data.data.forEach((eq, index) => {
             const images = eq.images ? JSON.parse(eq.images) : [];
             const thumbnail = images.length > 0 ? escapeHtml(images[0]) : '';
-            const isOwner = eq.owner_id == window.currentUserId;
+            const isOwner = eq.owner_id == window.AgroShare.userId;
             const detailPage = isOwner ? 'my-equipment-detail.php' : 'equipment-detail.php';
             const availabilityClass = eq.is_available == 1 ? 'available' : 'unavailable';
             const availabilityText = eq.is_available == 1 ? 'Listed' : 'Off-market';
@@ -164,9 +172,10 @@ const RealtimeEngine = (function() {
             `;
         });
 
-        if (grid.innerHTML.trim() !== html.trim()) {
-            grid.innerHTML = html;
-        }
+        grid.innerHTML = html;
+        
+        // Remove the updating class after DOM has stabilized to allow next-cycle CSS logic
+        setTimeout(() => grid.classList.remove('is-updating'), 100);
     }
 
     /**
@@ -175,6 +184,12 @@ const RealtimeEngine = (function() {
     function updatePoolingGrid(data) {
         const grid = document.querySelector('.pooling-grid');
         if (!grid || !data.data) return;
+
+        const dataHash = JSON.stringify(data.data);
+        if (grid.dataset.lastHash === dataHash) return;
+        grid.dataset.lastHash = dataHash;
+
+        grid.classList.add('is-updating');
 
         let html = '';
         data.data.forEach(camp => {
@@ -225,9 +240,8 @@ const RealtimeEngine = (function() {
             `;
         });
 
-        if (grid.innerHTML.trim() !== html.trim()) {
-            grid.innerHTML = html;
-        }
+        grid.innerHTML = html;
+        setTimeout(() => grid.classList.remove('is-updating'), 100);
     }
 
     function escapeHtml(text) {

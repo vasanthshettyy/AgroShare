@@ -23,6 +23,12 @@ class BookingCalendar {
         this.monthNames = ["January", "February", "March", "April", "May", "June",
             "July", "August", "September", "October", "November", "December"];
 
+        // 2-month range lock
+        this.minDate = new Date(this.today);
+        this.minDate.setMonth(this.today.getMonth() - 2);
+        this.maxDate = new Date(this.today);
+        this.maxDate.setMonth(this.today.getMonth() + 2);
+
         this.init();
     }
 
@@ -295,7 +301,19 @@ class BookingCalendar {
     }
 
     changeMonth(delta) {
-        this.viewDate.setMonth(this.viewDate.getMonth() + delta);
+        const nextView = new Date(this.viewDate);
+        nextView.setMonth(this.viewDate.getMonth() + delta);
+
+        // Allow navigation only if the first day of nextView is within a reasonable buffer of our min/max
+        const minCompare = new Date(this.minDate.getFullYear(), this.minDate.getMonth(), 1);
+        const maxCompare = new Date(this.maxDate.getFullYear(), this.maxDate.getMonth(), 1);
+
+        if (nextView < minCompare || nextView > maxCompare) {
+            if (window.showToast) window.showToast('info', 'Viewing range is limited to 2 months from today.');
+            return;
+        }
+
+        this.viewDate = nextView;
         this.render();
     }
 
@@ -322,22 +340,31 @@ class BookingCalendar {
     }
 
     render() {
+        if (!this.container) return;
+        
         const year = this.viewDate.getFullYear();
         const month = this.viewDate.getMonth();
 
-        document.getElementById('calMonthYear').textContent = `${this.monthNames[month]} ${year}`;
+        const monthYearEl = document.getElementById('calMonthYear');
+        if (monthYearEl) {
+            monthYearEl.textContent = `${this.monthNames[month]} ${year}`;
+        }
 
         const grid = this.container;
-        const labels = grid.querySelectorAll('.calendar-day-label');
+        const labels = Array.from(grid.querySelectorAll('.calendar-day-label'));
+        
         grid.innerHTML = '';
         labels.forEach(l => grid.appendChild(l));
 
         const firstDay = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
         let offset = firstDay === 0 ? 6 : firstDay - 1;
 
         for (let i = 0; i < offset; i++) {
-            grid.appendChild(document.createElement('div'));
+            const empty = document.createElement('div');
+            empty.className = 'calendar-day-empty';
+            grid.appendChild(empty);
         }
 
         for (let day = 1; day <= daysInMonth; day++) {
@@ -348,7 +375,7 @@ class BookingCalendar {
             dayEl.className = 'calendar-day';
             dayEl.textContent = day;
 
-            if (date < this.today) {
+            if (date < this.today || date < this.minDate || date > this.maxDate) {
                 dayEl.classList.add('disabled');
             } else if (this.isDateBooked(date)) {
                 dayEl.classList.add('booked');
@@ -586,9 +613,12 @@ window.calculatePricing = function () {
 };
 
 // Global initialization
-document.addEventListener('DOMContentLoaded', () => {
+window.initBookingCalendar = function() {
     const eqId = new URLSearchParams(window.location.search).get('id');
-    if (eqId && document.getElementById('calGrid')) {
+    const grid = document.getElementById('calGrid');
+    if (eqId && grid) {
         window.bookingCal = new BookingCalendar('calGrid', eqId);
     }
-});
+};
+
+document.addEventListener('DOMContentLoaded', window.initBookingCalendar);

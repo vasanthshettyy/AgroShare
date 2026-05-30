@@ -37,7 +37,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
     <link rel="stylesheet" href="assets/css/dashboard.css?v=<?= time() ?>">
     <style>
         .bookings-container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 1rem;
         }
@@ -94,32 +94,34 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
             background: var(--surface-color);
             border: 1px solid var(--border-color);
             border-radius: 14px;
-            padding: 1.25rem;
+            padding: 1.25rem 1.75rem;
             display: flex;
             flex-direction: row;
             align-items: center;
-            gap: 1.5rem;
+            gap: 1.75rem;
             transition: all 0.3s ease;
             position: relative;
             overflow: visible; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             animation: fadeSlideIn 0.35s ease-out;
+            min-height: 125px;
         }
         .booking-card:hover, .booking-card:focus-within {
             transform: translateY(-4px);
             border-color: var(--primary-action);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-            z-index: 10; /* Stack above other cards when menu is open */
+            box-shadow: 0 12px 35px rgba(0,0,0,0.25);
+            z-index: 10; 
         }
 
         .card-thumb {
-            width: 130px;
-            height: 100px;
+            width: 140px;
+            height: 105px;
             flex-shrink: 0;
             overflow: hidden;
-            border-radius: 10px;
+            border-radius: 12px;
             background: rgba(255,255,255,0.03);
             position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
         .card-thumb::after {
             content: '';
@@ -142,13 +144,13 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
         }
 
         .card-details {
-            flex: 2; /* Give more priority to details */
-            min-width: 200px;
+            flex: 2;
+            min-width: 240px;
             display: flex;
             flex-direction: column;
-            gap: 0.4rem;
+            gap: 0.5rem;
             position: relative;
-            padding-right: 1rem;
+            padding-right: 1.5rem;
         }
         .card-details::after {
             content: '';
@@ -162,12 +164,12 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
         }
 
         .card-person {
-            min-width: 160px;
+            min-width: 190px;
             display: flex;
             flex-direction: column;
-            gap: 0.25rem;
-            font-size: 0.82rem;
-            padding: 0 1.25rem;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            padding: 0 1.75rem;
             position: relative;
         }
         .card-person::after {
@@ -257,36 +259,38 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
         .info-label { font-weight: 600; color: var(--text-muted); min-width: 50px; }
 
         .card-footer {
-            margin-top: 0;
+            flex: 1.5;
             display: flex;
-            flex-direction: row; 
             align-items: center;
             justify-content: flex-end;
             padding: 0;
-            gap: 12px;
-            min-width: 220px; 
+            gap: 1.25rem;
+            min-width: 340px; 
             position: relative;
         }
 
         .actions-wrap {
             display: flex;
-            gap: 0.6rem;
+            gap: 0.75rem;
             align-items: center;
             justify-content: flex-end;
             width: 100%;
+            flex-wrap: wrap;
         }
 
         .status-badge {
-            padding: 0.5rem 1rem;
+            padding: 0.45rem 0.85rem;
             border-radius: 10px;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.05em;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border-color);
             color: var(--text-muted);
             white-space: nowrap;
+            min-width: 105px;
+            text-align: center;
         }
 
         .status-confirmed, .status-active {
@@ -415,25 +419,41 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
         .status-active    { background: rgba(156, 39, 176, 0.15); color: #E040FB; border: 1px solid rgba(156, 39, 176, 0.2); }
 
         .btn-sm {
-            padding: 0.45rem 0.9rem;
+            height: 38px;
+            padding: 0 1.25rem;
             font-size: 0.8rem;
-            border-radius: 8px;
+            border-radius: 10px;
             border: none;
-            font-weight: 600;
-            transition: all 0.2s;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            min-width: 95px;
         }
         .btn-primary.btn-sm { 
             background: var(--primary-action); 
             color: #fff; 
-            transition: transform 0.2s, filter 0.2s; 
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);
         }
         .btn-primary.btn-sm:hover { 
             transform: translateY(-2px); 
-            filter: brightness(1.15); 
+            filter: brightness(1.1); 
+            box-shadow: 0 6px 16px rgba(46, 125, 50, 0.3);
         }
         .btn-danger.btn-sm { background: var(--danger); color: #fff; }
-        .btn-secondary.btn-sm { background: var(--border-color); color: var(--text-main); }
-        .btn-sm:hover { filter: brightness(1.2); transform: translateY(-1px); }
+        .btn-secondary.btn-sm { 
+            background: rgba(255,255,255,0.05); 
+            border: 1px solid var(--border-color);
+            color: var(--text-main); 
+        }
+        .btn-sm:hover { 
+            filter: brightness(1.2); 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
 
         .empty-state {
             display: flex;
@@ -833,7 +853,18 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 
                         <div class="card-footer">
                             <div class="actions-wrap">
-                                <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
+                                 <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                    <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
+                                    <div class="payment-sub-label" style="font-size: 0.62rem; font-weight: 700; display: flex; align-items: center; gap: 3px;">
+                                        <?php if (!empty($b['payment_verified_at'])): ?>
+                                            <span style="color: #10b981;">● Payment Verified</span>
+                                        <?php elseif (($b['payment_status'] ?? 'pending') === 'confirmed' || !empty($b['payment_reference'])): ?>
+                                            <span style="color: #fbbf24;">● Payment Processing</span>
+                                        <?php else: ?>
+                                            <span style="color: var(--text-muted);">● Payment Pending</span>
+                                        <?php endif; ?>
+                                    </div>
+                                 </div>
                                 <?php
                                     $bData = [
                                         'id' => $b['id'],
@@ -860,13 +891,18 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                 ?>
                                 <button type="button" class="btn-sm btn-secondary view-booking-details" data-booking="<?= htmlspecialchars(json_encode($bData)) ?>">Details</button>
                                 
-                                <?php if ($b['status'] === 'confirmed' && ($b['payment_status'] ?? 'pending') !== 'confirmed'): ?>
-                                    <button class="btn-primary btn-sm view-payment-btn" 
-                                            style="background: #fbbf24; color: #000;"
-                                            data-booking="<?= htmlspecialchars(json_encode($bData)) ?>">
-                                        💳 Pay Now
-                                    </button>
-                                <?php endif; ?>
+                                <?php if ($b['status'] === 'confirmed' && ($b['payment_status'] ?? 'pending') !== 'confirmed' && empty($b['payment_reference'])): ?>
+                                     <button class="btn-primary btn-sm view-payment-btn" 
+                                             style="background: #fbbf24; color: #000;"
+                                             data-booking="<?= htmlspecialchars(json_encode($bData)) ?>">
+                                         💳 Pay Now
+                                     </button>
+                                 <?php elseif ($b['status'] === 'confirmed' && (($b['payment_status'] ?? 'pending') === 'confirmed' || !empty($b['payment_reference']))): ?>
+                                     <div style="font-size: 0.7rem; color: #ef4444; font-weight: 800; display: flex; align-items: center; gap: 4px; background: rgba(239, 68, 68, 0.1); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.2);">
+                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                         🔒 Reschedule Locked
+                                     </div>
+                                 <?php endif; ?>
                                 
                                 <?php if (empty($b['review_id']) && in_array($b['status'], ['confirmed', 'active', 'completed'])): ?>
                                     <button class="btn-primary btn-sm" 
@@ -881,7 +917,7 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
                                 <div class="dots-container">
                                     <button class="btn-sm btn-icon dots-trigger" aria-label="More actions">⋮</button>
                                     <div class="dots-menu">
-                                        <?php if (in_array($b['status'], ['pending', 'confirmed']) && ($b['payment_status'] ?? 'pending') !== 'confirmed'): ?>
+                                        <?php if (in_array($b['status'], ['pending', 'confirmed']) && ($b['payment_status'] ?? 'pending') !== 'confirmed' && empty($b['payment_reference'])): ?>
                                             <button class="btn-sm btn-reschedule" data-booking="<?= htmlspecialchars(json_encode($bData)) ?>" style="color: var(--primary-action);">Reschedule</button>
                                         <?php endif; ?>
                                         <?php if (in_array($b['status'], ['pending', 'confirmed'])): ?>
@@ -972,12 +1008,25 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
 
                         <div class="card-footer">
                             <div class="actions-wrap">
-                                <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
+                                 <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                    <span class="status-badge status-<?= $b['status'] ?>"><?= $b['status'] ?></span>
+                                    <div class="payment-sub-label" style="font-size: 0.62rem; font-weight: 700; display: flex; align-items: center; gap: 3px;">
+                                        <?php if (!empty($b['payment_verified_at'])): ?>
+                                            <span style="color: #10b981;">● Payment Verified</span>
+                                        <?php elseif (($b['payment_status'] ?? 'pending') === 'confirmed' || !empty($b['payment_reference'])): ?>
+                                            <span style="color: #fbbf24;">● Payment Processing</span>
+                                        <?php else: ?>
+                                            <span style="color: var(--text-muted);">● Payment Pending</span>
+                                        <?php endif; ?>
+                                    </div>
+                                 </div>
                                 <?php
                                     $bData = [
                                         'id' => $b['id'],
                                         'title' => $b['equipment_title'],
                                         'status' => $b['status'],
+                                        'payment_status' => $b['payment_status'] ?? 'pending',
+                                        'payment_reference' => $b['payment_reference'] ?? '',
                                         'start' => date('d M Y', strtotime($b['start_datetime'])),
                                         'end' => date('d M Y', strtotime($b['end_datetime'])),
                                         'rental_fee' => $b['total_price'],
@@ -1559,13 +1608,20 @@ if (!empty($nameParts[1])) $initials .= strtoupper(substr($nameParts[1], 0, 1));
         });
     });
 
-    document.getElementById('paymentAcknowledge')?.addEventListener('change', (e) => {
+    const togglePaymentConfirmBtn = () => {
         const confirmBtn = document.getElementById('paymentConfirmBtn');
-        if (!confirmBtn) return;
-        confirmBtn.disabled = !e.target.checked;
-        confirmBtn.style.opacity = e.target.checked ? '1' : '0.65';
-        confirmBtn.style.cursor = e.target.checked ? 'pointer' : 'not-allowed';
-    });
+        const ack = document.getElementById('paymentAcknowledge');
+        const ref = document.getElementById('payment_reference');
+        if (!confirmBtn || !ack || !ref) return;
+
+        const isReady = ack.checked && ref.value.trim().length > 0;
+        confirmBtn.disabled = !isReady;
+        confirmBtn.style.opacity = isReady ? '1' : '0.65';
+        confirmBtn.style.cursor = isReady ? 'pointer' : 'not-allowed';
+    };
+
+    document.getElementById('paymentAcknowledge')?.addEventListener('change', togglePaymentConfirmBtn);
+    document.getElementById('payment_reference')?.addEventListener('input', togglePaymentConfirmBtn);
 
     document.getElementById('paymentConfirmBtn')?.addEventListener('click', async () => {
         const confirmBtn = document.getElementById('paymentConfirmBtn');
