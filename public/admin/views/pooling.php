@@ -29,7 +29,7 @@ $campaigns = getPoolingCampaignsForAdmin($conn);
                     <?php foreach ($campaigns as $c): ?>
                     <?php 
                         $percent = $c['target_quantity'] > 0 ? min(100, ($c['current_quantity'] / $c['target_quantity']) * 100) : 0;
-                        $isExpired = strtotime($c['end_date']) < time();
+                        $isExpired = strtotime($c['deadline']) < time();
                     ?>
                     <tr data-campaign-id="<?= $c['id'] ?>">
                         <td>
@@ -67,7 +67,7 @@ $campaigns = getPoolingCampaignsForAdmin($conn);
                         </td>
                         <td>
                             <p style="margin: 0; font-size: 0.85rem; color: <?= $isExpired ? '#ef4444' : 'inherit' ?>;">
-                                <?= date('d M Y', strtotime($c['end_date'])) ?>
+                                <?= date('d M Y', strtotime($c['deadline'])) ?>
                             </p>
                         </td>
                         <td style="text-align: right;">
